@@ -71,7 +71,7 @@ Configure::write('Error', [
  *   including anonymous functions.
  *   Make sure you add App::uses('MyHandler', 'Error'); when using a custom handler class
  * - `renderer` - string - The class responsible for rendering uncaught exceptions. If you choose a custom class you
- *   should place the file for that class in app/Lib/Error. This class needs to implement a render method.
+ *   should place the file for that class in src/Lib/Error. This class needs to implement a render method.
  * - `log` - boolean - Should Exceptions be logged?
  * - `skipLog` - array - list of exceptions to skip for logging. Exceptions that
  *   extend one of the listed exceptions will also be skipped for logging.
@@ -92,12 +92,10 @@ Configure::write('App.encoding', 'UTF-8');
 
 /**
  * To configure CakePHP *not* to use mod_rewrite and to
- * use CakePHP pretty URLs, remove these .htaccess
- * files:
+ * use CakePHP pretty URLs, remove this .htaccess
+ * file:
  *
- * /.htaccess
- * /app/.htaccess
- * /app/webroot/.htaccess
+ * /webroot/.htaccess
  *
  * And uncomment the App.baseUrl below. But keep in mind
  * that plugin assets such as images, CSS and JavaScript files
@@ -220,11 +218,11 @@ Configure::write('App.encoding', 'UTF-8');
  * - 'database' - Uses CakePHP's database sessions.
  * - 'cache' - Use the Cache class to save sessions.
  *
- * To define a custom session handler, save it at /app/Model/Datasource/Session/<name>.php.
+ * To define a custom session handler, save it at src/Model/Datasource/Session/<name>.php.
  * Make sure the class implements `CakeSessionHandlerInterface` and set Session.handler to <name>
  *
- * To use database sessions, run the app/Config/Schema/sessions.php schema using
- * the cake shell command: cake schema create Sessions
+ * To use database sessions, run the config/Schema/sessions.php schema using
+ * the cake shell command: bin/cake schema create Sessions
  */
 Configure::write('Session', [
     'defaults' => 'php',
@@ -347,7 +345,7 @@ Configure::write('Acl.database', 'default');
  *
  * By default File is used, but for improved performance you should use APC.
  *
- * Note: 'default' and other application caches should be configured in app/Config/bootstrap.php.
+ * Note: 'default' and other application caches should be configured in config/bootstrap.php.
  *       Please check the comments in bootstrap.php for more info on the cache engines available
  *       and their settings.
  */
