@@ -241,8 +241,9 @@ Configure::write('Security.cipherSeed', '76859309657453542496749683645');
 /**
  * Use the OpenSSL extension instead of mcrypt for Security::encrypt() and Security::decrypt().
  *
- * The mcrypt extension is not available on PHP 7.2+, so this must be enabled for
- * Security::encrypt()/decrypt() and CookieComponent's 'aes' encryption to work.
+ * The mcrypt extension is not bundled with PHP 7.2+ (it is only available from PECL),
+ * so enable this for Security::encrypt()/decrypt() and CookieComponent's 'aes'
+ * encryption to work without it.
  * Data encrypted with mcrypt can still be decrypted with OpenSSL.
  * Note that Security::rijndael() (CookieComponent's 'rijndael' type) always requires mcrypt.
  */
