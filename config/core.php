@@ -48,6 +48,8 @@ Configure::write('debug', 2);
  *   Make sure you add App::uses('MyHandler', 'Error'); when using a custom handler class
  * - `level` - integer - The level of errors you are interested in capturing.
  * - `trace` - boolean - Include stack traces for errors in log files.
+ * - `extraFatalErrorMemory` - integer - Increases memory limit at shutdown so fatal errors are logged. Specify
+ *   amount in megabytes or use 0 to disable (default: 4 MB)
  *
  * @see ErrorHandler for more information on error handling and configuration.
  */
@@ -71,8 +73,6 @@ Configure::write('Error', [
  * - `renderer` - string - The class responsible for rendering uncaught exceptions. If you choose a custom class you
  *   should place the file for that class in app/Lib/Error. This class needs to implement a render method.
  * - `log` - boolean - Should Exceptions be logged?
- * - `extraFatalErrorMemory` - integer - Increases memory limit at shutdown so fatal errors are logged. Specify
- *   amount in megabytes or use 0 to disable (default: 4 MB)
  * - `skipLog` - array - list of exceptions to skip for logging. Exceptions that
  *   extend one of the listed exceptions will also be skipped for logging.
  *   Example: `'skipLog' => ['NotFoundException', 'UnauthorizedException']`
