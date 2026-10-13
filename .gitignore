@@ -10,10 +10,6 @@
 !/tmp/tests/.gitkeep
 /logs/*
 !/logs/.gitkeep
-/app/Plugin/*
-!/app/Plugin/empty
-/app/Vendor/*
-!/app/Vendor/empty
 /vendor
 /plugins
 *.mo

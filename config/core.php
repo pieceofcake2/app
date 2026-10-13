@@ -48,6 +48,8 @@ Configure::write('debug', 2);
  *   Make sure you add App::uses('MyHandler', 'Error'); when using a custom handler class
  * - `level` - integer - The level of errors you are interested in capturing.
  * - `trace` - boolean - Include stack traces for errors in log files.
+ * - `extraFatalErrorMemory` - integer - Increases memory limit at shutdown so fatal errors are logged. Specify
+ *   amount in megabytes or use 0 to disable (default: 4 MB)
  *
  * @see ErrorHandler for more information on error handling and configuration.
  */
@@ -69,10 +71,8 @@ Configure::write('Error', [
  *   including anonymous functions.
  *   Make sure you add App::uses('MyHandler', 'Error'); when using a custom handler class
  * - `renderer` - string - The class responsible for rendering uncaught exceptions. If you choose a custom class you
- *   should place the file for that class in app/Lib/Error. This class needs to implement a render method.
+ *   should place the file for that class in src/Lib/Error. This class needs to implement a render method.
  * - `log` - boolean - Should Exceptions be logged?
- * - `extraFatalErrorMemory` - integer - Increases memory limit at shutdown so fatal errors are logged. Specify
- *   amount in megabytes or use 0 to disable (default: 4 MB)
  * - `skipLog` - array - list of exceptions to skip for logging. Exceptions that
  *   extend one of the listed exceptions will also be skipped for logging.
  *   Example: `'skipLog' => ['NotFoundException', 'UnauthorizedException']`
@@ -92,12 +92,10 @@ Configure::write('App.encoding', 'UTF-8');
 
 /**
  * To configure CakePHP *not* to use mod_rewrite and to
- * use CakePHP pretty URLs, remove these .htaccess
- * files:
+ * use CakePHP pretty URLs, remove this .htaccess
+ * file:
  *
- * /.htaccess
- * /app/.htaccess
- * /app/webroot/.htaccess
+ * /webroot/.htaccess
  *
  * And uncomment the App.baseUrl below. But keep in mind
  * that plugin assets such as images, CSS and JavaScript files
@@ -220,11 +218,11 @@ Configure::write('App.encoding', 'UTF-8');
  * - 'database' - Uses CakePHP's database sessions.
  * - 'cache' - Use the Cache class to save sessions.
  *
- * To define a custom session handler, save it at /app/Model/Datasource/Session/<name>.php.
+ * To define a custom session handler, save it at src/Model/Datasource/Session/<name>.php.
  * Make sure the class implements `CakeSessionHandlerInterface` and set Session.handler to <name>
  *
- * To use database sessions, run the app/Config/Schema/sessions.php schema using
- * the cake shell command: cake schema create Sessions
+ * To use database sessions, run the config/Schema/sessions.php schema using
+ * the cake shell command: bin/cake schema create Sessions
  */
 Configure::write('Session', [
     'defaults' => 'php',
@@ -239,6 +237,17 @@ Configure::write('Security.salt', 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi');
  * A random numeric string (digits only) used to encrypt/decrypt strings.
  */
 Configure::write('Security.cipherSeed', '76859309657453542496749683645');
+
+/**
+ * Use the OpenSSL extension instead of mcrypt for Security::encrypt() and Security::decrypt().
+ *
+ * The mcrypt extension is not bundled with PHP 7.2+ (it is only available from PECL),
+ * so enable this for Security::encrypt()/decrypt() and CookieComponent's 'aes'
+ * encryption to work without it.
+ * Data encrypted with mcrypt can still be decrypted with OpenSSL.
+ * Note that Security::rijndael() (CookieComponent's 'rijndael' type) always requires mcrypt.
+ */
+Configure::write('Security.useOpenSsl', true);
 
 /**
  * Apply timestamps with the last modified time to static assets (js, css, images).
@@ -305,24 +314,13 @@ Configure::write('Acl.database', 'default');
  *      'mask' => 0664, //[optional]
  *  ]);
  *
- * APC (http://pecl.php.net/package/APC)
+ * APC / APCu (https://pecl.php.net/package/APCu)
  *
  *   Cache::config('default', [
  *      'engine' => 'Apc', //[required]
  *      'duration' => 3600, //[optional]
  *      'probability' => 100, //[optional]
  *      'prefix' => Inflector::slug(APP_DIR) . '_', //[optional]  prefix every cache file with this string
- *  ]);
- *
- * Xcache (http://xcache.lighttpd.net/)
- *
- *   Cache::config('default', [
- *      'engine' => 'Xcache', //[required]
- *      'duration' => 3600, //[optional]
- *      'probability' => 100, //[optional]
- *      'prefix' => Inflector::slug(APP_DIR) . '_', //[optional] prefix every cache file with this string
- *      'user' => 'user', //user from xcache.admin.user settings
- *      'password' => 'password', //plaintext password (xcache.admin.pass)
  *  ]);
  *
  * Memcached (http://www.danga.com/memcached/)
@@ -340,15 +338,6 @@ Configure::write('Acl.database', 'default');
  *      'persistent' => 'my_connection', // [optional] The name of the persistent connection.
  *      'compress' => false, // [optional] compress data in Memcached (slower, but uses less memory)
  *  ]);
- *
- *  Wincache (http://php.net/wincache)
- *
- *   Cache::config('default', [
- *      'engine' => 'Wincache', //[required]
- *      'duration' => 3600, //[optional]
- *      'probability' => 100, //[optional]
- *      'prefix' => Inflector::slug(APP_DIR) . '_', //[optional]  prefix every cache file with this string
- *  ]);
  */
 
 /**
@@ -357,7 +346,7 @@ Configure::write('Acl.database', 'default');
  *
  * By default File is used, but for improved performance you should use APC.
  *
- * Note: 'default' and other application caches should be configured in app/Config/bootstrap.php.
+ * Note: 'default' and other application caches should be configured in config/bootstrap.php.
  *       Please check the comments in bootstrap.php for more info on the cache engines available
  *       and their settings.
  */
