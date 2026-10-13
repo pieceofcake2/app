@@ -20,13 +20,13 @@
  * You can specify multiple configurations for production, development and testing.
  *
  * datasource => The name of a supported datasource; valid options are as follows:
- *  Database/Mysql - MySQL 4 & 5,
- *  Database/Sqlite - SQLite (PHP5 only),
- *  Database/Postgres - PostgreSQL 7 and higher,
- *  Database/Sqlserver - Microsoft SQL Server 2005 and higher
+ *  Database/Mysql - MySQL 5.6, 5.7, 8.0+ (pdo_mysql),
+ *  Database/Sqlite - SQLite 3 (pdo_sqlite),
+ *  Database/Postgres - PostgreSQL 9.4+ (pdo_pgsql),
+ *  Database/Sqlserver - Microsoft SQL Server 2022+ (pdo_sqlsrv)
  *
  * You can add custom database datasources (or override existing datasources) by adding the
- * appropriate file to app/Model/Datasource/Database. Datasources should be named 'MyDatasource.php',
+ * appropriate file to src/Model/Datasource/Database. Datasources should be named 'MyDatasource.php',
  *
  *
  * persistent => true / false
@@ -49,8 +49,9 @@
  * database. Uses database default not specified.
  *
  * sslmode =>
- * For Postgres specifies whether to 'disable', 'allow', 'prefer', or 'require' SSL for the
- * connection. The default value is 'allow'.
+ * For Postgres specifies the SSL mode for the connection ('disable', 'allow', 'prefer', 'require',
+ * 'verify-ca' or 'verify-full'). If not set, sslmode is not added to the DSN and the libpq
+ * default ('prefer') is used.
  *
  * unix_socket =>
  * For MySQL to connect via socket specify the `unix_socket` parameter instead of `host` and `port`
