@@ -315,24 +315,13 @@ Configure::write('Acl.database', 'default');
  *      'mask' => 0664, //[optional]
  *  ]);
  *
- * APC (http://pecl.php.net/package/APC)
+ * APC / APCu (https://pecl.php.net/package/APCu)
  *
  *   Cache::config('default', [
  *      'engine' => 'Apc', //[required]
  *      'duration' => 3600, //[optional]
  *      'probability' => 100, //[optional]
  *      'prefix' => Inflector::slug(APP_DIR) . '_', //[optional]  prefix every cache file with this string
- *  ]);
- *
- * Xcache (http://xcache.lighttpd.net/)
- *
- *   Cache::config('default', [
- *      'engine' => 'Xcache', //[required]
- *      'duration' => 3600, //[optional]
- *      'probability' => 100, //[optional]
- *      'prefix' => Inflector::slug(APP_DIR) . '_', //[optional] prefix every cache file with this string
- *      'user' => 'user', //user from xcache.admin.user settings
- *      'password' => 'password', //plaintext password (xcache.admin.pass)
  *  ]);
  *
  * Memcached (http://www.danga.com/memcached/)
@@ -349,15 +338,6 @@ Configure::write('Acl.database', 'default');
  *      ], //[optional]
  *      'persistent' => 'my_connection', // [optional] The name of the persistent connection.
  *      'compress' => false, // [optional] compress data in Memcached (slower, but uses less memory)
- *  ]);
- *
- *  Wincache (http://php.net/wincache)
- *
- *   Cache::config('default', [
- *      'engine' => 'Wincache', //[required]
- *      'duration' => 3600, //[optional]
- *      'probability' => 100, //[optional]
- *      'prefix' => Inflector::slug(APP_DIR) . '_', //[optional]  prefix every cache file with this string
  *  ]);
  */
 
