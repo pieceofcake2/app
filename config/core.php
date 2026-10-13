@@ -241,6 +241,16 @@ Configure::write('Security.salt', 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi');
 Configure::write('Security.cipherSeed', '76859309657453542496749683645');
 
 /**
+ * Use the OpenSSL extension instead of mcrypt for Security::encrypt() and Security::decrypt().
+ *
+ * The mcrypt extension is not available on PHP 7.2+, so this must be enabled for
+ * Security::encrypt()/decrypt() and CookieComponent's 'aes' encryption to work.
+ * Data encrypted with mcrypt can still be decrypted with OpenSSL.
+ * Note that Security::rijndael() (CookieComponent's 'rijndael' type) always requires mcrypt.
+ */
+Configure::write('Security.useOpenSsl', true);
+
+/**
  * Apply timestamps with the last modified time to static assets (js, css, images).
  * Will append a query string parameter containing the time the file was modified. This is
  * useful for invalidating browser caches.
