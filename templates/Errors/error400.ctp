@@ -12,18 +12,29 @@
  * @package       app.View.Errors
  * @since         CakePHP(tm) v 0.10.0.1076
  * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @var View $this
+ * @var string $name The escaped error message
+ * @var string $message The escaped error message
+ * @var string $url The escaped request URL
+ * @var Exception $error The exception
  */
+
+// In production, render the error in the minimal error layout. In debug mode,
+// keep the default layout and show the stack trace below the message.
+if (!Configure::read('debug')):
+    $this->layout = 'error';
+endif;
 ?>
 <h2><?php echo $message; ?></h2>
 <p class="error">
-	<strong><?php echo __d('cake', 'Error'); ?>: </strong>
-	<?php printf(
-		__d('cake', 'The requested address %s was not found on this server.'),
-		"<strong>'{$url}'</strong>"
-	); ?>
+    <strong><?php echo __d('cake', 'Error'); ?>: </strong>
+    <?php printf(
+        __d('cake', 'The requested address %s was not found on this server.'),
+        "<strong>'{$url}'</strong>"
+    ); ?>
 </p>
 <?php
 if (Configure::read('debug') > 0):
-	echo $this->element('exception_stack_trace');
+    echo $this->element('exception_stack_trace');
 endif;
 ?>
