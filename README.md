@@ -8,8 +8,8 @@
 
 The application skeleton for CakePHP 2 applications running on
 [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp), with a directory layout
-compatible with CakePHP 5 (`config/`, `src/`, `templates/`, `tests/`, `webroot/`) and `.env`
-support.
+compatible with CakePHP 5 (`config/`, `src/`, `templates/`, `tests/`, `webroot/`), `.env`
+support, and the home page, layouts, error pages and styles of the CakePHP 5 skeleton.
 
 > [!WARNING]
 > CakePHP 2.x is for the maintenance of existing applications. For new projects, use
@@ -39,7 +39,7 @@ them when they are installed, so `bin/cake bake` works out of the box and
 Documentation: https://pieceofcake2.github.io/app/
 
 It covers the installation, the directory layout, the configuration and `.env` files,
-running tests and PHPStan, and migrating an existing application to the modern layout.
+the pages and styles, running tests and PHPStan, and migrating an existing application to the modern layout.
 
 ## Contributing
 
@@ -48,3 +48,7 @@ See the [contribution guidelines](https://github.com/pieceofcake2/.github/blob/m
 ## License
 
 Licensed under the MIT License. See [LICENSE](LICENSE).
+
+`webroot/css/normalize.min.css` (normalize.css) and `webroot/css/milligram.min.css`
+(Milligram) are MIT licensed, see their headers. The Raleway font in `webroot/font/` is
+licensed under the SIL Open Font License 1.1, see `webroot/font/Raleway-License.txt`.

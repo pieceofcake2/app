@@ -15,6 +15,7 @@ loads CakePHP and all dependencies with Composer.
 - [Configuration](#configuration)
 - [Environment Variables (.env)](#environment-variables-env)
 - [Running the Application](#running-the-application)
+- [Pages and Styles](#pages-and-styles)
 - [Development](#development)
 
 To move an existing application with the legacy `app/` layout to this layout, see
@@ -222,6 +223,74 @@ and open `http://localhost:8765/`. Use `--port` (`-p`) to choose another port.
 In production, point the document root of your web server to `webroot/`. The
 `webroot/.htaccess` file rewrites the requests to `index.php` for Apache with
 `mod_rewrite`.
+
+## Pages and Styles
+
+The layouts, the home page, the error pages and the flash messages are ported from the
+[CakePHP 5 application skeleton](https://github.com/cakephp/app) and use its stylesheets in
+`webroot/css/`:
+
+| File | Description |
+| --- | --- |
+| `normalize.min.css` | [normalize.css](https://github.com/necolas/normalize.css) 8.0.1 |
+| `milligram.min.css` | [Milligram](https://milligram.io) 1.4.1 |
+| `fonts.css` | The Raleway font, served from `webroot/font/` (no request to a font service) |
+| `cake.css` | The application styles: layout, flash messages, forms, tables, paginator, error pages and debug output |
+| `home.css` | The styles of the home page only |
+| `cake.generic.css` | The stylesheet of the earlier skeleton. The templates no longer load it; it is kept for views that still use its classes (for example views baked with the `legacy` bake theme) and is loaded by the fallback layouts of the core |
+
+Templates:
+
+- `templates/Layouts/default.ctp`: the top navigation bar and the content container. While
+  `debug` is 2, the SQL log is shown below the content.
+- `templates/Layouts/error.ctp`: a minimal layout for the error pages in production.
+- `templates/Layouts/flash.ctp`: the page rendered by `Controller::flash()`.
+- `templates/Elements/Flash/`: `default`, `success`, `error`, `warning` and `info` flash
+  messages (`$this->Flash->success('Saved.')` and so on). Messages are escaped; pass
+  `['params' => ['escape' => false]]` to output HTML. Click a message to hide it.
+
+Views baked with [pieceofcake2/bake](https://pieceofcake2.github.io/bake/) use the same
+styles.
+
+### Home Page
+
+`templates/Pages/home.ctp` is shown at `/` while `debug` is enabled. It checks the
+environment of the application: the PHP version and extensions (mbstring, intl, openssl,
+PDO and the driver of the `default` datasource), the `tmp/` and `logs/` directories, the
+cache, the database connection (with the error message when it fails), `config/.env`, the
+security salt and cipher seed, and the DebugKit and Bake plugins. Replace it with your own
+page before turning `debug` off: in production it throws a `NotFoundException`.
+
+![Home page](img/home.png)
+
+On a phone:
+
+![Home page on a phone](img/home-mobile.png)
+
+### Error Pages
+
+When `debug` is 0, `templates/Errors/error400.ctp` and `error500.ctp` render a short
+message in the `error` layout:
+
+![Error 400 in production](img/error400.png)
+
+![Error 500 in production](img/error500.png)
+
+In debug mode, they use the default layout and show the stack trace, like the other error
+pages of CakePHP.
+
+### Flash Messages
+
+![Flash messages](img/flash-messages.png)
+
+### Existing Applications
+
+Applications created from an earlier version of the skeleton are not affected: they own
+their templates and `webroot/css/`. To use the new look, copy `templates/Layouts/`,
+`templates/Elements/Flash/`, `templates/Errors/`, `webroot/css/`, `webroot/font/` and
+`webroot/img/cake.logo.svg` into your application. Views that you baked for
+`cake.generic.css` need to be baked again (or restyled), see
+[Baked Views and the Legacy Theme](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme).
 
 ## Development
 
