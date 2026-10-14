@@ -1,21 +1,24 @@
 # User specific & automatically generated files #
 #################################################
+# Keep the directory structure of tmp/ and logs/ (the "empty" placeholder files)
+# but ignore their contents.
 /tmp/cache/*
 !/tmp/cache/*/
 /tmp/cache/*/*
-!/tmp/cache/*/.gitkeep
+!/tmp/cache/*/empty
 /tmp/sessions/*
-!/tmp/sessions/.gitkeep
+!/tmp/sessions/empty
 /tmp/tests/*
-!/tmp/tests/.gitkeep
+!/tmp/tests/empty
 /logs/*
-!/logs/.gitkeep
+!/logs/empty
 /vendor
-/plugins
-*.mo
+# Plugins installed by Composer. Plugins of your own application in plugins/ are
+# committed; add other plugins that you install with Composer here.
+/plugins/Bake/
+/plugins/DebugKit/
 .phpunit.result.cache
 /phpunit.xml
-composer.lock
 /config/database.php
 /config/email.php
 /config/.env
