@@ -30,6 +30,10 @@ composer create-project pieceofcake2/app my_app
 Then copy `config/database.php.default` to `config/database.php` (or use `config/.env`) and
 change the security salts in `config/core.php`.
 
+The Bake and DebugKit plugins are development dependencies. `config/bootstrap.php` loads
+them when they are installed, so `bin/cake bake` works out of the box and
+`composer install --no-dev` still works in production.
+
 ## Documentation
 
 Documentation: https://pieceofcake2.github.io/app/
