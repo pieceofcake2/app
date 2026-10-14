@@ -239,9 +239,13 @@ Settings such as the debug level, security salt and database credentials can be 
 
 ```bash
 cp config/.env.example config/.env
+# or, in the project root:
+cp config/.env.example .env
 ```
 
-`config/.env` is loaded at the top of `config/core.php` (so it applies to web requests, `bin/cake` and tests) using [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv). It is ignored by git. Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`.
+`config/.env` and `.env` in the project root are loaded at the top of `config/core.php` (so they apply to web requests, `bin/cake` and tests) using [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv). Both are ignored by git. Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`.
+
+This follows the `.env` support of the CakePHP 3+/5 application skeleton ([cakephp/app](https://github.com/cakephp/app) loads `config/.env` with josegonzalez/dotenv in `config/bootstrap.php`), backported for CakePHP 2 and extended to also accept a `.env` in the project root.
 
 | Variable | Setting | Default |
 |----------|---------|---------|
@@ -251,10 +255,10 @@ cp config/.env.example config/.env
 | `DB_DATASOURCE`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` | `default` connection in `config/database.php` | values in `config/database.php` |
 | `DB_TEST_DATASOURCE`, `DB_TEST_HOST`, `DB_TEST_PORT`, `DB_TEST_USERNAME`, `DB_TEST_PASSWORD`, `DB_TEST_DATABASE` | `test` connection in `config/database.php` | values in `config/database.php` |
 
+- Precedence: real environment variables (web server, shell, container, CI) > `config/.env` > root `.env`. `config/.env` is loaded first and the root `.env` second; a variable that is already set is never overwritten.
 - Unset or empty variables keep the defaults, so the application behaves exactly as before without a `.env` file (an empty `DB_PASSWORD` / `DB_TEST_PASSWORD` is allowed).
-- Real environment variables (web server, shell, container, CI) take precedence; `config/.env` never overwrites them.
-- Quote values in `config/.env` (e.g. `DEBUG="0"`). Unquoted numbers are normalized by the parser (`007` becomes `7`, and long digit strings such as a cipher seed overflow).
-- `config/.env` is meant for development. In production, set real environment variables instead.
+- Quote values in `.env` files (e.g. `DEBUG="0"`). Unquoted numbers are normalized by the parser (`007` becomes `7`, and long digit strings such as a cipher seed overflow).
+- `.env` files are meant for development. In production, set real environment variables instead.
 - The database variables are read by `config/database.php.default`. If you created `config/database.php` before this was added, copy the `__construct()` and `applyEnv()` methods into it.
 
 ## Development
