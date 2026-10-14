@@ -55,25 +55,69 @@ Then finish the configuration:
    your transport.
 4. Make sure that the web server can write to `tmp/` and `logs/`.
 
-`config/database.php`, `config/email.php` and the `.env` files are ignored by Git.
+### Version Control
 
-### Loading the Development Plugins
+The `.gitignore` file of the skeleton is meant for your application, so you can run
+`git init` right after `create-project`. It ignores:
 
-The plugins installed by Composer are not loaded automatically. Load them in
-`config/bootstrap.php`:
+- `vendor/` and the plugins that Composer installs into `plugins/` (`plugins/Bake/` and
+  `plugins/DebugKit/`). If you install more plugins with Composer, add them to
+  `.gitignore`; the plugins of your own application in `plugins/` are committed.
+- the contents of `tmp/` and `logs/`. The `empty` files that keep the directories are
+  committed.
+- `config/database.php`, `config/email.php`, `config/.env` and `.env`, which contain the
+  settings and credentials of each environment.
+- `phpunit.xml` (a local copy of `phpunit.xml.dist`) and `.phpunit.result.cache`.
+
+Commit `composer.lock`, so that every environment installs the same versions of the
+dependencies.
+
+### Development Plugins
+
+`config/bootstrap.php` loads the [Bake](https://pieceofcake2.github.io/bake/) and
+[DebugKit](https://pieceofcake2.github.io/debug_kit/) plugins when they are installed:
 
 ```php
-CakePlugin::loadAll();
+foreach (['Bake', 'DebugKit'] as $plugin) {
+    try {
+        CakePlugin::load($plugin);
+    } catch (MissingPluginException) {
+        // The plugin is not installed.
+    }
+}
 ```
 
-`CakePlugin::loadAll()` loads the plugins that are installed, so it also works when the
-development plugins are not installed (`composer install --no-dev`). To load the plugins
-one by one, make sure that `CakePlugin::load()` only runs where the plugin is installed,
-because loading a missing plugin throws a `MissingPluginException`.
+They are development dependencies, so they are skipped when the application is installed
+with `composer install --no-dev`. Run Bake with:
 
-Then add the DebugKit toolbar to your `AppController` as described in the
-[DebugKit documentation](https://pieceofcake2.github.io/debug_kit/), and run Bake with
-`bin/cake bake`.
+```bash
+bin/cake bake
+```
+
+To show the DebugKit toolbar, add the `DebugKit.Toolbar` component to your `AppController`
+(see the [DebugKit documentation](https://pieceofcake2.github.io/debug_kit/)). Add it only
+when the plugin is loaded, so that the application still works without the development
+dependencies:
+
+```php
+class AppController extends Controller
+{
+    public function __construct($request = null, $response = null)
+    {
+        if (CakePlugin::loaded('DebugKit')) {
+            $this->components[] = 'DebugKit.Toolbar';
+        }
+        parent::__construct($request, $response);
+    }
+}
+```
+
+The toolbar is only shown when `debug` is greater than 0.
+
+Load the other plugins in `config/bootstrap.php` with `CakePlugin::load()` (or
+`CakePlugin::loadAll()`). `CakePlugin::load()` throws a `MissingPluginException` when the
+plugin is not installed, so wrap the plugins that are development dependencies as shown
+above.
 
 ## Directory Layout
 

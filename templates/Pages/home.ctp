@@ -145,9 +145,15 @@ endif;
         endif;
     endforeach;
 
-    if (CakePlugin::loaded('DebugKit')):
+    if (CakePlugin::loaded('DebugKit') && isset($this->helpers['DebugKit.Toolbar'])):
         echo '<span class="notice success">';
             echo __d('cake_dev', 'DebugKit plugin is present');
+        echo '</span>';
+    elseif (CakePlugin::loaded('DebugKit')):
+        echo '<span class="notice">';
+            echo __d('cake_dev', 'DebugKit is loaded. It will help you inspect and debug different aspects of your application.');
+            echo '<br/>';
+            echo __d('cake_dev', 'Add the %s component to your AppController to show the toolbar.', '<code>DebugKit.Toolbar</code>');
         echo '</span>';
     elseif ($debugKitInstalled):
         echo '<span class="notice">';
