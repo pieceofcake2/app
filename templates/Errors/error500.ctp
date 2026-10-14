@@ -19,10 +19,28 @@
  * @var Exception $error The exception
  */
 
-// In production, render the error in the minimal error layout. In debug mode,
-// keep the default layout and show the stack trace below the message.
-if (!Configure::read('debug')):
-    $this->layout = 'error';
+// In production, render the error in the minimal error layout. In debug mode, use the
+// development error page of the core (dev_error layout), like CakePHP 5 does.
+$this->layout = 'error';
+
+if (Configure::read('debug') > 0 && !$this->request->is('ajax')):
+    $this->layout = 'dev_error';
+
+    $this->assign('title', $message);
+    $this->assign('templateName', 'error500.ctp');
+
+    $this->start('file');
+    if (isset($error) && $error instanceof Error):
+?>
+    <p>
+        <strong><?php echo __d('cake_dev', 'Error in'); ?>:</strong>
+        <?php echo h(Debugger::trimPath($error->getFile())); ?>, <?php echo __d('cake_dev', 'line %s', h($error->getLine())); ?>
+    </p>
+<?php
+    endif;
+    $this->end();
+
+    return;
 endif;
 ?>
 <h2><?php echo $message; ?></h2>
@@ -30,8 +48,3 @@ endif;
     <strong><?php echo __d('cake', 'Error'); ?>: </strong>
     <?php echo __d('cake', 'An Internal Error Has Occurred.'); ?>
 </p>
-<?php
-if (Configure::read('debug') > 0):
-    echo $this->element('exception_stack_trace');
-endif;
-?>
