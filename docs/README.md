@@ -50,7 +50,8 @@ Then finish the configuration:
    connection settings, or set them with [environment variables](#environment-variables-env).
 2. Change `Security.salt` and `Security.cipherSeed` in `config/core.php`, or set
    `SECURITY_SALT` and `SECURITY_CIPHER_SEED`. The skeleton ships with well-known example
-   values that must not be used in a real application.
+   values that must not be used in a real application. See
+   [Generating the Security Salts](#generating-the-security-salts).
 3. If you send email, copy `config/email.php.default` to `config/email.php` and configure
    your transport.
 4. Make sure that the web server can write to `tmp/` and `logs/`.
@@ -164,6 +165,50 @@ project root.
 - The database variables are read by `config/database.php.default`. If you created
   `config/database.php` before this was added, copy the `__construct()` and `applyEnv()`
   methods into it.
+
+### Generating the Security Salts
+
+Generate `Security.salt` and `Security.cipherSeed` with a cryptographically secure random
+generator. These commands work in any POSIX shell on Linux and macOS:
+
+```bash
+# SECURITY_SALT: 64 hexadecimal characters
+php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'
+openssl rand -hex 32                               # without PHP
+
+# SECURITY_CIPHER_SEED: a number from 1 to 4294967295
+php -r 'echo random_int(1, 4294967295), PHP_EOL;'
+od -An -N4 -tu4 /dev/urandom | tr -dc 0-9; echo    # without PHP
+```
+
+To append both to `config/.env` after copying `config/.env.example` (the last line wins
+when a variable is set twice):
+
+```bash
+php -r 'printf("export SECURITY_SALT=\"%s\"\nexport SECURITY_CIPHER_SEED=\"%d\"\n", bin2hex(random_bytes(32)), random_int(1, 4294967295));' >> config/.env
+```
+
+or without PHP:
+
+```bash
+printf 'export SECURITY_SALT="%s"\nexport SECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env
+```
+
+- Keep the salt at least 32 characters long: it is the default key of `CookieComponent`,
+  and the `'aes'` cookie type rejects shorter keys.
+- Do not use a longer cipher seed. `Security::cipher()` uses only the lower 32 bits of the
+  seed, and every seed with 27 or more digits, including the 29-digit example value in
+  `config/core.php`, ends up as the same seed `0`.
+- Use different values in each environment, and do not commit them. In production, set
+  real environment variables.
+- Changing `Security.salt` later logs users out, invalidates open forms, makes encrypted
+  cookies unreadable, breaks data encrypted with `Security::encrypt()` without an explicit
+  HMAC salt, and breaks passwords hashed with `SimplePasswordHasher` (bcrypt hashes are not
+  affected). Changing `Security.cipherSeed` only breaks values encrypted with
+  `Security::cipher()`, such as cookies of the default `'cipher'` type.
+
+See [Generating the Security Salts](https://pieceofcake2.github.io/docs/development/configuration#security-salts)
+in the book for details and for how to rotate the values safely.
 
 ## Running the Application
 
