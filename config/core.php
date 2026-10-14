@@ -21,17 +21,29 @@
 use josegonzalez\Dotenv\Loader;
 
 /**
- * Load environment variables from config/.env, if present.
+ * Load environment variables from .env files, if present.
  *
- * Copy config/.env.example to config/.env and adjust the values for your
- * development environment. Variables that are already defined in the real
- * environment take precedence and are never overwritten by config/.env.
+ * Two locations are supported:
+ *
+ * - config/.env (copy config/.env.example to config/.env)
+ * - .env in the project root (ROOT . DS . '.env')
+ *
+ * Precedence: real environment variables > config/.env > root .env.
+ * config/.env is loaded first and the root .env second, and a variable that
+ * is already defined (in the real environment or by an earlier file) is
+ * never overwritten.
+ *
+ * This follows the .env support of the CakePHP 3+/5 application skeleton
+ * (config/bootstrap.php in cakephp/app), backported for CakePHP 2.
  *
  * In production, prefer setting real environment variables instead of
  * using a .env file.
  */
-if (is_file(CONFIG . '.env')) {
-    $dotenv = new Loader([CONFIG . '.env']);
+foreach ([CONFIG . '.env', ROOT . DS . '.env'] as $dotenvFile) {
+    if (!is_file($dotenvFile)) {
+        continue;
+    }
+    $dotenv = new Loader([$dotenvFile]);
     foreach ($dotenv->parse()->toArray() as $key => $value) {
         if (getenv($key) !== false || isset($_ENV[$key]) || isset($_SERVER[$key])) {
             continue;
@@ -47,6 +59,7 @@ if (is_file(CONFIG . '.env')) {
     }
     unset($dotenv, $key, $value);
 }
+unset($dotenvFile);
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
