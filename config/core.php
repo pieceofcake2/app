@@ -292,11 +292,13 @@ Configure::write('Session', [
 Configure::write('Security.salt', env('SECURITY_SALT') ?: 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi');
 
 /**
- * A random numeric string (digits only) used to encrypt/decrypt strings.
+ * A random number from 1 to 4294967295 used by Security::cipher(), that is, only by
+ * the legacy 'cipher' encryption type of CookieComponent. Longer values all end up as
+ * the same seed (0), and no value makes 'cipher' secure: use the 'aes' type instead.
  *
  * Can be set with the SECURITY_CIPHER_SEED environment variable.
  */
-Configure::write('Security.cipherSeed', env('SECURITY_CIPHER_SEED') ?: '76859309657453542496749683645');
+Configure::write('Security.cipherSeed', env('SECURITY_CIPHER_SEED') ?: '2659758734');
 
 /**
  * Use the OpenSSL extension instead of mcrypt for Security::encrypt() and Security::decrypt().
