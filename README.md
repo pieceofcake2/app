@@ -232,6 +232,30 @@ The [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) core has bee
 
 **You don't need to modify your application code** - the framework handles the path mapping automatically.
 
+## Environment Variables (.env)
+
+Settings such as the debug level, security salt and database credentials can be read from environment variables. For local development, copy the example file and edit it:
+
+```bash
+cp config/.env.example config/.env
+```
+
+`config/.env` is loaded at the top of `config/core.php` (so it applies to web requests, `bin/cake` and tests) using [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv). It is ignored by git. Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`.
+
+| Variable | Setting | Default |
+|----------|---------|---------|
+| `DEBUG` | `debug` (`0`, `1`, `2`, `true` = 2, `false` = 0) | `2` |
+| `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
+| `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (digits only) | value in `config/core.php` |
+| `DB_DATASOURCE`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` | `default` connection in `config/database.php` | values in `config/database.php` |
+| `DB_TEST_DATASOURCE`, `DB_TEST_HOST`, `DB_TEST_PORT`, `DB_TEST_USERNAME`, `DB_TEST_PASSWORD`, `DB_TEST_DATABASE` | `test` connection in `config/database.php` | values in `config/database.php` |
+
+- Unset or empty variables keep the defaults, so the application behaves exactly as before without a `.env` file (an empty `DB_PASSWORD` / `DB_TEST_PASSWORD` is allowed).
+- Real environment variables (web server, shell, container, CI) take precedence; `config/.env` never overwrites them.
+- Quote values in `config/.env` (e.g. `DEBUG="0"`). Unquoted numbers are normalized by the parser (`007` becomes `7`, and long digit strings such as a cipher seed overflow).
+- `config/.env` is meant for development. In production, set real environment variables instead.
+- The database variables are read by `config/database.php.default`. If you created `config/database.php` before this was added, copy the `__construct()` and `applyEnv()` methods into it.
+
 ## Development
 
 ### Running Tests

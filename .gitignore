@@ -18,6 +18,7 @@
 composer.lock
 /config/database.php
 /config/email.php
+/config/.env
 
 # IDE and editor specific files #
 #################################

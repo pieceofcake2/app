@@ -64,6 +64,15 @@
  *
  * flags =>
  * A key/value array of driver specific connection options.
+ *
+ * Environment variables:
+ * The datasource, host, port, login, password and database of the `default`
+ * connection can be set with DB_DATASOURCE, DB_HOST, DB_PORT, DB_USERNAME,
+ * DB_PASSWORD and DB_DATABASE. The `test` connection uses DB_TEST_DATASOURCE,
+ * DB_TEST_HOST, DB_TEST_PORT, DB_TEST_USERNAME, DB_TEST_PASSWORD and
+ * DB_TEST_DATABASE. Unset or empty variables keep the values defined below
+ * (DB_PASSWORD and DB_TEST_PASSWORD may be set to an empty string).
+ * See config/.env.example.
  */
 class DATABASE_CONFIG
 {
@@ -101,4 +110,42 @@ class DATABASE_CONFIG
         //        PDO::ATTR_STRINGIFY_FETCHES => true
         //    )
     ];
+
+    /**
+     * Constructor. Applies database settings from environment variables.
+     */
+    public function __construct()
+    {
+        $this->default = $this->applyEnv($this->default, 'DB_');
+        $this->test = $this->applyEnv($this->test, 'DB_TEST_');
+    }
+
+    /**
+     * Overrides connection settings with environment variables that are set.
+     *
+     * @param array $config Connection configuration.
+     * @param string $prefix Environment variable name prefix.
+     * @return array
+     */
+    protected function applyEnv(array $config, string $prefix): array
+    {
+        $variables = [
+            'datasource' => 'DATASOURCE',
+            'host' => 'HOST',
+            'port' => 'PORT',
+            'login' => 'USERNAME',
+            'password' => 'PASSWORD',
+            'database' => 'DATABASE',
+        ];
+        foreach ($variables as $key => $name) {
+            $value = env($prefix . $name);
+            // An empty value keeps the default, except for the password which may be empty.
+            if ($value === null || ($value === '' && $key !== 'password')) {
+                continue;
+            }
+            $config[$key] = (string)$value;
+        }
+
+        return $config;
+    }
 }
