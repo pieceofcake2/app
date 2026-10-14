@@ -225,8 +225,12 @@ encryption type of `CookieComponent`, which is the default type and is insecure.
   and the keystream is a non-cryptographic Mersenne Twister XOR, so it can be brute-forced.
 - Changing the seed makes existing `'cipher'` cookies unreadable.
 
-Use the `'aes'` type with its own key of 32 random bytes or more instead. The skeleton does
-not use `CookieComponent` and does not read `COOKIE_KEY`, so wire it in
+Use the `'aes'` type with its own key of 32 random bytes or more instead, and make sure
+`Security.useOpenSsl` is `true`. The skeleton sets it in `config/core.php`; without it,
+`Security::encrypt()`/`decrypt()` call mcrypt, which does not exist on PHP 8, and `'aes'`
+cookies fail (see
+[Enable OpenSSL](https://pieceofcake2.github.io/docs/appendices/migrating-from-cakephp-2-10#enable-openssl)).
+The skeleton does not use `CookieComponent` and does not read `COOKIE_KEY`, so wire it in
 `src/Controller/AppController.php` when you add cookies:
 
 ```php
