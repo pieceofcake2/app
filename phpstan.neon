@@ -1,0 +1,11 @@
+includes:
+    - vendor/pieceofcake2/phpstan-cakephp2/extension.neon
+
+parameters:
+    level: 5
+    phpVersion: 80000
+    paths:
+        - src
+        - config
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
