@@ -18,6 +18,36 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use josegonzalez\Dotenv\Loader;
+
+/**
+ * Load environment variables from config/.env, if present.
+ *
+ * Copy config/.env.example to config/.env and adjust the values for your
+ * development environment. Variables that are already defined in the real
+ * environment take precedence and are never overwritten by config/.env.
+ *
+ * In production, prefer setting real environment variables instead of
+ * using a .env file.
+ */
+if (is_file(CONFIG . '.env')) {
+    $dotenv = new Loader([CONFIG . '.env']);
+    foreach ($dotenv->parse()->toArray() as $key => $value) {
+        if (getenv($key) !== false || isset($_ENV[$key]) || isset($_SERVER[$key])) {
+            continue;
+        }
+        // The parser converts some values to booleans, numbers or null; keep them as strings.
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
+        $value = (string)$value;
+        putenv($key . '=' . $value);
+        $_ENV[$key] = $value;
+        $_SERVER[$key] = $value;
+    }
+    unset($dotenv, $key, $value);
+}
+
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
 
@@ -33,8 +63,21 @@
  *
  * In production mode, flash messages redirect after a time interval.
  * In development mode, you need to click the flash message to continue.
+ *
+ * Can be set with the DEBUG environment variable (0, 1, 2, true or false).
+ * true is treated as 2 and false as 0. Defaults to 2 when not set.
  */
-Configure::write('debug', 2);
+$debug = env('DEBUG');
+if (is_string($debug) && $debug !== '') {
+    $debug = is_numeric($debug)
+        ? (int)$debug
+        : filter_var($debug, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+}
+if (is_bool($debug)) {
+    $debug = $debug ? 2 : 0;
+}
+Configure::write('debug', is_int($debug) ? $debug : 2);
+unset($debug);
 
 /**
  * Configure the Error handler used to handle errors for your application. By default
@@ -230,13 +273,17 @@ Configure::write('Session', [
 
 /**
  * A random string used in security hashing methods.
+ *
+ * Can be set with the SECURITY_SALT environment variable.
  */
-Configure::write('Security.salt', 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi');
+Configure::write('Security.salt', env('SECURITY_SALT') ?: 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi');
 
 /**
  * A random numeric string (digits only) used to encrypt/decrypt strings.
+ *
+ * Can be set with the SECURITY_CIPHER_SEED environment variable.
  */
-Configure::write('Security.cipherSeed', '76859309657453542496749683645');
+Configure::write('Security.cipherSeed', env('SECURITY_CIPHER_SEED') ?: '76859309657453542496749683645');
 
 /**
  * Use the OpenSSL extension instead of mcrypt for Security::encrypt() and Security::decrypt().
