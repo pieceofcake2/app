@@ -1,0 +1,23 @@
+name: Docs
+
+on:
+  push:
+    branches:
+      - '2.x'
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    if: github.repository_owner == 'pieceofcake2'
+    uses: pieceofcake2/docs-skeleton/.github/workflows/plugin-docs.yml@main

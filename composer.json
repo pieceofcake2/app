@@ -1,6 +1,6 @@
 {
     "name": "pieceofcake2/app",
-    "description": "CakePHP 2 Application skeleton",
+    "description": "CakePHP 2 application skeleton with a CakePHP 5-style directory layout",
     "type": "project",
     "keywords": ["cakephp", "skeleton"],
     "license": "MIT",
