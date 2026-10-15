@@ -15,6 +15,16 @@ support.
 > CakePHP 2.x is for the maintenance of existing applications. For new projects, use
 > the current major version of CakePHP instead.
 
+## Documentation
+
+- Website: https://pieceofcake2.github.io/app/
+- Markdown: [docs/README.md](docs/README.md) (for AI tools and offline reading)
+
+It covers the installation, the directory layout, the configuration and `.env` files,
+running tests and PHPStan, and migrating an existing application to the modern layout.
+
+For AI coding tools, install the Markdown docs of the CakePHP 2 book as a dev dependency: `composer require --dev pieceofcake2/docs` (files in `vendor/pieceofcake2/docs/docs/en/`).
+
 ## Requirements
 
 - PHP 8.0+
@@ -33,13 +43,6 @@ change the security salts in `config/core.php`.
 The Bake and DebugKit plugins are development dependencies. `config/bootstrap.php` loads
 them when they are installed, so `bin/cake bake` works out of the box and
 `composer install --no-dev` still works in production.
-
-## Documentation
-
-Documentation: https://pieceofcake2.github.io/app/
-
-It covers the installation, the directory layout, the configuration and `.env` files,
-running tests and PHPStan, and migrating an existing application to the modern layout.
 
 ## Contributing
 
