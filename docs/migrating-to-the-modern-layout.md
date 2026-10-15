@@ -4,7 +4,8 @@ If you plan to upgrade to CakePHP 5 in the future, you can prepare now by adopti
 CakePHP 5-style directory layout of this skeleton while you stay on CakePHP 2.
 
 See also [Migrating to the Modern Layout](https://pieceofcake2.github.io/docs/appendices/migrating-to-the-modern-layout.html)
-in the CakePHP 2 book.
+in the CakePHP 2 book
+([Markdown](https://github.com/pieceofcake2/docs/blob/2.x/docs/en/appendices/migrating-to-the-modern-layout.md)).
 
 ## Gradual Migration
 

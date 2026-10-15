@@ -224,7 +224,7 @@ In production, point the document root of your web server to `webroot/`, never
 to the project directory, which contains `config/`, `logs/`, `tmp/`, `vendor/`
 and `.env` files. The `webroot/.htaccess` file rewrites the requests to
 `index.php` for Apache with `mod_rewrite`. For Apache and nginx examples, see
-[Web Server Configuration](https://pieceofcake2.github.io/docs/installation/url-rewriting)
+[Web Server Configuration](https://pieceofcake2.github.io/docs/installation/url-rewriting.html)
 in the book.
 
 ## Pages and Styles
