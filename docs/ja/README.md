@@ -260,7 +260,7 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
   受けません)。`Security.cipherSeed` を変更して使えなくなるのは、デフォルトの `'cipher'` タイプのクッキーなど、
   `Security::cipher()` で暗号化した値だけです。
 
-詳しい内容と、値を安全に入れ替える方法については、本の
+詳しい内容と、値を安全に入れ替える方法については、クックブックの
 [セキュリティ用のソルトの生成](https://pieceofcake2.github.io/docs/ja/development/configuration#security-salts)
 を参照してください。
 
@@ -327,7 +327,7 @@ public function beforeFilter()
 キーは `php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'` または `openssl rand -hex 32` で生成し、
 `config/.env` の `COOKIE_KEY` に設定してください (本番環境では実際の環境変数として設定します)。
 既存のアプリケーションを `'cipher'` から `'aes'` に切り替えると、既存のクッキーの値 (たとえば、ログイン状態を保持する
-remember-me) は一度失われます。影響、アプリケーションに合った選択肢、移行の手順については、本の
+remember-me) は一度失われます。影響、アプリケーションに合った選択肢、移行の手順については、クックブックの
 [cipherSeed と Cookie の 'cipher' タイプ](https://pieceofcake2.github.io/docs/ja/development/configuration#cipher-seed)
 を参照してください。
 
@@ -345,7 +345,7 @@ bin/cake server
 
 本番環境では、Web サーバーのドキュメントルートを `webroot/` に向けてください。`config/`、`logs/`、`tmp/`、`vendor/`
 と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。`webroot/.htaccess` ファイルは、
-`mod_rewrite` を使う Apache のためにリクエストを `index.php` に書き換えます。Apache と nginx の例については、本の
+`mod_rewrite` を使う Apache のためにリクエストを `index.php` に書き換えます。Apache と nginx の例については、クックブックの
 [Web サーバーの設定](https://pieceofcake2.github.io/docs/ja/installation/url-rewriting.html)
 を参照してください。
 
@@ -388,11 +388,11 @@ PHP のバージョンと拡張 (mbstring、intl、openssl、PDO と `default` �
 cipher seed、そして DebugKit プラグインと Bake プラグインです。本番環境では `NotFoundException` を投げるので、
 `debug` を無効にする前に独自のページに置き換えてください。
 
-![Home page](../img/home.png)
+![ホームページ](../img/home.png)
 
 スマートフォンでの表示:
 
-![Home page on a phone](../img/home-mobile.png)
+![スマートフォンでのホームページ](../img/home-mobile.png)
 
 <a id="error-pages"></a>
 
@@ -401,9 +401,9 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 `debug` が 0 のとき、`templates/Errors/error400.ctp` と `error500.ctp` は `error` レイアウトで短いメッセージを
 表示します:
 
-![Error 400 in production](../img/error400.png)
+![本番環境のエラー 400](../img/error400.png)
 
-![Error 500 in production](../img/error500.png)
+![本番環境のエラー 500](../img/error500.png)
 
 デバッグモードでは、CakePHP の他のエラーページと同じように、デフォルトのレイアウトを使ってスタックトレースを表示します。
 
@@ -411,7 +411,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 
 ### フラッシュメッセージ
 
-![Flash messages](../img/flash-messages.png)
+![フラッシュメッセージ](../img/flash-messages.png)
 
 <a id="existing-applications"></a>
 
@@ -421,7 +421,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 アプリケーション自身のものだからです。新しい見た目を使うには、`templates/Layouts/`、`templates/Elements/Flash/`、
 `templates/Errors/`、`webroot/css/`、`webroot/font/` と `webroot/img/cake.logo.svg` をアプリケーションに
 コピーしてください。`cake.generic.css` 向けに bake したビューは、bake し直す (またはスタイルを直す) 必要があります。
-[Baked Views and the Legacy Theme](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme)
+[bake したビューと legacy テーマ](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme)
 を参照してください。
 
 <a id="development"></a>

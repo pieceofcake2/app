@@ -3,7 +3,7 @@
 将来 CakePHP 5 にアップグレードする予定があるなら、CakePHP 2 のまま、このスケルトンの CakePHP 5 スタイルの
 ディレクトリ構成を取り入れることで、今のうちに準備しておけます。
 
-CakePHP 2 の本の [モダン構成への移行](https://pieceofcake2.github.io/docs/ja/appendices/migrating-to-the-modern-layout.html)
+CakePHP 2 のクックブックの [モダン構成への移行](https://pieceofcake2.github.io/docs/ja/appendices/migrating-to-the-modern-layout.html)
 ([Markdown](https://github.com/pieceofcake2/docs/blob/2.x/docs/ja/appendices/migrating-to-the-modern-layout.md))
 も参照してください。
 
