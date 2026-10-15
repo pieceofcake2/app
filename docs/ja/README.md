@@ -19,7 +19,7 @@ Composer で読み込みます。
 - [開発](#development)
 
 レガシーな `app/` 構成の既存アプリケーションをこの構成に移すには、
-[モダン構成への移行](migrating-to-the-modern-layout.md) を参照してください。
+[モダン構成への移行](migrating-to-the-modern-layout.md) をご覧ください。
 
 <a id="requirements"></a>
 
@@ -31,13 +31,13 @@ Composer で読み込みます。
 - PHP 拡張: `mbstring`、`intl`、`openssl` と、使用するデータベースの PDO ドライバー
 
 詳しくは [pieceofcake2/cakephp の動作要件](https://github.com/pieceofcake2/cakephp#requirements--compatibility)
-を参照してください。
+をご覧ください。
 
 <a id="installation"></a>
 
 ## インストール
 
-Composer の `create-project` コマンドで新しいアプリケーションを作成します:
+Composer の `create-project` コマンドで新しいアプリケーションを作成します。
 
 ```bash
 composer create-project pieceofcake2/app my_app
@@ -56,7 +56,7 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 2. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
    `SECURITY_SALT` と `SECURITY_CIPHER_SEED` を設定します。スケルトンには広く知られたサンプル値が
    入っており、実際のアプリケーションで使ってはいけません。
-   [セキュリティ用のソルトの生成](#generating-the-security-salts) を参照してください。
+   [セキュリティ用のソルトの生成](#generating-the-security-salts) をご覧ください。
 3. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーして
    トランスポートを設定します。
 4. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
@@ -95,7 +95,7 @@ foreach (['Bake', 'DebugKit'] as $plugin) {
 ```
 
 これらは開発用の依存パッケージなので、`composer install --no-dev` でアプリケーションをインストールした場合は
-読み込まれません。Bake は次のように実行します:
+読み込まれません。Bake は次のように実行します。
 
 ```bash
 bin/cake bake
@@ -103,7 +103,7 @@ bin/cake bake
 
 DebugKit のツールバーを表示するには、`AppController` に `DebugKit.Toolbar` コンポーネントを追加します
 ([DebugKit のドキュメント](https://pieceofcake2.github.io/debug_kit/) を参照)。開発用の依存パッケージが
-なくてもアプリケーションが動作するように、プラグインが読み込まれている場合にだけ追加してください:
+なくてもアプリケーションが動作するように、プラグインが読み込まれている場合にだけ追加してください。
 
 ```php
 class AppController extends Controller
@@ -181,7 +181,7 @@ my_app/
 ## 環境変数 (.env)
 
 デバッグレベル、セキュリティ用のソルト、データベースの認証情報などの設定は、環境変数から読み込めます。
-ローカルでの開発では、サンプルファイルをコピーして編集します:
+ローカルでの開発では、サンプルファイルをコピーして編集します。
 
 ```bash
 cp config/.env.example config/.env
@@ -225,7 +225,7 @@ cp config/.env.example .env
 `Security.salt` と `Security.cipherSeed` は、暗号論的に安全な乱数生成器で生成してください。
 以下のコマンドは、Linux と macOS のどの POSIX シェルでも動作します (cipher seed はレガシーな `'cipher'`
 クッキーのタイプでしか使いません。[cipherSeed と 'cipher' クッキータイプ](#cipherseed-and-the-cipher-cookie-type)
-を参照してください):
+をご覧ください):
 
 ```bash
 # SECURITY_SALT: 64 hexadecimal characters
@@ -262,7 +262,7 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
 
 詳しい内容と、値を安全に入れ替える方法については、クックブックの
 [セキュリティ用のソルトの生成](https://pieceofcake2.github.io/docs/ja/development/configuration#security-salts)
-を参照してください。
+をご覧ください。
 
 <a id="cipherseed-and-the-cipher-cookie-type"></a>
 
@@ -300,7 +300,7 @@ Configure::write('Cookie.key', env('COOKIE_KEY') ?: null);
 
 **2.12.5 以前:** `CookieComponent` は `Cookie.type` と `Cookie.key` を読み込まないので、上の行は効果がありません。
 スケルトンは `CookieComponent` を使っていません。クッキーを追加するときは、`src/Controller/AppController.php` で
-タイプとキーを渡してください:
+タイプとキーを渡してください。
 
 ```php
 public $components = [
@@ -329,13 +329,13 @@ public function beforeFilter()
 既存のアプリケーションを `'cipher'` から `'aes'` に切り替えると、既存のクッキーの値 (たとえば、ログイン状態を保持する
 remember-me) は一度失われます。影響、アプリケーションに合った選択肢、移行の手順については、クックブックの
 [cipherSeed と Cookie の 'cipher' タイプ](https://pieceofcake2.github.io/docs/ja/development/configuration#cipher-seed)
-を参照してください。
+をご覧ください。
 
 <a id="running-the-application"></a>
 
 ## アプリケーションの実行
 
-開発時は、次のコマンドで PHP のビルトイン Web サーバーを起動します:
+開発時は、次のコマンドで PHP のビルトイン Web サーバーを起動します。
 
 ```bash
 bin/cake server
@@ -347,7 +347,7 @@ bin/cake server
 と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。`webroot/.htaccess` ファイルは、
 `mod_rewrite` を使う Apache のためにリクエストを `index.php` に書き換えます。Apache と nginx の例については、クックブックの
 [Web サーバーの設定](https://pieceofcake2.github.io/docs/ja/installation/url-rewriting.html)
-を参照してください。
+をご覧ください。
 
 <a id="pages-and-styles"></a>
 
@@ -382,7 +382,7 @@ bin/cake server
 
 ### ホームページ
 
-`templates/Pages/home.ctp` は、`debug` が有効な間 `/` に表示されます。このページはアプリケーションの環境をチェックします:
+`templates/Pages/home.ctp` は、`debug` が有効な間 `/` に表示されます。このページはアプリケーションの環境をチェックします。
 PHP のバージョンと拡張 (mbstring、intl、openssl、PDO と `default` データソースのドライバー)、`tmp/` と `logs/`
 ディレクトリ、キャッシュ、データベース接続 (失敗した場合はエラーメッセージも)、`config/.env`、セキュリティ用のソルトと
 cipher seed、そして DebugKit プラグインと Bake プラグインです。本番環境では `NotFoundException` を投げるので、
@@ -399,7 +399,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 ### エラーページ
 
 `debug` が 0 のとき、`templates/Errors/error400.ctp` と `error500.ctp` は `error` レイアウトで短いメッセージを
-表示します:
+表示します。
 
 ![本番環境のエラー 400](../img/error400.png)
 
@@ -422,7 +422,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 `templates/Errors/`、`webroot/css/`、`webroot/font/` と `webroot/img/cake.logo.svg` をアプリケーションに
 コピーしてください。`cake.generic.css` 向けに bake したビューは、bake し直す (またはスタイルを直す) 必要があります。
 [bake したビューと legacy テーマ](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme)
-を参照してください。
+をご覧ください。
 
 <a id="development"></a>
 
@@ -433,7 +433,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 ### テストの実行
 
 テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。`config/database.php`
-(または `DB_TEST_*` 変数) で `test` 接続を設定してから、PHPUnit でテストを実行します:
+(または `DB_TEST_*` 変数) で `test` 接続を設定してから、PHPUnit でテストを実行します。
 
 ```bash
 vendor/bin/phpunit
@@ -465,7 +465,7 @@ bin/cake test app Controller/PostsController
 End-to-End テストのためのディレクトリです。pieceofcake2/panther は Symfony Panther と同じ方法でテストを実行します。
 アプリケーションを PHP のビルトイン Web サーバーで起動し、ヘッドレス Chrome で操作します。使い方は次のとおりです:
 
-1. パッケージと、使っている Chrome に合った chromedriver をインストールします:
+1. パッケージと、使っている Chrome に合った chromedriver をインストールします。
 
    ```bash
    composer require --dev pieceofcake2/panther dbrekelmans/bdi
@@ -486,13 +486,13 @@ End-to-End テストのためのディレクトリです。pieceofcake2/panther 
 
 `PANTHER_NO_HEADLESS=1` (ブラウザーの動きを見るため) のようなマシンごとの値は、シェルか、`phpunit.xml.dist` を
 コピーした `phpunit.xml` で設定してください。CI では、End-to-End テストを別のジョブで実行してください。変数、
-テスト用データベース、GitHub Actions の例については panther のドキュメントを参照してください。
+テスト用データベース、GitHub Actions の例については panther のドキュメントをご覧ください。
 
 <a id="code-standards"></a>
 
 ### コーディング規約
 
-CakePHP のコーディング規約に沿っているかコードをチェックします:
+CakePHP のコーディング規約に沿っているかコードをチェックします。
 
 ```bash
 vendor/bin/phpcs
@@ -502,7 +502,7 @@ vendor/bin/phpcs
 
 ### 静的解析
 
-`src/` と `config/` に対して PHPStan (レベル 5) を実行します:
+`src/` と `config/` に対して PHPStan (レベル 5) を実行します。
 
 ```bash
 vendor/bin/phpstan analyse
@@ -519,4 +519,4 @@ vendor/bin/phpstan analyse
 最後のアップストリームのバージョンは 2.10.24) の `app/` ディレクトリを元にしており、元々は CakePHP コミュニティ
 (Cake Software Foundation, Inc.) によるものです。これを別のパッケージとして切り出し、モダンな PHP で動く CakePHP 2 のために
 [pieceofcake2](https://github.com/pieceofcake2) が保守しています。元のコードからの変更点は
-[コミット履歴](https://github.com/pieceofcake2/app/commits/2.x) を参照してください。
+[コミット履歴](https://github.com/pieceofcake2/app/commits/2.x) をご覧ください。
