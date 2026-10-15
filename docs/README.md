@@ -460,10 +460,10 @@ headless Chrome drives it. To use them:
 
 They are configured with Panther's `PANTHER_*` variables. `phpunit.xml.dist` sets two:
 
-- `PANTHER_APP_DATASOURCE=test`: the web server gets `APP_DATASOURCE=test`, and
+- `PANTHER_APP_ENV=test`: Panther gives the web server `APP_ENV=test`, and
   `config/database.php.default` then uses the `test` connection as `default`, where the
   fixtures are. If you created `config/database.php` before this was added, copy the
-  `APP_DATASOURCE` lines of the constructor into it.
+  `APP_ENV` lines of the constructor into it.
 - `PANTHER_ERROR_SCREENSHOT_DIR=./tmp/error-screenshots`: screenshots of the failed tests.
 
 Set per-machine values, such as `PANTHER_NO_HEADLESS=1` (to watch the browser), in your

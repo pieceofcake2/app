@@ -75,9 +75,9 @@
  * See config/.env.example.
  *
  * End-to-End tests:
- * When APP_DATASOURCE names another connection (e.g. `test`), it is used as `default`.
- * pieceofcake2/panther sets it for the web server of the End-to-End tests
- * (PANTHER_APP_DATASOURCE=test in phpunit.xml.dist), so that the pages read the fixtures.
+ * When APP_ENV is `test`, the `default` connection is the `test` connection. Symfony Panther
+ * sets it in the web server of the End-to-End tests (PANTHER_APP_ENV=test in
+ * phpunit.xml.dist), so that the pages read the fixtures.
  */
 class DATABASE_CONFIG
 {
@@ -125,9 +125,8 @@ class DATABASE_CONFIG
         $this->test = $this->applyEnv($this->test, 'DB_TEST_');
 
         // The web server of the End-to-End tests (pieceofcake2/panther) uses the test datasource
-        $datasource = env('APP_DATASOURCE');
-        if ($datasource && $datasource !== 'default' && isset($this->{$datasource})) {
-            $this->default = $this->{$datasource};
+        if (env('APP_ENV') === 'test') {
+            $this->default = $this->test;
         }
     }
 
