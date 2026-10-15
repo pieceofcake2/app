@@ -262,3 +262,12 @@ vendor/bin/phpstan analyse
 
 The configuration is in `phpstan.neon` and uses the
 [pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/) extension.
+
+## Origin
+
+This package is based on the `app/` directory of
+[cakephp/cakephp](https://github.com/cakephp/cakephp) (`cakephp/cakephp` on Packagist, last upstream
+version 2.10.24), originally by the CakePHP community (Cake Software Foundation, Inc.). It was
+extracted into a separate package and is maintained for CakePHP 2 on modern PHP by
+[pieceofcake2](https://github.com/pieceofcake2). Changes from the original are listed in the
+[commit history](https://github.com/pieceofcake2/app/commits/2.x).

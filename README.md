@@ -48,6 +48,15 @@ them when they are installed, so `bin/cake bake` works out of the box and
 
 See the [contribution guidelines](https://github.com/pieceofcake2/.github/blob/master/CONTRIBUTING.md).
 
+## Origin
+
+This package is based on the `app/` directory of
+[cakephp/cakephp](https://github.com/cakephp/cakephp) (`cakephp/cakephp` on Packagist, last upstream
+version 2.10.24), originally by the CakePHP community (Cake Software Foundation, Inc.). It was
+extracted into a separate package and is maintained for CakePHP 2 on modern PHP by
+[pieceofcake2](https://github.com/pieceofcake2). Changes from the original are listed in the
+[commit history](https://github.com/pieceofcake2/app/commits/2.x).
+
 ## License
 
 Licensed under the MIT License. See [LICENSE](LICENSE).
