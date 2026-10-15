@@ -92,3 +92,12 @@ hr {
 .content ul ul {
     margin-bottom: 0;
 }
+/* Lists without bullet icons line up with the headings */
+ul.plain {
+    padding-left: 0;
+}
+/* Milligram keeps inline code on one line; let long commands wrap on small screens */
+li code {
+    overflow-wrap: anywhere;
+    white-space: normal;
+}

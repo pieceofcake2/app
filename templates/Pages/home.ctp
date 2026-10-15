@@ -316,7 +316,7 @@ endforeach;
                 <div class="row">
                     <div class="column">
                         <h3><?php echo __d('cake_dev', 'Editing this Page'); ?></h3>
-                        <ul>
+                        <ul class="plain">
                             <li><?php echo __d('cake_dev', 'To change the content of this page, edit: %s.', '<code>templates/Pages/home.ctp</code>'); ?></li>
                             <li><?php echo __d('cake_dev', 'To change its layout, edit: %s.', '<code>templates/Layouts/default.ctp</code>'); ?></li>
                             <li><?php echo __d('cake_dev', 'You can also add some CSS styles for your pages at: %s.', '<code>webroot/css</code>'); ?></li>

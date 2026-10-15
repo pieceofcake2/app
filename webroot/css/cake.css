@@ -376,8 +376,20 @@ pre {
 }
 .cake-sql-log {
     background: var(--color-white);
+    border-radius: 0.4rem;
+    box-shadow: 0 7px 14px 0 rgba(60, 66, 87, 0.1),
+        0 3px 6px 0 rgba(0, 0, 0, 0.07);
     font-size: 1.3rem;
     margin-top: 2rem;
+}
+/* Same inner spacing as the .content box */
+.cake-sql-log th:first-child,
+.cake-sql-log td:first-child {
+    padding-left: 2rem;
+}
+.cake-sql-log th:last-child,
+.cake-sql-log td:last-child {
+    padding-right: 2rem;
 }
 .cake-sql-log caption {
     font-weight: bold;
