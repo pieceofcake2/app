@@ -17,8 +17,8 @@ support, and the home page, layouts, error pages and styles of the CakePHP 5 ske
 
 ## Documentation
 
-- Website: https://pieceofcake2.github.io/app/
-- Markdown: [docs/README.md](docs/README.md) (for AI tools and offline reading)
+- Website: https://pieceofcake2.github.io/app/ (日本語: https://pieceofcake2.github.io/app/ja/)
+- Markdown: [docs/README.md](docs/README.md) (日本語: [docs/ja/README.md](docs/ja/README.md)) (for AI tools and offline reading)
 
 It covers the installation, the directory layout, the configuration and `.env` files,
 the pages and styles, running tests and PHPStan, and migrating an existing application to the modern layout.
