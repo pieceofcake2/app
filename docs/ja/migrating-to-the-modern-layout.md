@@ -5,7 +5,7 @@
 
 CakePHP 2 のクックブックの [モダン構成への移行](https://pieceofcake2.github.io/docs/ja/appendices/migrating-to-the-modern-layout.html)
 ([Markdown](https://github.com/pieceofcake2/docs/blob/2.x/docs/ja/appendices/migrating-to-the-modern-layout.md))
-もご覧ください。
+も参照してください。
 
 <a id="gradual-migration"></a>
 
