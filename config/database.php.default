@@ -73,6 +73,11 @@
  * DB_TEST_DATABASE. Unset or empty variables keep the values defined below
  * (DB_PASSWORD and DB_TEST_PASSWORD may be set to an empty string).
  * See config/.env.example.
+ *
+ * End-to-End tests:
+ * When E2E_DATASOURCE is `test`, the `default` connection is the `test` connection.
+ * pieceofcake2/e2e-test sets it for the application server of the End-to-End tests
+ * (E2E_SERVER_DATASOURCE=test in phpunit.xml.dist), so that the pages read the fixtures.
  */
 class DATABASE_CONFIG
 {
@@ -118,6 +123,11 @@ class DATABASE_CONFIG
     {
         $this->default = $this->applyEnv($this->default, 'DB_');
         $this->test = $this->applyEnv($this->test, 'DB_TEST_');
+
+        // The application server of the End-to-End tests (pieceofcake2/e2e-test) uses the test database
+        if (env('E2E_DATASOURCE') === 'test') {
+            $this->default = $this->test;
+        }
     }
 
     /**

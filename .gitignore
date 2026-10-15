@@ -42,3 +42,10 @@
 Icon?
 ehthumbs.db
 Thumbs.db
+
+# End-to-End tests (pieceofcake2/e2e-test) #
+############################################
+# Failure screenshots, HTML and server logs
+/tmp/e2e-artifacts/
+# chromedriver downloaded by vendor/bin/bdi detect drivers
+/drivers/

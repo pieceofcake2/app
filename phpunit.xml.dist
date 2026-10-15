@@ -1,19 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    vendor/bin/phpunit runs the App suite (defaultTestSuite). Select the End-to-End tests
+    (pieceofcake2/e2e-test) with the testsuite option: "EndToEnd", or "App,EndToEnd" for everything.
+    Remove defaultTestSuite="App" to make vendor/bin/phpunit run everything, as in Symfony.
+-->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="./tests/bootstrap.php"
          backupGlobals="true"
+         defaultTestSuite="App"
          stderr="true"
          colors="true">
     <php>
         <ini name="memory_limit" value="-1"/>
+        <!--
+            End-to-End tests (pieceofcake2/e2e-test) are configured with environment variables.
+            Real environment variables win; put per-machine values in your shell or phpunit.xml.
+        -->
+        <!-- The application server uses the test datasource, where the fixtures are -->
+        <env name="E2E_SERVER_DATASOURCE" value="test"/>
+        <!-- DEBUG of the application server -->
+        <env name="E2E_SERVER_ENV_DEBUG" value="0"/>
     </php>
+    <!--
+        Quits the browsers and stops the application server after the last test.
+        Enable it when you install pieceofcake2/e2e-test.
+    -->
+    <!--
+    <extensions>
+        <extension class="Pieceofcake2\E2ETest\PHPUnit\E2EExtension"/>
+    </extensions>
+    -->
     <listeners>
         <listener class="CakeFixtureInjector" file="./vendor/pieceofcake2/cakephp/src/Cake/TestSuite/Fixture/CakeFixtureInjector.php"/>
     </listeners>
     <testsuites>
-        <testsuite name="All Tests">
+        <testsuite name="App">
             <directory>./tests/TestCase/</directory>
+            <exclude>./tests/TestCase/EndToEnd/</exclude>
+        </testsuite>
+        <testsuite name="EndToEnd">
+            <directory>./tests/TestCase/EndToEnd/</directory>
         </testsuite>
     </testsuites>
     <coverage>
