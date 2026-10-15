@@ -20,10 +20,12 @@
  */
 
 // In production, render the error in the minimal error layout. In debug mode, use the
-// development error page of the core (dev_error layout), like CakePHP 5 does.
-$this->layout = 'error';
+// development error page of the core (dev_error layout), like CakePHP 5 does. The core
+// provides that layout from pieceofcake2/cakephp 2.12.6; with older versions, keep the
+// default layout and show the stack trace below the message.
+$devErrorLayout = is_file(dirname(CAKE_CORE_INCLUDE_PATH) . DS . 'templates' . DS . 'Layouts' . DS . 'dev_error.ctp');
 
-if (Configure::read('debug') > 0 && !$this->request->is('ajax')):
+if (Configure::read('debug') > 0 && !$this->request->is('ajax') && $devErrorLayout):
     $this->layout = 'dev_error';
 
     $this->assign('title', $message);
@@ -42,9 +44,20 @@ if (Configure::read('debug') > 0 && !$this->request->is('ajax')):
 
     return;
 endif;
+
+if (!Configure::read('debug')):
+    $this->layout = 'error';
+    // The page title would otherwise be the humanized view path ("Errors")
+    $this->assign('title', __d('cake', 'Error'));
+endif;
 ?>
 <h2><?php echo $message; ?></h2>
 <p class="error">
     <strong><?php echo __d('cake', 'Error'); ?>: </strong>
     <?php echo __d('cake', 'An Internal Error Has Occurred.'); ?>
 </p>
+<?php
+if (Configure::read('debug') > 0):
+    echo $this->element('exception_stack_trace');
+endif;
+?>

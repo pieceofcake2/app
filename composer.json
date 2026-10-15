@@ -7,7 +7,7 @@
     "require": {
         "php": ">=8.0",
         "josegonzalez/dotenv": "^4.0",
-        "pieceofcake2/cakephp": "^2.12.6"
+        "pieceofcake2/cakephp": "^2.12"
     },
     "require-dev": {
         "cakephp/cakephp-codesniffer": "^5.0",
