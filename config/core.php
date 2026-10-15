@@ -424,6 +424,10 @@ Configure::write('Acl.database', 'default');
  *
  * By default File is used, but for improved performance you should use APC.
  *
+ * The 'dsn' keys set the engines with the CACHE_CAKECORE_URL and CACHE_CAKEMODEL_URL
+ * environment variables (e.g. redis://localhost:6379/0, see config/.env.example). The
+ * keys in a DSN replace the same keys below; an unset variable keeps the keys below.
+ *
  * Note: 'default' and other application caches should be configured in config/bootstrap.php.
  *       Please check the comments in bootstrap.php for more info on the cache engines available
  *       and their settings.
@@ -448,6 +452,7 @@ Cache::config('_cake_core_', [
     'prefix' => $prefix . 'cake_core_',
     'path' => CACHE . 'persistent' . DS,
     'duration' => $duration,
+    'dsn' => env('CACHE_CAKECORE_URL'),
 ]);
 
 /**
@@ -459,4 +464,5 @@ Cache::config('_cake_model_', [
     'prefix' => $prefix . 'cake_model_',
     'path' => CACHE . 'models' . DS,
     'duration' => $duration,
+    'dsn' => env('CACHE_CAKEMODEL_URL'),
 ]);

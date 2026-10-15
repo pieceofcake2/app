@@ -33,9 +33,27 @@
  *
  * from =>
  * The origin email. See CakeEmail::from() about the valid values
+ *
+ * dsn =>
+ * A mailer DSN in the format of Symfony Mailer (needs the release of pieceofcake2/cakephp after 2.12.6):
+ *  smtp://user:password@smtp.example.com:587 (Smtp; STARTTLS on port 587 or with ?tls=1)
+ *  smtps://user:password@smtp.example.com:465 (Smtp over SSL/TLS)
+ *  sendmail://default or native://default (Mail, PHP mail())
+ *  null://null (Debug, nothing is sent)
+ * Query parameters set the other keys (timeout, client, ...). Encode reserved
+ * characters of the password (%40 for @). The keys in the DSN replace the same keys
+ * of the profile, and the other keys are kept. An empty dsn is ignored.
+ *
+ * Environment variables:
+ * MAILER_DSN sets the transport of the `default` profile. See config/.env.example.
  */
 class EmailConfig
 {
+    /**
+     * The default profile. MAILER_DSN replaces the transport keys it sets.
+     *
+     * @var array
+     */
     public $default = [
         'transport' => 'Mail',
         'from' => 'you@localhost',
@@ -87,4 +105,12 @@ class EmailConfig
         //'charset' => 'utf-8',
         //'headerCharset' => 'utf-8',
     ];
+
+    /**
+     * Constructor. Reads the transport of the default profile from MAILER_DSN.
+     */
+    public function __construct()
+    {
+        $this->default['dsn'] = env('MAILER_DSN');
+    }
 }

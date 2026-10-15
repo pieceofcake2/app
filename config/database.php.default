@@ -65,14 +65,22 @@
  * flags =>
  * A key/value array of driver specific connection options.
  *
+ * dsn =>
+ * A DSN that sets the connection in one string, as in CakePHP 3.x and later
+ * (needs the release of pieceofcake2/cakephp after 2.12.6). The scheme selects the datasource:
+ *  mysql://user:password@localhost:3306/database_name?encoding=utf8mb4
+ *  postgres://user:password@localhost:5432/database_name?schema=public
+ *  sqlite:///tmp/database.sqlite (relative to the working directory),
+ *  sqlite:////var/db/database.sqlite (absolute path) or sqlite:///:memory:
+ *  sqlserver://user:password@localhost:1433/database_name
+ * Query parameters set the other keys (encoding, schema, prefix, persistent, flags[...]).
+ * Encode reserved characters of the password (%40 for @, %3F for ?, %23 for #).
+ * The keys in the DSN replace the same keys below, and the other keys below are kept.
+ * An empty dsn is ignored, so the keys below are used when the variable is not set.
+ *
  * Environment variables:
- * The datasource, host, port, login, password and database of the `default`
- * connection can be set with DB_DATASOURCE, DB_HOST, DB_PORT, DB_USERNAME,
- * DB_PASSWORD and DB_DATABASE. The `test` connection uses DB_TEST_DATASOURCE,
- * DB_TEST_HOST, DB_TEST_PORT, DB_TEST_USERNAME, DB_TEST_PASSWORD and
- * DB_TEST_DATABASE. Unset or empty variables keep the values defined below
- * (DB_PASSWORD and DB_TEST_PASSWORD may be set to an empty string).
- * See config/.env.example.
+ * DATABASE_URL sets the `default` connection and DATABASE_TEST_URL the `test`
+ * connection. See config/.env.example.
  *
  * End-to-End tests:
  * When APP_ENV is `test`, the `default` connection is the `test` connection. Symfony Panther
@@ -81,6 +89,11 @@
  */
 class DATABASE_CONFIG
 {
+    /**
+     * The connection of the application. DATABASE_URL replaces the keys it sets.
+     *
+     * @var array
+     */
     public $default = [
         'datasource' => 'Database/Mysql',
         'persistent' => false,
@@ -89,7 +102,7 @@ class DATABASE_CONFIG
         'password' => 'password',
         'database' => 'database_name',
         'prefix' => '',
-        //'encoding' => 'utf8',
+        //'encoding' => 'utf8mb4',
 
         // PDO MySQL/SQLite Driver had the following backward incompatible changes in PHP 8.1
         // * https://www.php.net/manual/en/migration81.incompatible.php#migration81.incompatible.pdo.mysql
@@ -101,6 +114,11 @@ class DATABASE_CONFIG
         //    )
     ];
 
+    /**
+     * The connection of the tests. DATABASE_TEST_URL replaces the keys it sets.
+     *
+     * @var array
+     */
     public $test = [
         'datasource' => 'Database/Mysql',
         'persistent' => false,
@@ -109,7 +127,7 @@ class DATABASE_CONFIG
         'password' => 'password',
         'database' => 'test_database_name',
         'prefix' => '',
-        //'encoding' => 'utf8',
+        //'encoding' => 'utf8mb4',
 
         //    'flags' => array(
         //        PDO::ATTR_STRINGIFY_FETCHES => true
@@ -117,45 +135,16 @@ class DATABASE_CONFIG
     ];
 
     /**
-     * Constructor. Applies database settings from environment variables.
+     * Constructor. Reads the connections from DATABASE_URL and DATABASE_TEST_URL.
      */
     public function __construct()
     {
-        $this->default = $this->applyEnv($this->default, 'DB_');
-        $this->test = $this->applyEnv($this->test, 'DB_TEST_');
+        $this->default['dsn'] = env('DATABASE_URL');
+        $this->test['dsn'] = env('DATABASE_TEST_URL');
 
         // The web server of the End-to-End tests (pieceofcake2/panther) uses the test datasource
         if (env('APP_ENV') === 'test') {
             $this->default = $this->test;
         }
-    }
-
-    /**
-     * Overrides connection settings with environment variables that are set.
-     *
-     * @param array $config Connection configuration.
-     * @param string $prefix Environment variable name prefix.
-     * @return array
-     */
-    protected function applyEnv(array $config, string $prefix): array
-    {
-        $variables = [
-            'datasource' => 'DATASOURCE',
-            'host' => 'HOST',
-            'port' => 'PORT',
-            'login' => 'USERNAME',
-            'password' => 'PASSWORD',
-            'database' => 'DATABASE',
-        ];
-        foreach ($variables as $key => $name) {
-            $value = env($prefix . $name);
-            // An empty value keeps the default, except for the password which may be empty.
-            if ($value === null || ($value === '' && $key !== 'password')) {
-                continue;
-            }
-            $config[$key] = (string)$value;
-        }
-
-        return $config;
     }
 }

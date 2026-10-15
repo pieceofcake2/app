@@ -45,6 +45,9 @@ jobs:
 
     env:
       DB: ${{ matrix.db-type }}
+      # The connections of config/database.php (copied from config/database.php.default)
+      DATABASE_URL: ${{ matrix.db-type == 'pgsql' && 'postgres://postgres:postgres@127.0.0.1:5432/cakephp_test' || 'mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8' }}
+      DATABASE_TEST_URL: ${{ matrix.db-type == 'pgsql' && 'postgres://postgres:postgres@127.0.0.1:5432/cakephp_test' || 'mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8' }}
 
     steps:
       - name: Checkout
@@ -128,8 +131,35 @@ jobs:
           chmod -R 777 ./tmp
           chmod -R 777 ./logs
 
-      - name: Copy database.php
-        run: cp ./vendor/pieceofcake2/cakephp/tests/config/database.php ./config/
+      - name: Copy database.php and email.php
+        run: |
+          cp ./config/database.php.default ./config/database.php
+          cp ./config/email.php.default ./config/email.php
+
+      - name: Check the connections from DATABASE_URL and DATABASE_TEST_URL
+        run: |
+          php -r '
+            require "vendor/autoload.php";
+            require "tests/bootstrap.php";
+            foreach (["default", "test"] as $name) {
+                // Wait for the database container to accept connections
+                for ($try = 1; ; $try++) {
+                    try {
+                        $db = ConnectionManager::getDataSource($name);
+                        break;
+                    } catch (MissingConnectionException $e) {
+                        if ($try === 30) {
+                            throw $e;
+                        }
+                        sleep(2);
+                    }
+                }
+                printf("%s: %s %s@%s/%s%s", $name, get_class($db), $db->config["login"], $db->config["host"], $db->config["database"], PHP_EOL);
+                if (!$db->isConnected()) {
+                    exit(1);
+                }
+            }
+          '
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"

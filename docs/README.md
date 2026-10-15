@@ -47,14 +47,15 @@ and the CakePHP coding standard) are installed as development dependencies.
 
 Then finish the configuration:
 
-1. Copy `config/database.php.default` to `config/database.php` and enter your database
-   connection settings, or set them with [environment variables](#environment-variables-env).
+1. Copy `config/database.php.default` to `config/database.php`, and set the connections with
+   `DATABASE_URL` and `DATABASE_TEST_URL` (see [Database and Mailer DSNs](#database-and-mailer-dsns))
+   or enter them in the file.
 2. Change `Security.salt` and `Security.cipherSeed` in `config/core.php`, or set
    `SECURITY_SALT` and `SECURITY_CIPHER_SEED`. The skeleton ships with well-known example
    values that must not be used in a real application. See
    [Generating the Security Salts](#generating-the-security-salts).
-3. If you send email, copy `config/email.php.default` to `config/email.php` and configure
-   your transport.
+3. If you send email, copy `config/email.php.default` to `config/email.php`, and set the
+   transport with `MAILER_DSN` or configure it in the file.
 4. Make sure that the web server can write to `tmp/` and `logs/`.
 
 ### Version Control
@@ -196,21 +197,138 @@ project root.
 | `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1 to 4294967295, legacy `'cipher'` cookies only) | value in `config/core.php` |
 | `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type (read by the component from 2.12.6) | `null` (`Security.salt` is used) |
-| `DB_DATASOURCE`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` | `default` connection in `config/database.php` | values in `config/database.php` |
-| `DB_TEST_DATASOURCE`, `DB_TEST_HOST`, `DB_TEST_PORT`, `DB_TEST_USERNAME`, `DB_TEST_PASSWORD`, `DB_TEST_DATABASE` | `test` connection in `config/database.php` | values in `config/database.php` |
+| `DATABASE_URL` | `default` connection in `config/database.php`, as a DSN | values in `config/database.php` |
+| `DATABASE_TEST_URL` | `test` connection in `config/database.php`, as a DSN | values in `config/database.php` |
+| `MAILER_DSN` | transport of the `default` profile in `config/email.php`, as a Symfony Mailer DSN | values in `config/email.php` |
+| `CACHE_DEFAULT_URL`, `CACHE_CAKECORE_URL`, `CACHE_CAKEMODEL_URL` | `default` cache (`config/bootstrap.php`), `_cake_core_` and `_cake_model_` caches (`config/core.php`), as DSNs | `File` engine settings of the files |
+| `LOG_DEBUG_URL`, `LOG_ERROR_URL` | `debug` and `error` logs in `config/bootstrap.php`, as DSNs | `File` logs in `logs/` |
 
 - Precedence: real environment variables (web server, shell, container, CI) > `config/.env` >
   root `.env`. `config/.env` is loaded first and the root `.env` second; a variable that is
   already set is never overwritten.
 - Unset or empty variables keep the defaults, so the application behaves exactly as before
-  without a `.env` file (an empty `DB_PASSWORD` / `DB_TEST_PASSWORD` is allowed).
+  without a `.env` file.
 - Quote values in `.env` files (e.g. `DEBUG="0"`). Unquoted numbers are normalized by the
   parser (`007` becomes `7`, and long digit strings such as a cipher seed overflow).
 - `.env` files are meant for development. In production, set real environment variables
   instead.
-- The database variables are read by `config/database.php.default`. If you created
-  `config/database.php` before this was added, copy the `__construct()` and `applyEnv()`
-  methods into it.
+- `DATABASE_URL` and `DATABASE_TEST_URL` are read by `config/database.php.default`, and
+  `MAILER_DSN` by `config/email.php.default`. The cache and log variables are read by
+  `config/core.php` and `config/bootstrap.php`. If you created `config/database.php` or
+  `config/email.php` from an earlier skeleton, copy the `__construct()` method into it (and
+  remove the `applyEnv()` method of the former `DB_*` variables).
+
+### Database and Mailer DSNs
+
+A DSN sets a whole connection in one string, as in CakePHP 3.x and later and in Symfony. The
+`'dsn'` key of a connection in `config/database.php` and of a profile in `config/email.php`
+takes the DSN, and the skeleton sets it from the environment variables of Symfony
+(`DATABASE_URL`, `MAILER_DSN`):
+
+```php
+// config/database.php
+$this->default['dsn'] = env('DATABASE_URL');
+$this->test['dsn'] = env('DATABASE_TEST_URL');
+
+// config/email.php
+$this->default['dsn'] = env('MAILER_DSN');
+```
+
+The `'dsn'` key needs the release of pieceofcake2/cakephp after 2.12.6. With an earlier
+release the key is ignored and the other keys of the files are used.
+
+```dotenv
+# MySQL
+DATABASE_URL="mysql://user:password@localhost:3306/my_app?encoding=utf8mb4"
+# PostgreSQL
+DATABASE_URL="postgres://user:password@localhost:5432/my_app?schema=public"
+# SQLite: three slashes for a path relative to the working directory, four for an absolute path
+DATABASE_URL="sqlite:////var/db/my_app.sqlite"
+DATABASE_TEST_URL="sqlite:///:memory:"
+# SQL Server
+DATABASE_URL="sqlserver://user:password@localhost:1433/my_app?encoding=utf8"
+
+# SMTP with STARTTLS on port 587
+MAILER_DSN="smtp://user:password@smtp.example.com:587"
+# SMTP over SSL/TLS (port 465)
+MAILER_DSN="smtps://user:password@smtp.example.com"
+# Local SMTP server for development (e.g. Mailpit)
+MAILER_DSN="smtp://localhost:1025"
+# PHP mail()
+MAILER_DSN="sendmail://default"
+# Do not send (Debug transport)
+MAILER_DSN="null://null"
+```
+
+- The scheme selects the datasource (`mysql`, `postgres`, `sqlite`, `sqlserver`) or the
+  transport (`smtp` / `smtps` for `Smtp`, `sendmail` / `native` for `Mail`, `null` for `Debug`).
+- Query parameters set the other keys: `encoding`, `schema`, `prefix`, `persistent=true` or
+  `flags[1002]=...` for a database, `timeout`, `client` or `tls=1` for SMTP.
+- Encode reserved characters of a password: `%40` for `@`, `%3F` for `?`, `%23` for `#`,
+  `%25` for `%`. For example, `p@ss?` is `p%40ss%3F`.
+- The keys in the DSN replace the same keys in `config/database.php` or `config/email.php`,
+  and the other keys are kept. The keys of the skeleton files are defaults: a DSN without a
+  password (`mysql://root@localhost/my_app`) keeps `'password' => 'password'` of the file, so
+  write `mysql://root:@localhost/my_app` for an empty password.
+- An unset or empty variable is ignored, and the keys of the file are used.
+- Plugins can add schemes (e.g. `ses+api://` of an Amazon SES plugin) with
+  `CakeEmail::setDsnClassMap()` and the other `setDsnClassMap()` methods in their bootstrap.
+- See [Datasources](https://pieceofcake2.github.io/docs/models/datasources.html) and
+  [Email](https://pieceofcake2.github.io/docs/core-utility-libraries/email.html) in the
+  book for all the rules.
+
+#### Cache and Log DSNs
+
+The cache configurations in `config/core.php` and `config/bootstrap.php` and the logs in
+`config/bootstrap.php` also have a `'dsn'` key, set from the variables of the CakePHP 5 app
+skeleton. The keys of the files (`prefix`, `duration`, `types`, `file`, ...) are kept, so a DSN
+only changes the engine and its connection:
+
+```dotenv
+# Redis for the application and framework caches
+CACHE_DEFAULT_URL="redis://localhost:6379/0"
+CACHE_CAKECORE_URL="redis://localhost:6379/0"
+CACHE_CAKEMODEL_URL="redis://localhost:6379/0"
+# Log to the standard streams in a container
+LOG_DEBUG_URL="console://?stream=php://stdout"
+LOG_ERROR_URL="console://?stream=php://stderr"
+```
+
+The schemes are `file`, `apcu`, `memcached`, `memcache` and `redis` for caches and `file`,
+`console` and `syslog` for logs. See [Caching](https://pieceofcake2.github.io/docs/core-libraries/caching.html)
+and [Logging](https://pieceofcake2.github.io/docs/core-libraries/logging.html) in the book.
+
+#### Docker and CI
+
+Pass the DSNs as environment variables. With Docker Compose:
+
+```yaml
+services:
+  app:
+    environment:
+      DATABASE_URL: "mysql://my_app:secret@db:3306/my_app?encoding=utf8mb4"
+      MAILER_DSN: "smtp://mailpit:1025"
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: my_app
+      MYSQL_USER: my_app
+      MYSQL_PASSWORD: secret
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+  mailpit:
+    image: axllent/mailpit
+```
+
+In GitHub Actions, set `DATABASE_TEST_URL` for the test step:
+
+```yaml
+      - name: Run tests
+        env:
+          DATABASE_TEST_URL: mysql://root:root@127.0.0.1:3306/test_app?encoding=utf8mb4
+        run: |
+          cp config/database.php.default config/database.php
+          vendor/bin/phpunit
+```
 
 ### Generating the Security Salts
 
@@ -414,7 +532,7 @@ their templates and `webroot/css/`. To use the new look, copy `templates/Layouts
 ### Running Tests
 
 Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`. Configure the
-`test` connection in `config/database.php` (or with the `DB_TEST_*` variables), then run the
+`test` connection in `config/database.php` (or with the `DATABASE_TEST_URL` variable), then run the
 tests with PHPUnit:
 
 ```bash

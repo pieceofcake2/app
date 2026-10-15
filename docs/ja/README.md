@@ -51,14 +51,15 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 
 続けて設定を仕上げます:
 
-1. `config/database.php.default` を `config/database.php` にコピーしてデータベースの接続設定を入力するか、
-   [環境変数](#environment-variables-env) で設定します。
+1. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` と
+   `DATABASE_TEST_URL` で接続を設定するか ([データベースとメーラーの DSN](#database-and-mailer-dsns) をご覧ください)、
+   ファイルに入力します。
 2. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
    `SECURITY_SALT` と `SECURITY_CIPHER_SEED` を設定します。スケルトンには広く知られたサンプル値が
    入っており、実際のアプリケーションで使ってはいけません。
    [セキュリティ用のソルトの生成](#generating-the-security-salts) をご覧ください。
-3. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーして
-   トランスポートを設定します。
+3. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
+   `MAILER_DSN` でトランスポートを設定するか、ファイルで設定します。
 4. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
 
 <a id="version-control"></a>
@@ -205,18 +206,137 @@ cp config/.env.example .env
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー (2.12.6 からコンポーネントが読み込みます) | `null` (`Security.salt` が使われます) |
-| `DB_DATASOURCE`、`DB_HOST`、`DB_PORT`、`DB_USERNAME`、`DB_PASSWORD`、`DB_DATABASE` | `config/database.php` の `default` 接続 | `config/database.php` の値 |
-| `DB_TEST_DATASOURCE`、`DB_TEST_HOST`、`DB_TEST_PORT`、`DB_TEST_USERNAME`、`DB_TEST_PASSWORD`、`DB_TEST_DATABASE` | `config/database.php` の `test` 接続 | `config/database.php` の値 |
+| `DATABASE_URL` | `config/database.php` の `default` 接続 (DSN) | `config/database.php` の値 |
+| `DATABASE_TEST_URL` | `config/database.php` の `test` 接続 (DSN) | `config/database.php` の値 |
+| `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
+| `CACHE_DEFAULT_URL`、`CACHE_CAKECORE_URL`、`CACHE_CAKEMODEL_URL` | `default` キャッシュ (`config/bootstrap.php`)、`_cake_core_` と `_cake_model_` キャッシュ (`config/core.php`) (DSN) | ファイルにある `File` エンジンの設定 |
+| `LOG_DEBUG_URL`、`LOG_ERROR_URL` | `config/bootstrap.php` の `debug` ログと `error` ログ (DSN) | `logs/` への `File` ログ |
 
 - 優先順位: 実際の環境変数 (Web サーバー、シェル、コンテナ、CI) > `config/.env` > ルートの `.env`。
   `config/.env` が先に、ルートの `.env` が後に読み込まれます。すでに設定されている変数が上書きされることはありません。
 - 設定されていない変数や空の変数ではデフォルトが使われるので、`.env` ファイルがなければアプリケーションは
-  これまでとまったく同じように動作します (`DB_PASSWORD` / `DB_TEST_PASSWORD` は空でもかまいません)。
+  これまでとまったく同じように動作します。
 - `.env` ファイルの値は引用符で囲んでください (例: `DEBUG="0"`)。引用符で囲まない数値はパーサーによって
   正規化されます (`007` は `7` になり、cipher seed のような長い数字の列はオーバーフローします)。
 - `.env` ファイルは開発用です。本番環境では、代わりに実際の環境変数を設定してください。
-- データベースの変数は `config/database.php.default` が読み込みます。この機能が追加される前に
-  `config/database.php` を作成した場合は、`__construct()` メソッドと `applyEnv()` メソッドをそこにコピーしてください。
+- `DATABASE_URL` と `DATABASE_TEST_URL` は `config/database.php.default` が、`MAILER_DSN` は
+  `config/email.php.default` が読み込みます。キャッシュとログの変数は `config/core.php` と `config/bootstrap.php`
+  が読み込みます。以前のスケルトンから `config/database.php` や `config/email.php` を作成した場合は、
+  `__construct()` メソッドをそこにコピーしてください (以前の `DB_*` 変数用の `applyEnv()` メソッドは削除します)。
+
+<a id="database-and-mailer-dsns"></a>
+
+### データベースとメーラーの DSN
+
+DSN は、CakePHP 3.x 以降や Symfony と同じように、1 つの文字列で接続全体を設定します。`config/database.php`
+の接続と `config/email.php` のプロファイルの `'dsn'` キーが DSN を受け取り、スケルトンはそれを Symfony
+の環境変数 (`DATABASE_URL`、`MAILER_DSN`) から設定します。
+
+```php
+// config/database.php
+$this->default['dsn'] = env('DATABASE_URL');
+$this->test['dsn'] = env('DATABASE_TEST_URL');
+
+// config/email.php
+$this->default['dsn'] = env('MAILER_DSN');
+```
+
+`'dsn'` キーには、2.12.6 の次のリリース以降の pieceofcake2/cakephp が必要です。それより前のリリースではこのキーは
+無視され、ファイルのほかのキーが使われます。
+
+```dotenv
+# MySQL
+DATABASE_URL="mysql://user:password@localhost:3306/my_app?encoding=utf8mb4"
+# PostgreSQL
+DATABASE_URL="postgres://user:password@localhost:5432/my_app?schema=public"
+# SQLite: three slashes for a path relative to the working directory, four for an absolute path
+DATABASE_URL="sqlite:////var/db/my_app.sqlite"
+DATABASE_TEST_URL="sqlite:///:memory:"
+# SQL Server
+DATABASE_URL="sqlserver://user:password@localhost:1433/my_app?encoding=utf8"
+
+# SMTP with STARTTLS on port 587
+MAILER_DSN="smtp://user:password@smtp.example.com:587"
+# SMTP over SSL/TLS (port 465)
+MAILER_DSN="smtps://user:password@smtp.example.com"
+# Local SMTP server for development (e.g. Mailpit)
+MAILER_DSN="smtp://localhost:1025"
+# PHP mail()
+MAILER_DSN="sendmail://default"
+# Do not send (Debug transport)
+MAILER_DSN="null://null"
+```
+
+- スキームでデータソース (`mysql`、`postgres`、`sqlite`、`sqlserver`) やトランスポート (`Smtp` には
+  `smtp` / `smtps`、`Mail` には `sendmail` / `native`、`Debug` には `null`) が決まります。
+- クエリパラメーターでほかのキーを設定します。データベースでは `encoding`、`schema`、`prefix`、`persistent=true`、
+  `flags[1002]=...`、SMTP では `timeout`、`client`、`tls=1` などです。
+- パスワードの予約文字はエンコードしてください。`@` は `%40`、`?` は `%3F`、`#` は `%23`、`%` は `%25` です。
+  たとえば `p@ss?` は `p%40ss%3F` になります。
+- DSN にあるキーは `config/database.php` や `config/email.php` の同じキーを置き換え、ほかのキーはそのまま残ります。
+  スケルトンのファイルのキーはデフォルト値です。パスワードのない DSN (`mysql://root@localhost/my_app`) では
+  ファイルの `'password' => 'password'` が残るので、空のパスワードには `mysql://root:@localhost/my_app` と書きます。
+- 設定されていない変数や空の変数は無視され、ファイルのキーが使われます。
+- プラグインは、ブートストラップで `CakeEmail::setDsnClassMap()` などの `setDsnClassMap()` メソッドを使って
+  スキーム (たとえば Amazon SES プラグインの `ses+api://`) を追加できます。
+- すべての規則は、本の [データソース](https://pieceofcake2.github.io/docs/ja/models/datasources.html) と
+  [CakeEmail](https://pieceofcake2.github.io/docs/ja/core-utility-libraries/email.html) をご覧ください。
+
+<a id="cache-and-log-dsns"></a>
+
+#### キャッシュとログの DSN
+
+`config/core.php` と `config/bootstrap.php` のキャッシュ設定、`config/bootstrap.php` のログにも `'dsn'` キーが
+あり、CakePHP 5 のアプリケーションスケルトンと同じ名前の変数から設定されます。ファイルのキー (`prefix`、`duration`、
+`types`、`file` など) はそのまま残るので、DSN はエンジンとその接続だけを変更します。
+
+```dotenv
+# Redis for the application and framework caches
+CACHE_DEFAULT_URL="redis://localhost:6379/0"
+CACHE_CAKECORE_URL="redis://localhost:6379/0"
+CACHE_CAKEMODEL_URL="redis://localhost:6379/0"
+# Log to the standard streams in a container
+LOG_DEBUG_URL="console://?stream=php://stdout"
+LOG_ERROR_URL="console://?stream=php://stderr"
+```
+
+スキームは、キャッシュでは `file`、`apcu`、`memcached`、`memcache`、`redis`、ログでは `file`、`console`、
+`syslog` です。本の [キャッシュ](https://pieceofcake2.github.io/docs/ja/core-libraries/caching.html) と
+[ロギング](https://pieceofcake2.github.io/docs/ja/core-libraries/logging.html) をご覧ください。
+
+<a id="docker-and-ci"></a>
+
+#### Docker と CI
+
+DSN は環境変数として渡します。Docker Compose では次のようにします。
+
+```yaml
+services:
+  app:
+    environment:
+      DATABASE_URL: "mysql://my_app:secret@db:3306/my_app?encoding=utf8mb4"
+      MAILER_DSN: "smtp://mailpit:1025"
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: my_app
+      MYSQL_USER: my_app
+      MYSQL_PASSWORD: secret
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+  mailpit:
+    image: axllent/mailpit
+```
+
+GitHub Actions では、テストのステップに `DATABASE_TEST_URL` を設定します。
+
+```yaml
+      - name: Run tests
+        env:
+          DATABASE_TEST_URL: mysql://root:root@127.0.0.1:3306/test_app?encoding=utf8mb4
+        run: |
+          cp config/database.php.default config/database.php
+          vendor/bin/phpunit
+```
 
 <a id="generating-the-security-salts"></a>
 
@@ -433,7 +553,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 ### テストの実行
 
 テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。`config/database.php`
-(または `DB_TEST_*` 変数) で `test` 接続を設定してから、PHPUnit でテストを実行します。
+(または `DATABASE_TEST_URL` 変数) で `test` 接続を設定してから、PHPUnit でテストを実行します。
 
 ```bash
 vendor/bin/phpunit
