@@ -300,7 +300,7 @@ their templates and `webroot/css/`. To use the new look, copy `templates/Layouts
 ### Running Tests
 
 Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`. Configure the
-`test` connection in `config/database.php` (or with the `DB_TEST_*` variables), then run all
+`test` connection in `config/database.php` (or with the `DB_TEST_*` variables), then run the
 tests with PHPUnit:
 
 ```bash
@@ -312,6 +312,51 @@ or a single test case with the test shell:
 ```bash
 bin/cake test app Controller/PostsController
 ```
+
+`phpunit.xml.dist` has two test suites:
+
+| Suite | Directory | Run with |
+| --- | --- | --- |
+| `App` | `tests/TestCase/`, without `EndToEnd/` | `vendor/bin/phpunit` (the default suite) |
+| `EndToEnd` | `tests/TestCase/EndToEnd/` | `vendor/bin/phpunit --testsuite EndToEnd` |
+
+`vendor/bin/phpunit --testsuite App,EndToEnd` runs both. `defaultTestSuite="App"` in
+`phpunit.xml.dist` keeps `vendor/bin/phpunit` fast and free of a browser. **Delete that one
+attribute to make `vendor/bin/phpunit` run everything**, as a Symfony application does.
+
+#### End-to-End Tests
+
+`tests/TestCase/EndToEnd/` is for browser End-to-End tests with
+[pieceofcake2/e2e-test](https://pieceofcake2.github.io/e2e-test/): they start the
+application with PHP's built-in web server and drive it with headless Chrome. To use them:
+
+1. Install the package and a chromedriver that matches your Chrome:
+
+   ```bash
+   composer require --dev pieceofcake2/e2e-test dbrekelmans/bdi
+   vendor/bin/bdi detect drivers
+   ```
+
+2. Uncomment the `E2EExtension` in `phpunit.xml.dist`. It stops the server and the browsers
+   after the last test; they start only when an End-to-End test runs.
+3. Write tests that extend `Pieceofcake2\E2ETest\TestSuite\E2ETestCase` in
+   `tests/TestCase/EndToEnd/`, and run them with `vendor/bin/phpunit --testsuite EndToEnd`.
+
+The End-to-End tests are configured with environment variables. `phpunit.xml.dist` sets two:
+
+- `E2E_SERVER_DATASOURCE=test`: the application server uses the `test` connection, where
+  the fixtures are. It sets `E2E_DATASOURCE=test` in the server, and
+  `config/database.php.default` then uses the `test` connection as `default`. If you created
+  `config/database.php` before this was added, copy the `E2E_DATASOURCE` lines of the
+  constructor into it.
+- `E2E_SERVER_ENV_DEBUG=0`: `DEBUG=0` in the application server.
+
+Set per-machine values, such as `PANTHER_CHROME_DRIVER_BINARY` or `PANTHER_NO_HEADLESS=1`
+(to watch the browser), in your shell, in `config/.env`, or in a `phpunit.xml` copy of
+`phpunit.xml.dist`. Failure screenshots, the page HTML and the server logs are saved to
+`tmp/e2e-artifacts/`. In CI, run the End-to-End tests in a separate job; see the
+[e2e-test documentation](https://pieceofcake2.github.io/e2e-test/) for the variables, the
+test database and a GitHub Actions example.
 
 ### Code Standards
 
