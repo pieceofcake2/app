@@ -12,18 +12,54 @@
  * @package       app.View.Errors
  * @since         CakePHP(tm) v 0.10.0.1076
  * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @var View $this
+ * @var string $name The escaped error message
+ * @var string $message The escaped error message
+ * @var string $url The escaped request URL
+ * @var Exception $error The exception
  */
+
+// In production, render the error in the minimal error layout. In debug mode, use the
+// development error page of the core (dev_error layout), like CakePHP 5 does. The core
+// provides that layout from pieceofcake2/cakephp 2.12.6; with older versions, keep the
+// default layout and show the stack trace below the message.
+$devErrorLayout = is_file(dirname(CAKE_CORE_INCLUDE_PATH) . DS . 'templates' . DS . 'Layouts' . DS . 'dev_error.ctp');
+
+if (Configure::read('debug') > 0 && !$this->request->is('ajax') && $devErrorLayout):
+    $this->layout = 'dev_error';
+
+    $this->assign('title', $message);
+    $this->assign('templateName', 'error400.ctp');
+
+    $this->start('subheading');
+?>
+    <strong><?php echo __d('cake', 'Error'); ?>:</strong>
+    <?php printf(
+        __d('cake', 'The requested address %s was not found on this server.'),
+        "<strong>'{$url}'</strong>"
+    ); ?>
+<?php
+    $this->end();
+
+    return;
+endif;
+
+if (!Configure::read('debug')):
+    $this->layout = 'error';
+    // The page title would otherwise be the humanized view path ("Errors")
+    $this->assign('title', __d('cake', 'Error'));
+endif;
 ?>
 <h2><?php echo $message; ?></h2>
 <p class="error">
-	<strong><?php echo __d('cake', 'Error'); ?>: </strong>
-	<?php printf(
-		__d('cake', 'The requested address %s was not found on this server.'),
-		"<strong>'{$url}'</strong>"
-	); ?>
+    <strong><?php echo __d('cake', 'Error'); ?>: </strong>
+    <?php printf(
+        __d('cake', 'The requested address %s was not found on this server.'),
+        "<strong>'{$url}'</strong>"
+    ); ?>
 </p>
 <?php
 if (Configure::read('debug') > 0):
-	echo $this->element('exception_stack_trace');
+    echo $this->element('exception_stack_trace');
 endif;
 ?>

@@ -12,52 +12,48 @@
  * @package       app.View.Layouts
  * @since         CakePHP(tm) v 0.10.0.1076
  * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @var View $this
  */
 
 $cakeDescription = __d('cake_dev', 'CakePHP: the rapid development php framework');
-$cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-	<?php echo $this->Html->charset(); ?>
-	<title>
-		<?php echo $cakeDescription ?>:
-		<?php echo $this->fetch('title'); ?>
-	</title>
-	<?php
-		echo $this->Html->meta('icon');
+    <?php echo $this->Html->charset(); ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        <?php echo $cakeDescription; ?>:
+        <?php echo $this->fetch('title'); ?>
+    </title>
+    <?php
+    echo $this->Html->meta('icon');
 
-		echo $this->Html->css('cake.generic');
+    echo $this->Html->css(['normalize.min', 'milligram.min', 'fonts', 'cake']);
 
-		echo $this->fetch('meta');
-		echo $this->fetch('css');
-		echo $this->fetch('script');
-	?>
+    echo $this->fetch('meta');
+    echo $this->fetch('css');
+    echo $this->fetch('script');
+    ?>
 </head>
 <body>
-	<div id="container">
-		<div id="header">
-			<h1><?php echo $this->Html->link($cakeDescription, 'https://cakephp.org'); ?></h1>
-		</div>
-		<div id="content">
-
-			<?php echo $this->Flash->render(); ?>
-
-			<?php echo $this->fetch('content'); ?>
-		</div>
-		<div id="footer">
-			<?php echo $this->Html->link(
-					$this->Html->image('cake.power.gif', array('alt' => $cakeDescription, 'border' => '0')),
-					'https://cakephp.org/',
-					array('target' => '_blank', 'escape' => false, 'id' => 'cake-powered')
-				);
-			?>
-			<p>
-				<?php echo $cakeVersion; ?>
-			</p>
-		</div>
-	</div>
-	<?php echo $this->element('sql_dump'); ?>
+    <nav class="top-nav">
+        <div class="top-nav-title">
+            <a href="<?php echo $this->Html->url('/'); ?>"><span>Cake</span>PHP</a>
+        </div>
+        <div class="top-nav-links">
+            <a target="_blank" rel="noopener" href="https://pieceofcake2.github.io/docs/"><?php echo __('Documentation'); ?></a>
+            <a target="_blank" rel="noopener" href="https://github.com/pieceofcake2/cakephp">GitHub</a>
+        </div>
+    </nav>
+    <main class="main">
+        <div class="container">
+            <?php echo $this->Flash->render(); ?>
+            <?php echo $this->fetch('content'); ?>
+            <?php echo $this->element('sql_dump'); ?>
+        </div>
+    </main>
+    <footer>
+    </footer>
 </body>
 </html>

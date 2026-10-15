@@ -12,28 +12,32 @@
  * @package       app.View.Layouts
  * @since         CakePHP(tm) v 0.10.0.1076
  * @license       https://opensource.org/licenses/mit-license.php MIT License
+ * @var View $this
+ * @var string $pageTitle
+ * @var string $message
+ * @var string $url
+ * @var int $pause
  */
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-<?php echo $this->Html->charset(); ?>
-<title><?php echo $pageTitle; ?></title>
+    <?php echo $this->Html->charset(); ?>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?php echo $pageTitle; ?></title>
+    <?php
+    if (Configure::read('debug') == 0):
+        echo sprintf('<meta http-equiv="Refresh" content="%s;url=%s" />', $pause, $url);
+    endif;
 
-<?php
-if (Configure::read('debug') == 0):
-	echo sprintf('<meta http-equiv="Refresh" content="%s;url=%s" />', $pause, $url);
-endif;
-?>
-<style><!--
-P { text-align:center; font:bold 1.1em sans-serif }
-A { color:#444; text-decoration:none }
-A:HOVER { text-decoration: underline; color:#44E }
---></style>
+    echo $this->Html->meta('icon');
+
+    echo $this->Html->css(['normalize.min', 'milligram.min', 'fonts', 'cake']);
+    ?>
 </head>
 <body>
-<p>
-	<?php echo $this->Html->link($message, $url); ?>
-</p>
+    <div class="flash-container">
+        <h3><?php echo $this->Html->link($message, $url); ?></h3>
+    </div>
 </body>
 </html>
