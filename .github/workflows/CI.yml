@@ -134,7 +134,7 @@ jobs:
 
       - name: Test summary
         if: ${{ !cancelled() }}
-        uses: pieceofcake2/.github/actions/ci-summary@master
+        uses: pieceofcake2/ci-summary@v1
         with:
           type: junit
           title: PHPUnit — PHP ${{ matrix.php-version }} / ${{ matrix.db-type }}
@@ -230,7 +230,7 @@ jobs:
 
       - name: PHPCS summary
         if: ${{ !cancelled() }}
-        uses: pieceofcake2/.github/actions/ci-summary@master
+        uses: pieceofcake2/ci-summary@v1
         with:
           type: checkstyle
           title: PHPCS
@@ -276,7 +276,7 @@ jobs:
 
       - name: PHPStan summary
         if: ${{ !cancelled() }}
-        uses: pieceofcake2/.github/actions/ci-summary@master
+        uses: pieceofcake2/ci-summary@v1
         with:
           type: phpstan
           title: PHPStan
