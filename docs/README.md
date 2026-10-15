@@ -233,13 +233,13 @@ To append both to `config/.env` after copying `config/.env.example` (the last li
 when a variable is set twice):
 
 ```bash
-php -r 'printf("export SECURITY_SALT=\"%s\"\nexport SECURITY_CIPHER_SEED=\"%d\"\n", bin2hex(random_bytes(32)), random_int(1, 4294967295));' >> config/.env
+php -r 'printf("SECURITY_SALT=\"%s\"\nSECURITY_CIPHER_SEED=\"%d\"\n", bin2hex(random_bytes(32)), random_int(1, 4294967295));' >> config/.env
 ```
 
 or without PHP:
 
 ```bash
-printf 'export SECURITY_SALT="%s"\nexport SECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env
+printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env
 ```
 
 - Keep the salt at least 32 characters long: it is the default key of `CookieComponent`,
