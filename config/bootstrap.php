@@ -68,6 +68,20 @@ Cache::config('default', ['engine' => 'File']);
  */
 
 /**
+ * Load the development plugins when they are installed. Bake and DebugKit are development
+ * dependencies (require-dev), so they are missing after `composer install --no-dev`.
+ * To show the DebugKit toolbar, also add the `DebugKit.Toolbar` component to your AppController.
+ */
+foreach (['Bake', 'DebugKit'] as $plugin) {
+    try {
+        CakePlugin::load($plugin);
+    } catch (MissingPluginException) {
+        // The plugin is not installed.
+    }
+}
+unset($plugin);
+
+/**
  * To prefer app translation over plugin translation, you can set
  *
  * Configure::write('I18n.preferApp', true);

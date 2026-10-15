@@ -15,6 +15,7 @@ loads CakePHP and all dependencies with Composer.
 - [Configuration](#configuration)
 - [Environment Variables (.env)](#environment-variables-env)
 - [Running the Application](#running-the-application)
+- [Pages and Styles](#pages-and-styles)
 - [Development](#development)
 
 To move an existing application with the legacy `app/` layout to this layout, see
@@ -56,25 +57,69 @@ Then finish the configuration:
    your transport.
 4. Make sure that the web server can write to `tmp/` and `logs/`.
 
-`config/database.php`, `config/email.php` and the `.env` files are ignored by Git.
+### Version Control
 
-### Loading the Development Plugins
+The `.gitignore` file of the skeleton is meant for your application, so you can run
+`git init` right after `create-project`. It ignores:
 
-The plugins installed by Composer are not loaded automatically. Load them in
-`config/bootstrap.php`:
+- `vendor/` and the plugins that Composer installs into `plugins/` (`plugins/Bake/` and
+  `plugins/DebugKit/`). If you install more plugins with Composer, add them to
+  `.gitignore`; the plugins of your own application in `plugins/` are committed.
+- the contents of `tmp/` and `logs/`. The `empty` files that keep the directories are
+  committed.
+- `config/database.php`, `config/email.php`, `config/.env` and `.env`, which contain the
+  settings and credentials of each environment.
+- `phpunit.xml` (a local copy of `phpunit.xml.dist`) and `.phpunit.result.cache`.
+
+Commit `composer.lock`, so that every environment installs the same versions of the
+dependencies.
+
+### Development Plugins
+
+`config/bootstrap.php` loads the [Bake](https://pieceofcake2.github.io/bake/) and
+[DebugKit](https://pieceofcake2.github.io/debug_kit/) plugins when they are installed:
 
 ```php
-CakePlugin::loadAll();
+foreach (['Bake', 'DebugKit'] as $plugin) {
+    try {
+        CakePlugin::load($plugin);
+    } catch (MissingPluginException) {
+        // The plugin is not installed.
+    }
+}
 ```
 
-`CakePlugin::loadAll()` loads the plugins that are installed, so it also works when the
-development plugins are not installed (`composer install --no-dev`). To load the plugins
-one by one, make sure that `CakePlugin::load()` only runs where the plugin is installed,
-because loading a missing plugin throws a `MissingPluginException`.
+They are development dependencies, so they are skipped when the application is installed
+with `composer install --no-dev`. Run Bake with:
 
-Then add the DebugKit toolbar to your `AppController` as described in the
-[DebugKit documentation](https://pieceofcake2.github.io/debug_kit/), and run Bake with
-`bin/cake bake`.
+```bash
+bin/cake bake
+```
+
+To show the DebugKit toolbar, add the `DebugKit.Toolbar` component to your `AppController`
+(see the [DebugKit documentation](https://pieceofcake2.github.io/debug_kit/)). Add it only
+when the plugin is loaded, so that the application still works without the development
+dependencies:
+
+```php
+class AppController extends Controller
+{
+    public function __construct($request = null, $response = null)
+    {
+        if (CakePlugin::loaded('DebugKit')) {
+            $this->components[] = 'DebugKit.Toolbar';
+        }
+        parent::__construct($request, $response);
+    }
+}
+```
+
+The toolbar is only shown when `debug` is greater than 0.
+
+Load the other plugins in `config/bootstrap.php` with `CakePlugin::load()` (or
+`CakePlugin::loadAll()`). `CakePlugin::load()` throws a `MissingPluginException` when the
+plugin is not installed, so wrap the plugins that are development dependencies as shown
+above.
 
 ## Directory Layout
 
@@ -289,16 +334,87 @@ bin/cake server
 
 and open `http://localhost:8765/`. Use `--port` (`-p`) to choose another port.
 
-In production, point the document root of your web server to `webroot/`. The
-`webroot/.htaccess` file rewrites the requests to `index.php` for Apache with
-`mod_rewrite`.
+In production, point the document root of your web server to `webroot/`, never
+to the project directory, which contains `config/`, `logs/`, `tmp/`, `vendor/`
+and `.env` files. The `webroot/.htaccess` file rewrites the requests to
+`index.php` for Apache with `mod_rewrite`. For Apache and nginx examples, see
+[Web Server Configuration](https://pieceofcake2.github.io/docs/installation/url-rewriting.html)
+in the book.
+
+## Pages and Styles
+
+The layouts, the home page, the error pages and the flash messages are ported from the
+[CakePHP 5 application skeleton](https://github.com/cakephp/app) and use its stylesheets in
+`webroot/css/`:
+
+| File | Description |
+| --- | --- |
+| `normalize.min.css` | [normalize.css](https://github.com/necolas/normalize.css) 8.0.1 |
+| `milligram.min.css` | [Milligram](https://milligram.io) 1.4.1 |
+| `fonts.css` | The Raleway font, served from `webroot/font/` (no request to a font service) |
+| `cake.css` | The application styles: layout, flash messages, forms, tables, paginator, error pages and debug output |
+| `home.css` | The styles of the home page only |
+| `cake.generic.css` | The stylesheet of the earlier skeleton. The templates no longer load it; it is kept for views that still use its classes (for example views baked with the `legacy` bake theme) and is loaded by the fallback layouts of the core |
+
+Templates:
+
+- `templates/Layouts/default.ctp`: the top navigation bar and the content container. While
+  `debug` is 2, the SQL log is shown below the content.
+- `templates/Layouts/error.ctp`: a minimal layout for the error pages in production.
+- `templates/Layouts/flash.ctp`: the page rendered by `Controller::flash()`.
+- `templates/Elements/Flash/`: `default`, `success`, `error`, `warning` and `info` flash
+  messages (`$this->Flash->success('Saved.')` and so on). Messages are escaped; pass
+  `['params' => ['escape' => false]]` to output HTML. Click a message to hide it.
+
+Views baked with [pieceofcake2/bake](https://pieceofcake2.github.io/bake/) use the same
+styles.
+
+### Home Page
+
+`templates/Pages/home.ctp` is shown at `/` while `debug` is enabled. It checks the
+environment of the application: the PHP version and extensions (mbstring, intl, openssl,
+PDO and the driver of the `default` datasource), the `tmp/` and `logs/` directories, the
+cache, the database connection (with the error message when it fails), `config/.env`, the
+security salt and cipher seed, and the DebugKit and Bake plugins. Replace it with your own
+page before turning `debug` off: in production it throws a `NotFoundException`.
+
+![Home page](img/home.png)
+
+On a phone:
+
+![Home page on a phone](img/home-mobile.png)
+
+### Error Pages
+
+When `debug` is 0, `templates/Errors/error400.ctp` and `error500.ctp` render a short
+message in the `error` layout:
+
+![Error 400 in production](img/error400.png)
+
+![Error 500 in production](img/error500.png)
+
+In debug mode, they use the default layout and show the stack trace, like the other error
+pages of CakePHP.
+
+### Flash Messages
+
+![Flash messages](img/flash-messages.png)
+
+### Existing Applications
+
+Applications created from an earlier version of the skeleton are not affected: they own
+their templates and `webroot/css/`. To use the new look, copy `templates/Layouts/`,
+`templates/Elements/Flash/`, `templates/Errors/`, `webroot/css/`, `webroot/font/` and
+`webroot/img/cake.logo.svg` into your application. Views that you baked for
+`cake.generic.css` need to be baked again (or restyled), see
+[Baked Views and the Legacy Theme](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme).
 
 ## Development
 
 ### Running Tests
 
 Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`. Configure the
-`test` connection in `config/database.php` (or with the `DB_TEST_*` variables), then run all
+`test` connection in `config/database.php` (or with the `DB_TEST_*` variables), then run the
 tests with PHPUnit:
 
 ```bash
@@ -310,6 +426,51 @@ or a single test case with the test shell:
 ```bash
 bin/cake test app Controller/PostsController
 ```
+
+`phpunit.xml.dist` has two test suites:
+
+| Suite | Directory | Run with |
+| --- | --- | --- |
+| `App` | `tests/TestCase/`, without `EndToEnd/` | `vendor/bin/phpunit` (the default suite) |
+| `EndToEnd` | `tests/TestCase/EndToEnd/` | `vendor/bin/phpunit --testsuite EndToEnd` |
+
+`vendor/bin/phpunit --testsuite App,EndToEnd` runs both. `defaultTestSuite="App"` in
+`phpunit.xml.dist` keeps `vendor/bin/phpunit` fast and free of a browser. **Delete that one
+attribute to make `vendor/bin/phpunit` run everything**, as a Symfony application does.
+
+#### End-to-End Tests
+
+`tests/TestCase/EndToEnd/` is for browser End-to-End tests with
+[pieceofcake2/e2e-test](https://pieceofcake2.github.io/e2e-test/): they start the
+application with PHP's built-in web server and drive it with headless Chrome. To use them:
+
+1. Install the package and a chromedriver that matches your Chrome:
+
+   ```bash
+   composer require --dev pieceofcake2/e2e-test dbrekelmans/bdi
+   vendor/bin/bdi detect drivers
+   ```
+
+2. Uncomment the `E2EExtension` in `phpunit.xml.dist`. It stops the server and the browsers
+   after the last test; they start only when an End-to-End test runs.
+3. Write tests that extend `Pieceofcake2\E2ETest\TestSuite\E2ETestCase` in
+   `tests/TestCase/EndToEnd/`, and run them with `vendor/bin/phpunit --testsuite EndToEnd`.
+
+The End-to-End tests are configured with environment variables. `phpunit.xml.dist` sets two:
+
+- `E2E_SERVER_DATASOURCE=test`: the application server uses the `test` connection, where
+  the fixtures are. It sets `E2E_DATASOURCE=test` in the server, and
+  `config/database.php.default` then uses the `test` connection as `default`. If you created
+  `config/database.php` before this was added, copy the `E2E_DATASOURCE` lines of the
+  constructor into it.
+- `E2E_SERVER_ENV_DEBUG=0`: `DEBUG=0` in the application server.
+
+Set per-machine values, such as `PANTHER_CHROME_DRIVER_BINARY` or `PANTHER_NO_HEADLESS=1`
+(to watch the browser), in your shell, in `config/.env`, or in a `phpunit.xml` copy of
+`phpunit.xml.dist`. Failure screenshots, the page HTML and the server logs are saved to
+`tmp/e2e-artifacts/`. In CI, run the End-to-End tests in a separate job; see the
+[e2e-test documentation](https://pieceofcake2.github.io/e2e-test/) for the variables, the
+test database and a GitHub Actions example.
 
 ### Code Standards
 
@@ -329,3 +490,12 @@ vendor/bin/phpstan analyse
 
 The configuration is in `phpstan.neon` and uses the
 [pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/) extension.
+
+## Origin
+
+This package is based on the `app/` directory of
+[cakephp/cakephp](https://github.com/cakephp/cakephp) (`cakephp/cakephp` on Packagist, last upstream
+version 2.10.24), originally by the CakePHP community (Cake Software Foundation, Inc.). It was
+extracted into a separate package and is maintained for CakePHP 2 on modern PHP by
+[pieceofcake2](https://github.com/pieceofcake2). Changes from the original are listed in the
+[commit history](https://github.com/pieceofcake2/app/commits/2.x).

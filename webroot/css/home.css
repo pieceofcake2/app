@@ -1,0 +1,103 @@
+/**
+ * Styles for the default home page (templates/Pages/home.ctp).
+ *
+ * Based on the CakePHP application skeleton (https://github.com/cakephp/app),
+ * Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org),
+ * licensed under The MIT License.
+ */
+@font-face {
+    font-family: 'cakefont';
+    src: url('../font/cakedingbats-webfont.woff2') format('woff2'),
+    url('../font/cakedingbats-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+    padding: 60px 0;
+}
+header {
+    margin-bottom: 60px;
+}
+img {
+    margin-bottom: 30px;
+}
+h1 {
+    font-weight: bold;
+}
+ul {
+    list-style-type: none;
+    margin: 0 0 30px 0;
+    padding-left: 25px;
+}
+a {
+    color: #0071BC;
+    text-decoration: underline;
+}
+hr {
+    border-bottom: 1px solid #e7e7e7;
+    border-top: 0;
+    margin-bottom: 35px;
+}
+
+.text-center {
+    text-align: center;
+}
+.links a {
+    margin-right: 10px;
+}
+.release-name {
+    color: #D33C43;
+    font-weight: 400;
+    font-style: italic;
+}
+.bullet:before {
+    font-family: 'cakefont', sans-serif;
+    font-size: 18px;
+    display: inline-block;
+    margin-left: -1.3em;
+    width: 1.2em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    vertical-align: -1px;
+}
+.success:before {
+    color: #88c671;
+    content: "\0056";
+}
+.problem:before {
+    color: #d33d44;
+    content: "\0057";
+}
+.cake-error {
+    padding: 10px;
+    margin: 10px 0;
+}
+#url-rewriting-warning {
+    display: none;
+}
+.bullet code {
+    font-size: 85%;
+}
+.subtitle {
+    color: var(--color-lightgray);
+    font-size: 1.8rem;
+}
+.cake-logo {
+    margin-bottom: 30px;
+    max-width: 100%;
+}
+.links a {
+    display: inline-block;
+}
+.content ul ul {
+    margin-bottom: 0;
+}
+/* Lists without bullet icons line up with the headings */
+ul.plain {
+    padding-left: 0;
+}
+/* Milligram keeps inline code on one line; let long commands wrap on small screens */
+li code {
+    overflow-wrap: anywhere;
+    white-space: normal;
+}

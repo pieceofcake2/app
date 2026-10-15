@@ -8,12 +8,22 @@
 
 The application skeleton for CakePHP 2 applications running on
 [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp), with a directory layout
-compatible with CakePHP 5 (`config/`, `src/`, `templates/`, `tests/`, `webroot/`) and `.env`
-support.
+compatible with CakePHP 5 (`config/`, `src/`, `templates/`, `tests/`, `webroot/`), `.env`
+support, and the home page, layouts, error pages and styles of the CakePHP 5 skeleton.
 
 > [!WARNING]
 > CakePHP 2.x is for the maintenance of existing applications. For new projects, use
 > the current major version of CakePHP instead.
+
+## Documentation
+
+- Website: https://pieceofcake2.github.io/app/
+- Markdown: [docs/README.md](docs/README.md) (for AI tools and offline reading)
+
+It covers the installation, the directory layout, the configuration and `.env` files,
+the pages and styles, running tests and PHPStan, and migrating an existing application to the modern layout.
+
+For AI coding tools, install the Markdown docs of the CakePHP 2 book as a dev dependency: `composer require --dev pieceofcake2/docs` (files in `vendor/pieceofcake2/docs/docs/en/`).
 
 ## Requirements
 
@@ -31,17 +41,27 @@ Then copy `config/database.php.default` to `config/database.php` (or use `config
 change the security salts in `config/core.php` (see
 [Generating the Security Salts](https://pieceofcake2.github.io/app/#generating-the-security-salts)).
 
-## Documentation
-
-Documentation: https://pieceofcake2.github.io/app/
-
-It covers the installation, the directory layout, the configuration and `.env` files,
-running tests and PHPStan, and migrating an existing application to the modern layout.
+The Bake and DebugKit plugins are development dependencies. `config/bootstrap.php` loads
+them when they are installed, so `bin/cake bake` works out of the box and
+`composer install --no-dev` still works in production.
 
 ## Contributing
 
 See the [contribution guidelines](https://github.com/pieceofcake2/.github/blob/master/CONTRIBUTING.md).
 
+## Origin
+
+This package is based on the `app/` directory of
+[cakephp/cakephp](https://github.com/cakephp/cakephp) (`cakephp/cakephp` on Packagist, last upstream
+version 2.10.24), originally by the CakePHP community (Cake Software Foundation, Inc.). It was
+extracted into a separate package and is maintained for CakePHP 2 on modern PHP by
+[pieceofcake2](https://github.com/pieceofcake2). Changes from the original are listed in the
+[commit history](https://github.com/pieceofcake2/app/commits/2.x).
+
 ## License
 
 Licensed under the MIT License. See [LICENSE](LICENSE).
+
+`webroot/css/normalize.min.css` (normalize.css) and `webroot/css/milligram.min.css`
+(Milligram) are MIT licensed, see their headers. The Raleway font in `webroot/font/` is
+licensed under the SIL Open Font License 1.1, see `webroot/font/Raleway-License.txt`.
