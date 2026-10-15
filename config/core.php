@@ -101,7 +101,8 @@ unset($debug);
  *
  * - `handler` - callback - The callback to handle errors. You can set this to any callable type,
  *   including anonymous functions.
- *   Make sure you add App::uses('MyHandler', 'Error'); when using a custom handler class
+ *   A custom handler class in src/ is autoloaded by the Composer classmap (run `composer dump-autoload`
+ *   after adding it); add App::uses('MyHandler', 'Error'); only for a class outside src/
  * - `level` - integer - The level of errors you are interested in capturing.
  * - `trace` - boolean - Include stack traces for errors in log files.
  * - `extraFatalErrorMemory` - integer - Increases memory limit at shutdown so fatal errors are logged. Specify
@@ -125,7 +126,8 @@ Configure::write('Error', [
  *
  * - `handler` - callback - The callback to handle exceptions. You can set this to any callback type,
  *   including anonymous functions.
- *   Make sure you add App::uses('MyHandler', 'Error'); when using a custom handler class
+ *   A custom handler class in src/ is autoloaded by the Composer classmap (run `composer dump-autoload`
+ *   after adding it); add App::uses('MyHandler', 'Error'); only for a class outside src/
  * - `renderer` - string - The class responsible for rendering uncaught exceptions. If you choose a custom class you
  *   should place the file for that class in src/Lib/Error. This class needs to implement a render method.
  * - `log` - boolean - Should Exceptions be logged?
