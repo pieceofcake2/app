@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     vendor/bin/phpunit runs the App suite (defaultTestSuite). Select the End-to-End tests
-    (pieceofcake2/e2e-test) with the testsuite option: "EndToEnd", or "App,EndToEnd" for everything.
+    (pieceofcake2/panther) with the testsuite option: "EndToEnd", or "App,EndToEnd" for everything.
     Remove defaultTestSuite="App" to make vendor/bin/phpunit run everything, as in Symfony.
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -14,21 +14,22 @@
     <php>
         <ini name="memory_limit" value="-1"/>
         <!--
-            End-to-End tests (pieceofcake2/e2e-test) are configured with environment variables.
-            Real environment variables win; put per-machine values in your shell or phpunit.xml.
+            End-to-End tests (pieceofcake2/panther) are configured with PANTHER_* variables, as in
+            Symfony Panther. A <server> element replaces a shell variable of the same name: put
+            per-machine values such as PANTHER_NO_HEADLESS in your shell or in phpunit.xml.
         -->
-        <!-- The application server uses the test datasource, where the fixtures are -->
-        <env name="E2E_SERVER_DATASOURCE" value="test"/>
-        <!-- DEBUG of the application server -->
-        <env name="E2E_SERVER_ENV_DEBUG" value="0"/>
+        <!-- The web server uses the test datasource, where the fixtures are -->
+        <server name="PANTHER_APP_ENV" value="test"/>
+        <!-- Screenshots of the failed End-to-End tests -->
+        <server name="PANTHER_ERROR_SCREENSHOT_DIR" value="./tmp/error-screenshots"/>
     </php>
     <!--
-        Quits the browsers and stops the application server after the last test.
-        Enable it when you install pieceofcake2/e2e-test.
+        Keeps the web server and the browser running for the whole run of End-to-End tests.
+        Enable it when you install pieceofcake2/panther.
     -->
     <!--
     <extensions>
-        <extension class="Pieceofcake2\E2ETest\PHPUnit\E2EExtension"/>
+        <extension class="PieceOfCake2\Panther\ServerExtension"/>
     </extensions>
     -->
     <listeners>

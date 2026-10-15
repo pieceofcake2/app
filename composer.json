@@ -18,8 +18,8 @@
         "pieceofcake2/phpstan-cakephp2": "^0.2.3"
     },
     "suggest": {
-        "pieceofcake2/e2e-test": "Browser End-to-End tests in tests/TestCase/EndToEnd/ (the EndToEnd suite of phpunit.xml.dist)",
-        "dbrekelmans/bdi": "Downloads a chromedriver that matches the installed Chrome for pieceofcake2/e2e-test (vendor/bin/bdi detect drivers)"
+        "pieceofcake2/panther": "Browser End-to-End tests with Symfony Panther in tests/TestCase/EndToEnd/ (the EndToEnd suite of phpunit.xml.dist)",
+        "dbrekelmans/bdi": "Downloads a chromedriver that matches the installed Chrome for pieceofcake2/panther (vendor/bin/bdi detect drivers)"
     },
     "autoload": {
         "classmap": ["src/"]
