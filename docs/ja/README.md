@@ -6,7 +6,7 @@ CakePHP 2 アプリケーションのためのアプリケーションスケル�
 Composer で読み込みます。
 
 > [!WARNING]
-> CakePHP 2.x は既存アプリケーションの保守のためのものです。新しいプロジェクトには、
+> CakePHP 2.x は既存アプリケーションのメンテナンスのためのものです。新しいプロジェクトには、
 > CakePHP の現在のメジャーバージョンを使ってください。
 
 - [動作要件](#requirements)
@@ -203,7 +203,7 @@ cp config/.env.example .env
 | --- | --- | --- |
 | `DEBUG` | `debug` (`0`、`1`、`2`、`true` = 2、`false` = 0) | `2` |
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
-| `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` クッキーでのみ使用) | `config/core.php` の値 |
+| `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー (2.12.6 からコンポーネントが読み込みます) | `null` (`Security.salt` が使われます) |
 | `DB_DATASOURCE`、`DB_HOST`、`DB_PORT`、`DB_USERNAME`、`DB_PASSWORD`、`DB_DATABASE` | `config/database.php` の `default` 接続 | `config/database.php` の値 |
 | `DB_TEST_DATASOURCE`、`DB_TEST_HOST`、`DB_TEST_PORT`、`DB_TEST_USERNAME`、`DB_TEST_PASSWORD`、`DB_TEST_DATABASE` | `config/database.php` の `test` 接続 | `config/database.php` の値 |
@@ -224,7 +224,7 @@ cp config/.env.example .env
 
 `Security.salt` と `Security.cipherSeed` は、暗号論的に安全な乱数生成器で生成してください。
 以下のコマンドは、Linux と macOS のどの POSIX シェルでも動作します (cipher seed はレガシーな `'cipher'`
-クッキーのタイプでしか使いません。[cipherSeed と 'cipher' クッキータイプ](#cipherseed-and-the-cipher-cookie-type)
+Cookie のタイプでしか使いません。[cipherSeed と 'cipher' Cookie タイプ](#cipherseed-and-the-cipher-cookie-type)
 をご覧ください):
 
 ```bash
@@ -250,14 +250,14 @@ PHP を使わない場合は次のとおりです:
 printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env
 ```
 
-- ソルトは 32 文字以上にしてください。ソルトは `CookieComponent` のデフォルトのキーで、`'aes'` クッキーの
+- ソルトは 32 文字以上にしてください。ソルトは `CookieComponent` のデフォルトのキーで、`'aes'` Cookie の
   タイプはそれより短いキーを受け付けません。
 - これより長い cipher seed は使わないでください。意味があるのは 1〜4294967295 だけです (後述)。
 - 環境ごとに異なる値を使い、コミットしないでください。本番環境では、実際の環境変数を設定してください。
 - 後から `Security.salt` を変更すると、ユーザーはログアウトされ、開いているフォームは無効になり、
-  暗号化されたクッキーは読めなくなります。また、HMAC ソルトを明示せずに `Security::encrypt()` で暗号化した
+  暗号化された Cookie は読めなくなります。また、HMAC ソルトを明示せずに `Security::encrypt()` で暗号化した
   データと、`SimplePasswordHasher` でハッシュ化したパスワードも使えなくなります (bcrypt のハッシュは影響を
-  受けません)。`Security.cipherSeed` を変更して使えなくなるのは、デフォルトの `'cipher'` タイプのクッキーなど、
+  受けません)。`Security.cipherSeed` を変更して使えなくなるのは、デフォルトの `'cipher'` タイプの Cookie など、
   `Security::cipher()` で暗号化した値だけです。
 
 詳しい内容と、値を安全に入れ替える方法については、クックブックの
@@ -266,7 +266,7 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
 
 <a id="cipherseed-and-the-cipher-cookie-type"></a>
 
-#### cipherSeed と 'cipher' クッキータイプ
+#### cipherSeed と 'cipher' Cookie タイプ
 
 `Security.cipherSeed` を使うのは `Security::cipher()`、つまり `CookieComponent` の暗号化タイプ `'cipher'` だけです。
 これはデフォルトのタイプで、安全ではありません。
@@ -278,11 +278,11 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
   フォールバックは範囲内のサンプル値ですが、それでも置き換えてください。
 - 範囲内のシードにしても `'cipher'` は安全になりません。シードは約 43 億通りしかなく、キーストリームは
   暗号用ではない Mersenne Twister の XOR なので、総当たりで破れます。
-- シードを変更すると、既存の `'cipher'` クッキーは読めなくなります。
+- シードを変更すると、既存の `'cipher'` Cookie は読めなくなります。
 
 代わりに、32 バイト以上のランダムな専用のキーと `'aes'` タイプを使い、`Security.useOpenSsl` が `true` であることを
 確認してください。スケルトンは `config/core.php` でこれを設定しています。設定しないと、`Security::encrypt()`/`decrypt()`
-は PHP 8 には存在しない mcrypt を呼び出し、`'aes'` クッキーは失敗します
+は PHP 8 には存在しない mcrypt を呼び出し、`'aes'` Cookie は失敗します
 ([OpenSSL を有効にする](https://pieceofcake2.github.io/docs/ja/appendices/migrating-from-cakephp-2-10#enable-openssl)
 を参照)。
 
@@ -299,7 +299,7 @@ Configure::write('Cookie.key', env('COOKIE_KEY') ?: null);
 次に `Cookie.type`/`Cookie.key`、最後に `'cipher'` と `Security.salt` を使います。
 
 **2.12.5 以前:** `CookieComponent` は `Cookie.type` と `Cookie.key` を読み込まないので、上の行は効果がありません。
-スケルトンは `CookieComponent` を使っていません。クッキーを追加するときは、`src/Controller/AppController.php` で
+スケルトンは `CookieComponent` を使っていません。Cookie を追加するときは、`src/Controller/AppController.php` で
 タイプとキーを渡してください。
 
 ```php
@@ -321,12 +321,12 @@ public function beforeFilter()
 このコードは 2.12.6 以降でもそのまま動作します。
 
 `'aes'` タイプには 32 バイト以上のキーが必要です。`COOKIE_KEY` が設定されていないと、`Cookie.key` は `null` になり、
-キーには `Security.salt` が使われます。ソルトが 32 バイトより短いと、暗号化されたクッキーの書き込みや読み込みで
+キーには `Security.salt` が使われます。ソルトが 32 バイトより短いと、暗号化された Cookie の書き込みや読み込みで
 `CakeException` が投げられます。
 
 キーは `php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'` または `openssl rand -hex 32` で生成し、
 `config/.env` の `COOKIE_KEY` に設定してください (本番環境では実際の環境変数として設定します)。
-既存のアプリケーションを `'cipher'` から `'aes'` に切り替えると、既存のクッキーの値 (たとえば、ログイン状態を保持する
+既存のアプリケーションを `'cipher'` から `'aes'` に切り替えると、既存の Cookie の値 (たとえば、ログイン状態を保持する
 remember-me) は一度失われます。影響、アプリケーションに合った選択肢、移行の手順については、クックブックの
 [cipherSeed と Cookie の 'cipher' タイプ](https://pieceofcake2.github.io/docs/ja/development/configuration#cipher-seed)
 をご覧ください。
@@ -518,5 +518,5 @@ vendor/bin/phpstan analyse
 このパッケージは、[cakephp/cakephp](https://github.com/cakephp/cakephp) (Packagist では `cakephp/cakephp`、
 最後のアップストリームのバージョンは 2.10.24) の `app/` ディレクトリを元にしており、元々は CakePHP コミュニティ
 (Cake Software Foundation, Inc.) によるものです。これを別のパッケージとして切り出し、モダンな PHP で動く CakePHP 2 のために
-[pieceofcake2](https://github.com/pieceofcake2) が保守しています。元のコードからの変更点は
+[pieceofcake2](https://github.com/pieceofcake2) がメンテナンスしています。元のコードからの変更点は
 [コミット履歴](https://github.com/pieceofcake2/app/commits/2.x) をご覧ください。
