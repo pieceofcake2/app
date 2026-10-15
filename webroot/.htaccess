@@ -1,3 +1,9 @@
+# Based on webroot/.htaccess of cakephp/app (https://github.com/cakephp/app),
+# MIT License, Copyright (c) Cake Software Foundation, Inc.
+#
+# Set the document root of your web server to this webroot/ directory, never
+# to the project directory above it.
+
 # Uncomment the following to prevent the httpoxy vulnerability
 # See: https://httpoxy.org/
 #<IfModule mod_headers.c>
@@ -6,8 +12,14 @@
 
 <IfModule mod_rewrite.c>
 	RewriteEngine On
+
+	# Pass the Authorization header to PHP when it runs as CGI or FastCGI
+	RewriteCond %{HTTP:Authorization} .
 	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-	RewriteCond %{REQUEST_FILENAME} !-d
+
+	# Send every request that is not for an existing file to index.php,
+	# including requests for directories, so that Apache never lists the
+	# contents of a directory such as files/ or css/.
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteRule ^ index.php [L]
 </IfModule>

@@ -220,9 +220,12 @@ bin/cake server
 
 and open `http://localhost:8765/`. Use `--port` (`-p`) to choose another port.
 
-In production, point the document root of your web server to `webroot/`. The
-`webroot/.htaccess` file rewrites the requests to `index.php` for Apache with
-`mod_rewrite`.
+In production, point the document root of your web server to `webroot/`, never
+to the project directory, which contains `config/`, `logs/`, `tmp/`, `vendor/`
+and `.env` files. The `webroot/.htaccess` file rewrites the requests to
+`index.php` for Apache with `mod_rewrite`. For Apache and nginx examples, see
+[Web Server Configuration](https://pieceofcake2.github.io/docs/installation/url-rewriting)
+in the book.
 
 ## Pages and Styles
 
