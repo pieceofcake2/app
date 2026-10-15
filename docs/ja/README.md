@@ -82,7 +82,7 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 ### 開発用プラグイン
 
 `config/bootstrap.php` は、[Bake](https://pieceofcake2.github.io/bake/) プラグインと
-[DebugKit](https://pieceofcake2.github.io/debug_kit/) プラグインがインストールされていれば読み込みます:
+[DebugKit](https://pieceofcake2.github.io/debug_kit/) プラグインがインストールされていれば読み込みます。
 
 ```php
 foreach (['Bake', 'DebugKit'] as $plugin) {
@@ -244,7 +244,7 @@ od -An -N4 -tu4 /dev/urandom | tr -dc 0-9; echo    # without PHP
 php -r 'printf("SECURITY_SALT=\"%s\"\nSECURITY_CIPHER_SEED=\"%d\"\n", bin2hex(random_bytes(32)), random_int(1, 4294967295));' >> config/.env
 ```
 
-PHP を使わない場合は次のとおりです:
+PHP を使わない場合は次のとおりです。
 
 ```bash
 printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env
@@ -288,7 +288,7 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
 
 pieceofcake2/cakephp 2.12.6 からは、`Cookie.type` と `Cookie.key` を設定で指定できます。
 
-**2.12.6 以降:** `config/core.php` がソルトの隣で両方をすでに設定しているので、コントローラーを変更する必要はありません:
+**2.12.6 以降:** `config/core.php` がソルトの隣で両方をすでに設定しているので、コントローラーを変更する必要はありません。
 
 ```php
 Configure::write('Cookie.type', 'aes');
@@ -439,7 +439,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 vendor/bin/phpunit
 ```
 
-テストシェルで 1 つのテストケースだけを実行することもできます:
+テストシェルで 1 つのテストケースだけを実行することもできます。
 
 ```bash
 bin/cake test app Controller/PostsController
@@ -515,8 +515,10 @@ vendor/bin/phpstan analyse
 
 ## 由来
 
-このパッケージは、[cakephp/cakephp](https://github.com/cakephp/cakephp) (Packagist では `cakephp/cakephp`、
-最後のアップストリームのバージョンは 2.10.24) の `app/` ディレクトリを元にしており、元々は CakePHP コミュニティ
-(Cake Software Foundation, Inc.) によるものです。これを別のパッケージとして切り出し、モダンな PHP で動く CakePHP 2 のために
-[pieceofcake2](https://github.com/pieceofcake2) がメンテナンスしています。元のコードからの変更点は
-[コミット履歴](https://github.com/pieceofcake2/app/commits/2.x) をご覧ください。
+このパッケージは [cakephp/cakephp](https://github.com/cakephp/cakephp) (Packagist では
+`cakephp/cakephp`、アップストリームの最終バージョンは 2.10.24) の `app/` ディレクトリをもとに別のパッケージとして切り出したもので、
+元の作者は CakePHP コミュニティ (Cake Software Foundation, Inc.) です。
+[pieceofcake2](https://github.com/pieceofcake2) が、モダンな PHP で動く CakePHP 2 向けに
+メンテナンスしています。オリジナルからの変更点は
+[コミット履歴](https://github.com/pieceofcake2/app/commits/2.x)
+で確認できます。

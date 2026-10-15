@@ -11,14 +11,14 @@ CakePHP 2 のクックブックの [モダン構成への移行](https://pieceof
 
 ## 段階的な移行
 
-CakePHP 2 から CakePHP 5 に一度に移行すると、コード、フォルダ構成、API を同時に変更することになります:
+CakePHP 2 から CakePHP 5 に一度に移行すると、コード、フォルダ構成、API を同時に変更することになります。
 
 ```
 CakePHP 2.x → CakePHP 5.x
 (change everything at once: code + folder structure + APIs)
 ```
 
-モダン構成を使えば、これを小さなステップに分けられます:
+モダン構成を使えば、これを小さなステップに分けられます。
 
 ```
 Step 1: CakePHP 2.x with traditional structure
@@ -139,7 +139,7 @@ your-project/
 ### 2. ディスパッチャーのファイルを更新する
 
 このスケルトンから `config/define.php`、`webroot/index.php`、`webroot/test.php` と `bin/cake` を
-プロジェクトにコピーします。`config/define.php` はモダン構成のパス定数を設定し、他のファイルはこれを読み込みます:
+プロジェクトにコピーします。`config/define.php` はモダン構成のパス定数を設定し、他のファイルはこれを読み込みます。
 
 ```php
 define('ROOT', dirname(__DIR__));
@@ -178,7 +178,7 @@ define('VENDORS', ROOT . DS . 'vendor' . DS); // Standard Composer
 ### 5. Composer のオートロードを活用する (任意)
 
 `composer.json` で `src/` を `classmap` でオートロードすれば、`composer dump-autoload` を実行した後で、
-コードから `App::uses()` の呼び出しを削除できます:
+コードから `App::uses()` の呼び出しを削除できます。
 
 ```php
 // Before
