@@ -331,6 +331,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Copy config/.env
+        run: cp ./config/.env.example ./config/.env
+
       - name: Run PHPStan
         id: phpstan
         run: ./vendor/bin/phpstan analyse --no-progress --error-format=checkstyle > ./phpstan-report.xml

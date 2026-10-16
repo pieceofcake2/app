@@ -47,16 +47,18 @@ and the CakePHP coding standard) are installed as development dependencies.
 
 Then finish the configuration:
 
-1. Copy `config/database.php.default` to `config/database.php`, and set the connection with
+1. Copy `config/.env.example` to `config/.env`. A `.env` file is required (see
+   [Environment Variables (.env)](#environment-variables-env)).
+2. Copy `config/database.php.default` to `config/database.php`, and set the connection with
    `DATABASE_URL` (see [Database and Mailer DSNs](#database-and-mailer-dsns)) or enter it in the
    file. Set the test database in `config/.env.test.local` (see [Running Tests](#running-tests)).
-2. Change `Security.salt` and `Security.cipherSeed` in `config/core.php`, or set
+3. Change `Security.salt` and `Security.cipherSeed` in `config/core.php`, or set
    `SECURITY_SALT` and `SECURITY_CIPHER_SEED`. The skeleton ships with well-known example
    values that must not be used in a real application. See
    [Generating the Security Salts](#generating-the-security-salts).
-3. If you send email, copy `config/email.php.default` to `config/email.php`, and set the
+4. If you send email, copy `config/email.php.default` to `config/email.php`, and set the
    transport with `MAILER_DSN` or configure it in the file.
-4. Make sure that the web server can write to `tmp/` and `logs/`.
+5. Make sure that the web server can write to `tmp/` and `logs/`.
 
 ### Version Control
 
@@ -175,7 +177,7 @@ The legacy layout with an `app/` directory (`app/Config/`, `app/Controller/`,
 ## Environment Variables (.env)
 
 Settings such as the debug level, security salt and database credentials can be read from
-environment variables. For local development, copy the example file and edit it:
+environment variables. Copy the example file and edit it:
 
 ```bash
 cp config/.env.example config/.env
@@ -191,14 +193,15 @@ that exists is loaded, in this order:
 | File | Checked | In Git |
 | --- | --- | --- |
 | `config/.env.{APP_ENV}.local` | when `APP_ENV` is set | ignored |
-| `config/.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
 | `.env.{APP_ENV}.local` in the project root | when `APP_ENV` is set | ignored |
+| `config/.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
 | `.env.{APP_ENV}` in the project root | when `APP_ENV` is set | ignored |
 | `config/.env.local` | always | ignored |
-| `config/.env` | always | ignored |
 | `.env.local` in the project root | always | ignored |
+| `config/.env` | always | ignored |
 | `.env` in the project root | always | ignored |
-| `config/.env.example` (the defaults) | always | committed |
+
+One of the files must exist; otherwise `config/core.php` throws an exception.
 
 The files are not merged, so each file sets all the variables of its environment: start a
 `.local` file from a copy of the file it replaces. A variable that is already set in the real
@@ -220,12 +223,11 @@ your machine.
 | `DATABASE_URL` | `default` and `test` connections in `config/database.php`, as a DSN | values in `config/database.php` |
 | `MAILER_DSN` | transport of the `default` profile in `config/email.php`, as a Symfony Mailer DSN | values in `config/email.php` |
 
-- Unset or empty variables keep the defaults, so the application behaves exactly as before
-  without a `.env` file.
+- Unset or empty variables keep the defaults.
 - Quote values in `.env` files (e.g. `DEBUG="0"`). Unquoted numbers are normalized by the
   parser (`007` becomes `7`, and long digit strings such as a cipher seed overflow).
-- `.env` files are meant for development. In production, set real environment variables
-  instead.
+- In production, set real environment variables, and deploy an empty `config/.env`, because
+  a `.env` file is required.
 - `DATABASE_URL` is read by `config/database.php.default`, and `MAILER_DSN` by
   `config/email.php.default`. If you created `config/database.php` or `config/email.php` from
   an earlier skeleton, copy the `__construct()` method into it (and remove the `applyEnv()`
@@ -426,7 +428,9 @@ and open `http://localhost:8765/`. Use `--port` (`-p`) to choose another port.
 
 In production, point the document root of your web server to `webroot/`, never
 to the project directory, which contains `config/`, `logs/`, `tmp/`, `vendor/`
-and `.env` files. The `webroot/.htaccess` file rewrites the requests to
+and `.env` files. Deploy an empty `config/.env` and set the settings as real environment
+variables (see [Environment Variables (.env)](#environment-variables-env)). The
+`webroot/.htaccess` file rewrites the requests to
 `index.php` for Apache with `mod_rewrite`. For Apache and nginx examples, see
 [Web Server Configuration](https://pieceofcake2.github.io/docs/installation/url-rewriting.html)
 in the book.

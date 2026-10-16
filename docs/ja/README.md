@@ -51,16 +51,18 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 
 続けて設定を仕上げます:
 
-1. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` で接続を設定するか
+1. `config/.env.example` を `config/.env` にコピーします。`.env` ファイルは必須です
+   ([環境変数 (.env)](#environment-variables-env) を参照してください)。
+2. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` で接続を設定するか
    ([データベースとメーラーの DSN](#database-and-mailer-dsns) をご覧ください)、ファイルに入力します。テスト用
    データベースは `config/.env.test.local` で設定します ([テストの実行](#running-tests) を参照してください)。
-2. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
+3. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
    `SECURITY_SALT` と `SECURITY_CIPHER_SEED` を設定します。スケルトンには広く知られたサンプル値が
    入っており、実際のアプリケーションで使ってはいけません。
    [セキュリティ用のソルトの生成](#generating-the-security-salts) をご覧ください。
-3. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
+4. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
    `MAILER_DSN` でトランスポートを設定するか、ファイルで設定します。
-4. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
+5. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
 
 <a id="version-control"></a>
 
@@ -183,7 +185,7 @@ my_app/
 ## 環境変数 (.env)
 
 デバッグレベル、セキュリティ用のソルト、データベースの認証情報などの設定は、環境変数から読み込めます。
-ローカルでの開発では、サンプルファイルをコピーして編集します。
+サンプルファイルをコピーして編集します。
 
 ```bash
 cp config/.env.example config/.env
@@ -198,14 +200,15 @@ cp config/.env.example .env
 | ファイル | 探すとき | Git |
 | --- | --- | --- |
 | `config/.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
-| `config/.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
 | プロジェクトルートの `.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
+| `config/.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
 | プロジェクトルートの `.env.{APP_ENV}` | `APP_ENV` が設定されているとき | 無視 |
 | `config/.env.local` | 常に | 無視 |
-| `config/.env` | 常に | 無視 |
 | プロジェクトルートの `.env.local` | 常に | 無視 |
+| `config/.env` | 常に | 無視 |
 | プロジェクトルートの `.env` | 常に | 無視 |
-| `config/.env.example` (デフォルト値) | 常に | コミット |
+
+どれか 1 つのファイルが必要です。1 つもないと `config/core.php` で例外が投げられます。
 
 ファイルを混ぜることはしないので、各ファイルにはその環境の変数をすべて書きます。`.local` ファイルは、置き換える
 ファイルをコピーして作ってください。実際の環境変数 (Web サーバー、シェル、コンテナ、CI) ですでに設定されている
@@ -224,11 +227,10 @@ cp config/.env.example .env
 | `DATABASE_URL` | `config/database.php` の `default` 接続と `test` 接続 (DSN) | `config/database.php` の値 |
 | `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
 
-- 設定されていない変数や空の変数ではデフォルトが使われるので、`.env` ファイルがなければアプリケーションは
-  これまでとまったく同じように動作します。
+- 設定されていない変数や空の変数ではデフォルトが使われます。
 - `.env` ファイルの値は引用符で囲んでください (例: `DEBUG="0"`)。引用符で囲まない数値はパーサーによって
   正規化されます (`007` は `7` になり、cipher seed のような長い数字の列はオーバーフローします)。
-- `.env` ファイルは開発用です。本番環境では、代わりに実際の環境変数を設定してください。
+- 本番環境では実際の環境変数を設定し、空の `config/.env` をデプロイしてください。`.env` ファイルは必須です。
 - `DATABASE_URL` は `config/database.php.default` が、`MAILER_DSN` は `config/email.php.default` が
   読み込みます。以前のスケルトンから `config/database.php` や `config/email.php` を作成した場合は、
   `__construct()` メソッドをそこにコピーしてください (以前の `DB_*` 変数用の `applyEnv()` メソッドと以前の
@@ -431,7 +433,8 @@ bin/cake server
 そして `http://localhost:8765/` を開きます。別のポートを使うには `--port` (`-p`) を指定します。
 
 本番環境では、Web サーバーのドキュメントルートを `webroot/` に向けてください。`config/`、`logs/`、`tmp/`、`vendor/`
-と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。`webroot/.htaccess` ファイルは、
+と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。空の `config/.env` をデプロイし、設定は実際の
+環境変数で指定してください ([環境変数 (.env)](#environment-variables-env) を参照してください)。`webroot/.htaccess` ファイルは、
 `mod_rewrite` を使う Apache のためにリクエストを `index.php` に書き換えます。Apache と nginx の例については、クックブックの
 [Web サーバーの設定](https://pieceofcake2.github.io/docs/ja/installation/url-rewriting.html)
 をご覧ください。

@@ -26,14 +26,13 @@ use josegonzalez\Dotenv\Loader;
 $appEnv = env('APP_ENV');
 (new Loader([
     CONFIG . ".env.{$appEnv}.local",
-    CONFIG . ".env.{$appEnv}",
     ROOT . DS . ".env.{$appEnv}.local",
+    CONFIG . ".env.{$appEnv}",
     ROOT . DS . ".env.{$appEnv}",
     CONFIG . '.env.local',
-    CONFIG . '.env',
     ROOT . DS . '.env.local',
+    CONFIG . '.env',
     ROOT . DS . '.env',
-    CONFIG . '.env.example',
 ]))
     ->parse()
     ->skipExisting()
