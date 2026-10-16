@@ -23,23 +23,28 @@ use josegonzalez\Dotenv\Loader;
 /**
  * Load environment variables from .env files, if present.
  *
- * Two locations are supported:
+ * The files are loaded in this order, as in Symfony; a variable that is already
+ * defined (in the real environment or by an earlier file) is never overwritten,
+ * so real environment variables win over all files and earlier files win over
+ * later ones:
  *
+ * - config/.env.{APP_ENV}.local and config/.env.{APP_ENV} (only when APP_ENV is set,
+ *   e.g. config/.env.test, which phpunit.xml.dist selects with APP_ENV=test)
+ * - config/.env.local
  * - config/.env (copy config/.env.example to config/.env)
  * - .env in the project root (ROOT . DS . '.env')
  *
- * Precedence: real environment variables > config/.env > root .env.
- * config/.env is loaded first and the root .env second, and a variable that
- * is already defined (in the real environment or by an earlier file) is
- * never overwritten.
- *
- * This follows the .env support of the CakePHP 3+/5 application skeleton
- * (config/bootstrap.php in cakephp/app), backported for CakePHP 2.
+ * config/.env.test is committed; the other files are ignored by git.
  *
  * In production, prefer setting real environment variables instead of
  * using a .env file.
  */
-foreach ([CONFIG . '.env', ROOT . DS . '.env'] as $dotenvFile) {
+$appEnv = (string)env('APP_ENV');
+$dotenvFiles = [CONFIG . '.env.local', CONFIG . '.env', ROOT . DS . '.env'];
+if ($appEnv !== '') {
+    array_unshift($dotenvFiles, CONFIG . ".env.{$appEnv}.local", CONFIG . ".env.{$appEnv}");
+}
+foreach ($dotenvFiles as $dotenvFile) {
     if (!is_file($dotenvFile)) {
         continue;
     }
@@ -59,7 +64,7 @@ foreach ([CONFIG . '.env', ROOT . DS . '.env'] as $dotenvFile) {
     }
     unset($dotenv, $key, $value);
 }
-unset($dotenvFile);
+unset($appEnv, $dotenvFiles, $dotenvFile);
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
@@ -424,10 +429,6 @@ Configure::write('Acl.database', 'default');
  *
  * By default File is used, but for improved performance you should use APC.
  *
- * The 'dsn' keys set the engines with the CACHE_CAKECORE_URL and CACHE_CAKEMODEL_URL
- * environment variables (e.g. redis://localhost:6379/0, see config/.env.example). The
- * keys in a DSN replace the same keys below; an unset variable keeps the keys below.
- *
  * Note: 'default' and other application caches should be configured in config/bootstrap.php.
  *       Please check the comments in bootstrap.php for more info on the cache engines available
  *       and their settings.
@@ -452,7 +453,6 @@ Cache::config('_cake_core_', [
     'prefix' => $prefix . 'cake_core_',
     'path' => CACHE . 'persistent' . DS,
     'duration' => $duration,
-    'dsn' => env('CACHE_CAKECORE_URL'),
 ]);
 
 /**
@@ -464,5 +464,4 @@ Cache::config('_cake_model_', [
     'prefix' => $prefix . 'cake_model_',
     'path' => CACHE . 'models' . DS,
     'duration' => $duration,
-    'dsn' => env('CACHE_CAKEMODEL_URL'),
 ]);

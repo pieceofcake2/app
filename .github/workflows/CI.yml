@@ -161,6 +161,19 @@ jobs:
             }
           '
 
+      - name: Check that APP_ENV=test loads config/.env.test
+        run: |
+          env -u DATABASE_URL -u DATABASE_TEST_URL APP_ENV=test php -r '
+            require "vendor/autoload.php";
+            require "tests/bootstrap.php";
+            require_once CONFIG . "database.php";
+            $config = new DATABASE_CONFIG();
+            printf("default: %s%stest: %s%s", $config->default["dsn"], PHP_EOL, $config->test["dsn"], PHP_EOL);
+            if (strpos((string)$config->default["dsn"], "/test_database_name") === false || $config->default["dsn"] !== $config->test["dsn"]) {
+                exit(1);
+            }
+          '
+
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 

@@ -23,8 +23,7 @@
  */
 
 // Setup a 'default' cache configuration for use in the application.
-// CACHE_DEFAULT_URL sets it with a DSN (e.g. redis://localhost:6379/0), see config/.env.example.
-Cache::config('default', ['engine' => 'File', 'dsn' => env('CACHE_DEFAULT_URL')]);
+Cache::config('default', ['engine' => 'File']);
 
 /**
  * The settings below can be used to set additional paths to models, views and controllers.
@@ -112,19 +111,14 @@ Configure::write('Dispatcher.filters', [
 
 /**
  * Configures default file logging options
- *
- * LOG_DEBUG_URL and LOG_ERROR_URL set the engines with a DSN (e.g.
- * console://?stream=php://stderr), see config/.env.example.
  */
 CakeLog::config('debug', [
     'engine' => 'File',
     'types' => ['notice', 'info', 'debug'],
     'file' => 'debug',
-    'dsn' => env('LOG_DEBUG_URL'),
 ]);
 CakeLog::config('error', [
     'engine' => 'File',
     'types' => ['warning', 'error', 'critical', 'alert', 'emergency'],
     'file' => 'error',
-    'dsn' => env('LOG_ERROR_URL'),
 ]);

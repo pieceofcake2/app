@@ -14,12 +14,16 @@
     <php>
         <ini name="memory_limit" value="-1"/>
         <!--
+            config/core.php loads config/.env.test (DATABASE_URL and DATABASE_TEST_URL set to the
+            test database). The web server of the End-to-End tests inherits APP_ENV, so it loads
+            config/.env.test too and reads the fixtures.
+        -->
+        <env name="APP_ENV" value="test" force="true"/>
+        <!--
             End-to-End tests (pieceofcake2/panther) are configured with PANTHER_* variables, as in
             Symfony Panther. A <server> element replaces a shell variable of the same name: put
             per-machine values such as PANTHER_NO_HEADLESS in your shell or in phpunit.xml.
         -->
-        <!-- The web server uses the test datasource, where the fixtures are -->
-        <server name="PANTHER_APP_ENV" value="test"/>
         <!-- Screenshots of the failed End-to-End tests -->
         <server name="PANTHER_ERROR_SCREENSHOT_DIR" value="./tmp/error-screenshots"/>
     </php>

@@ -80,12 +80,9 @@
  *
  * Environment variables:
  * DATABASE_URL sets the `default` connection and DATABASE_TEST_URL the `test`
- * connection. See config/.env.example.
- *
- * End-to-End tests:
- * When APP_ENV is `test`, the `default` connection is the `test` connection. Symfony Panther
- * sets it in the web server of the End-to-End tests (PANTHER_APP_ENV=test in
- * phpunit.xml.dist), so that the pages read the fixtures.
+ * connection. See config/.env.example. In the tests (APP_ENV=test, set in
+ * phpunit.xml.dist) config/.env.test sets both to the test database, so the
+ * web server of the End-to-End tests also uses it.
  */
 class DATABASE_CONFIG
 {
@@ -141,10 +138,5 @@ class DATABASE_CONFIG
     {
         $this->default['dsn'] = env('DATABASE_URL');
         $this->test['dsn'] = env('DATABASE_TEST_URL');
-
-        // The web server of the End-to-End tests (pieceofcake2/panther) uses the test datasource
-        if (env('APP_ENV') === 'test') {
-            $this->default = $this->test;
-        }
     }
 }

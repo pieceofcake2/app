@@ -47,9 +47,9 @@ and the CakePHP coding standard) are installed as development dependencies.
 
 Then finish the configuration:
 
-1. Copy `config/database.php.default` to `config/database.php`, and set the connections with
-   `DATABASE_URL` and `DATABASE_TEST_URL` (see [Database and Mailer DSNs](#database-and-mailer-dsns))
-   or enter them in the file.
+1. Copy `config/database.php.default` to `config/database.php`, and set the connection with
+   `DATABASE_URL` (see [Database and Mailer DSNs](#database-and-mailer-dsns)) or enter it in the
+   file. Set the test database in `config/.env.test.local` (see [Running Tests](#running-tests)).
 2. Change `Security.salt` and `Security.cipherSeed` in `config/core.php`, or set
    `SECURITY_SALT` and `SECURITY_CIPHER_SEED`. The skeleton ships with well-known example
    values that must not be used in a real application. See
@@ -68,8 +68,9 @@ The `.gitignore` file of the skeleton is meant for your application, so you can 
   `.gitignore`; the plugins of your own application in `plugins/` are committed.
 - the contents of `tmp/` and `logs/`. The `empty` files that keep the directories are
   committed.
-- `config/database.php`, `config/email.php`, `config/.env` and `.env`, which contain the
-  settings and credentials of each environment.
+- `config/database.php`, `config/email.php`, `config/.env`, `config/.env.local`,
+  `config/.env.*.local` and `.env`, which contain the settings and credentials of each
+  environment. `config/.env.test`, the settings of the tests, is committed.
 - `phpunit.xml` (a local copy of `phpunit.xml.dist`) and `.phpunit.result.cache`.
 
 Commit `composer.lock`, so that every environment installs the same versions of the
@@ -181,15 +182,25 @@ cp config/.env.example config/.env
 cp config/.env.example .env
 ```
 
-`config/.env` and `.env` in the project root are loaded at the top of `config/core.php` (so
-they apply to web requests, `bin/cake` and tests) using
-[josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv). Both are ignored by Git.
-Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`.
+The `.env` files are loaded at the top of `config/core.php` (so they apply to web requests,
+`bin/cake` and tests) using [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv).
+Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`. As in Symfony,
+the files are loaded in this order, and a variable that is already set is never overwritten, so
+an earlier file wins over a later one and real environment variables (web server, shell,
+container, CI) win over all files:
 
-This follows the `.env` support of the CakePHP 3+/5 application skeleton
-([cakephp/app](https://github.com/cakephp/app) loads `config/.env` with josegonzalez/dotenv in
-`config/bootstrap.php`), backported for CakePHP 2 and extended to also accept a `.env` in the
-project root.
+| File | Loaded | In Git |
+| --- | --- | --- |
+| `config/.env.{APP_ENV}.local` | when `APP_ENV` is set | ignored |
+| `config/.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
+| `config/.env.local` | always | ignored |
+| `config/.env` | always | ignored |
+| `.env` in the project root | always | ignored |
+
+`APP_ENV` is read from the real environment. `phpunit.xml.dist` sets it to `test`, so the tests
+load `config/.env.test` (see [Running Tests](#running-tests)). Use `config/.env` for your
+development settings and `config/.env.local` or `config/.env.test.local` for overrides that
+only apply to your machine.
 
 | Variable | Setting | Default |
 | --- | --- | --- |
@@ -200,12 +211,7 @@ project root.
 | `DATABASE_URL` | `default` connection in `config/database.php`, as a DSN | values in `config/database.php` |
 | `DATABASE_TEST_URL` | `test` connection in `config/database.php`, as a DSN | values in `config/database.php` |
 | `MAILER_DSN` | transport of the `default` profile in `config/email.php`, as a Symfony Mailer DSN | values in `config/email.php` |
-| `CACHE_DEFAULT_URL`, `CACHE_CAKECORE_URL`, `CACHE_CAKEMODEL_URL` | `default` cache (`config/bootstrap.php`), `_cake_core_` and `_cake_model_` caches (`config/core.php`), as DSNs | `File` engine settings of the files |
-| `LOG_DEBUG_URL`, `LOG_ERROR_URL` | `debug` and `error` logs in `config/bootstrap.php`, as DSNs | `File` logs in `logs/` |
 
-- Precedence: real environment variables (web server, shell, container, CI) > `config/.env` >
-  root `.env`. `config/.env` is loaded first and the root `.env` second; a variable that is
-  already set is never overwritten.
 - Unset or empty variables keep the defaults, so the application behaves exactly as before
   without a `.env` file.
 - Quote values in `.env` files (e.g. `DEBUG="0"`). Unquoted numbers are normalized by the
@@ -213,10 +219,9 @@ project root.
 - `.env` files are meant for development. In production, set real environment variables
   instead.
 - `DATABASE_URL` and `DATABASE_TEST_URL` are read by `config/database.php.default`, and
-  `MAILER_DSN` by `config/email.php.default`. The cache and log variables are read by
-  `config/core.php` and `config/bootstrap.php`. If you created `config/database.php` or
+  `MAILER_DSN` by `config/email.php.default`. If you created `config/database.php` or
   `config/email.php` from an earlier skeleton, copy the `__construct()` method into it (and
-  remove the `applyEnv()` method of the former `DB_*` variables).
+  remove the `applyEnv()` method of the former `DB_*` variables and the `APP_ENV` branch).
 
 ### Database and Mailer DSNs
 
@@ -272,31 +277,10 @@ MAILER_DSN="null://null"
   write `mysql://root:@localhost/my_app` for an empty password.
 - An unset or empty variable is ignored, and the keys of the file are used.
 - Plugins can add schemes (e.g. `ses+api://` of an Amazon SES plugin) with
-  `CakeEmail::setDsnClassMap()` and the other `setDsnClassMap()` methods in their bootstrap.
+  `CakeEmail::setDsnClassMap()` and `ConnectionManager::setDsnClassMap()` in their bootstrap.
 - See [Datasources](https://pieceofcake2.github.io/docs/models/datasources.html) and
   [Email](https://pieceofcake2.github.io/docs/core-utility-libraries/email.html) in the
   book for all the rules.
-
-#### Cache and Log DSNs
-
-The cache configurations in `config/core.php` and `config/bootstrap.php` and the logs in
-`config/bootstrap.php` also have a `'dsn'` key, set from the variables of the CakePHP 5 app
-skeleton. The keys of the files (`prefix`, `duration`, `types`, `file`, ...) are kept, so a DSN
-only changes the engine and its connection:
-
-```dotenv
-# Redis for the application and framework caches
-CACHE_DEFAULT_URL="redis://localhost:6379/0"
-CACHE_CAKECORE_URL="redis://localhost:6379/0"
-CACHE_CAKEMODEL_URL="redis://localhost:6379/0"
-# Log to the standard streams in a container
-LOG_DEBUG_URL="console://?stream=php://stdout"
-LOG_ERROR_URL="console://?stream=php://stderr"
-```
-
-The schemes are `file`, `apcu`, `memcached`, `memcache` and `redis` for caches and `file`,
-`console` and `syslog` for logs. See [Caching](https://pieceofcake2.github.io/docs/core-libraries/caching.html)
-and [Logging](https://pieceofcake2.github.io/docs/core-libraries/logging.html) in the book.
 
 #### Docker and CI
 
@@ -319,11 +303,13 @@ services:
     image: axllent/mailpit
 ```
 
-In GitHub Actions, set `DATABASE_TEST_URL` for the test step:
+In GitHub Actions, set the test database for the test step. Real environment variables win
+over `config/.env.test`:
 
 ```yaml
       - name: Run tests
         env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/test_app?encoding=utf8mb4
           DATABASE_TEST_URL: mysql://root:root@127.0.0.1:3306/test_app?encoding=utf8mb4
         run: |
           cp config/database.php.default config/database.php
@@ -531,9 +517,25 @@ their templates and `webroot/css/`. To use the new look, copy `templates/Layouts
 
 ### Running Tests
 
-Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`. Configure the
-`test` connection in `config/database.php` (or with the `DATABASE_TEST_URL` variable), then run the
-tests with PHPUnit:
+Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`.
+`phpunit.xml.dist` sets `APP_ENV=test`:
+
+```xml
+<env name="APP_ENV" value="test" force="true"/>
+```
+
+so the tests load `config/.env.test`, which is committed and sets both `DATABASE_URL` and
+`DATABASE_TEST_URL` to the test database (and `MAILER_DSN` to `null://null`). Set your test
+database in `config/.env.test.local` (ignored by Git) or as real environment variables, which
+win over `config/.env.test`:
+
+```dotenv
+# config/.env.test.local
+DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
+DATABASE_TEST_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
+```
+
+Then run the tests with PHPUnit:
 
 ```bash
 vendor/bin/phpunit
@@ -542,8 +544,11 @@ vendor/bin/phpunit
 or a single test case with the test shell:
 
 ```bash
-bin/cake test app Controller/PostsController
+APP_ENV=test bin/cake test app Controller/PostsController
 ```
+
+The test shell does not read `phpunit.xml.dist`, so set `APP_ENV=test` yourself to load
+`config/.env.test`.
 
 `phpunit.xml.dist` has two test suites:
 
@@ -567,7 +572,7 @@ headless Chrome drives it. To use them:
 1. Install the package and a chromedriver that matches your Chrome:
 
    ```bash
-   composer require --dev pieceofcake2/panther dbrekelmans/bdi
+   composer require --dev "pieceofcake2/panther:^1.0.1" dbrekelmans/bdi
    vendor/bin/bdi detect drivers
    ```
 
@@ -576,13 +581,14 @@ headless Chrome drives it. To use them:
 3. Write tests that extend `PieceOfCake2\Panther\TestSuite\PantherTestCase` in
    `tests/TestCase/EndToEnd/`, and run them with `vendor/bin/phpunit --testsuite EndToEnd`.
 
-They are configured with Panther's `PANTHER_*` variables. `phpunit.xml.dist` sets two:
+The web server that Panther starts inherits the environment of PHPUnit, including
+`APP_ENV=test` of `phpunit.xml.dist`. It loads `config/.env.test` too, where `DATABASE_URL`
+(the `default` connection of the pages) is the test database, so the pages read the fixtures
+of the tests. No other setting is needed. Panther's `PANTHER_APP_ENV` is only needed to give
+the web server a different `APP_ENV` than the tests.
 
-- `PANTHER_APP_ENV=test`: Panther gives the web server `APP_ENV=test`, and
-  `config/database.php.default` then uses the `test` connection as `default`, where the
-  fixtures are. If you created `config/database.php` before this was added, copy the
-  `APP_ENV` lines of the constructor into it.
-- `PANTHER_ERROR_SCREENSHOT_DIR=./tmp/error-screenshots`: screenshots of the failed tests.
+The tests are configured with Panther's `PANTHER_*` variables. `phpunit.xml.dist` sets
+`PANTHER_ERROR_SCREENSHOT_DIR=./tmp/error-screenshots` for the screenshots of the failed tests.
 
 Set per-machine values, such as `PANTHER_NO_HEADLESS=1` (to watch the browser), in your
 shell or in a `phpunit.xml` copy of `phpunit.xml.dist`. In CI, run the End-to-End tests in a
