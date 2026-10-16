@@ -197,8 +197,9 @@ container, CI) win over all files:
 | `config/.env` | always | ignored |
 | `.env` in the project root | always | ignored |
 
-`APP_ENV` is read from the real environment. `tests/bootstrap.php` sets it to `test`, so the
-tests load `config/.env.test` (see [Running Tests](#running-tests)). Use `config/.env` for your
+`APP_ENV` is read from the real environment. `vendor/bin/phpunit` and `bin/cake test` run with
+`APP_ENV=test` by default, so the tests load `config/.env.test` (see
+[Running Tests](#running-tests)). Use `config/.env` for your
 development settings and `config/.env.local` or `config/.env.test.local` for overrides that
 only apply to your machine.
 
@@ -208,7 +209,7 @@ only apply to your machine.
 | `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1 to 4294967295, legacy `'cipher'` cookies only) | value in `config/core.php` |
 | `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type (read by the component from 2.12.6) | `null` (`Security.salt` is used) |
-| `DATABASE_URL` | `default` connection in `config/database.php`, as a DSN (with `APP_ENV=test` also the `test` connection) | values in `config/database.php` |
+| `DATABASE_URL` | `default` and `test` connections in `config/database.php`, as a DSN | values in `config/database.php` |
 | `MAILER_DSN` | transport of the `default` profile in `config/email.php`, as a Symfony Mailer DSN | values in `config/email.php` |
 
 - Unset or empty variables keep the defaults, so the application behaves exactly as before
@@ -220,9 +221,8 @@ only apply to your machine.
 - `DATABASE_URL` is read by `config/database.php.default`, and `MAILER_DSN` by
   `config/email.php.default`. If you created `config/database.php` or `config/email.php` from
   an earlier skeleton, copy the `__construct()` method into it (and remove the `applyEnv()`
-  method of the former `DB_*` variables and the former `APP_ENV` branch). `config/core.php`
-  must also write `App.env`, which the `test` connection checks, and `tests/bootstrap.php` must
-  set `APP_ENV=test` (copy both from the skeleton).
+  method of the former `DB_*` variables and the former `APP_ENV` branch). Copy the `APP_ENV`
+  default of `tests/bootstrap.php`, `bin/cake` and `webroot/test.php` from the skeleton too.
 
 ### Database and Mailer DSNs
 
@@ -234,20 +234,15 @@ takes the DSN, and the skeleton sets it from the environment variables of Symfon
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
-// Only the test database: config/core.php loaded config/.env.test (APP_ENV=test).
-if (Configure::read('App.env') === 'test') {
-    $this->test['dsn'] = env('DATABASE_URL');
-}
+$this->test['dsn'] = env('DATABASE_URL');
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
 ```
 
 There is one variable for the database, as in Symfony: `DATABASE_URL` is the database of the
-current environment. In the tests (`APP_ENV=test`) it is the test database, and both connections
-use it. Without `APP_ENV=test`, `DATABASE_URL` may be your development database, and the
-fixtures drop and create tables, so the `test` connection then ignores it and keeps the keys of
-`config/database.php`.
+current environment, and both connections use it. In the tests (`APP_ENV=test`) it is the test
+database of `config/.env.test`.
 
 The `'dsn'` key needs pieceofcake2/cakephp 2.12.7 or later. With an earlier
 release the key is ignored and the other keys of the files are used.
@@ -528,10 +523,11 @@ their templates and `webroot/css/`. To use the new look, copy `templates/Layouts
 ### Running Tests
 
 Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`.
-`tests/bootstrap.php` (the PHPUnit bootstrap) always sets `APP_ENV=test` before CakePHP
-loads the `.env` files, so the tests load `config/.env.test`. This file is committed and sets
-`DATABASE_URL` to the test database (and `MAILER_DSN` to `null://null`); with `APP_ENV=test`,
-both the `default` and the `test` connection use it. Set your test database in
+`vendor/bin/phpunit` and `bin/cake test` run with `APP_ENV=test` by default: `tests/bootstrap.php`
+and `bin/cake` set it before CakePHP loads the `.env` files when it is not set (`webroot/test.php`,
+the browser test runner, does the same). So the tests load `config/.env.test`. This file is
+committed and sets `DATABASE_URL` to the test database (and `MAILER_DSN` to `null://null`), which
+both the `default` and the `test` connection use. Set your test database in
 `config/.env.test.local` (ignored by Git) or as a real environment variable, which wins over
 `config/.env.test`, as CI does:
 
@@ -541,9 +537,9 @@ DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
 ```
 
 Your development `DATABASE_URL` stays in `config/.env`; `config/.env.test` and
-`config/.env.test.local` are loaded first and win. Do not export your development
-`DATABASE_URL` in your shell, since a real environment variable wins over
-`config/.env.test` too.
+`config/.env.test.local` are loaded first and win. A real environment variable wins over the
+files, so do not export your development `DATABASE_URL` or another `APP_ENV` in the shell where
+you run the tests: the fixtures drop and create tables.
 
 Then run the tests with PHPUnit:
 
@@ -554,13 +550,8 @@ vendor/bin/phpunit
 or a single test case with the test shell:
 
 ```bash
-APP_ENV=test bin/cake test app Controller/PostsController
+bin/cake test app Controller/PostsController
 ```
-
-`bin/cake` loads the `.env` files before the test shell starts, so set `APP_ENV=test` yourself
-to load `config/.env.test`. Without it, `tests/bootstrap.php` stops the run with an error, and
-the `test` connection never reads `DATABASE_URL` (it keeps the keys of `config/database.php`),
-so the tests cannot reach your development database.
 
 `phpunit.xml.dist` has two test suites:
 
@@ -594,7 +585,7 @@ headless Chrome drives it. To use them:
    `tests/TestCase/EndToEnd/`, and run them with `vendor/bin/phpunit --testsuite EndToEnd`.
 
 The web server that Panther starts inherits the environment of PHPUnit, including
-`APP_ENV=test` of `tests/bootstrap.php`. It loads `config/.env.test` too, where `DATABASE_URL`
+`APP_ENV=test`. It loads `config/.env.test` too, where `DATABASE_URL`
 (the `default` connection of the pages) is the test database, so the pages read the fixtures
 of the tests. No other setting is needed. Panther's `PANTHER_APP_ENV` is only needed to give
 the web server a different `APP_ENV` than the tests.

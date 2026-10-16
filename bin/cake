@@ -46,4 +46,12 @@ if (!is_file(VENDORS . 'autoload.php')) {
 }
 require_once VENDORS . 'autoload.php';
 
+// The test shell runs with APP_ENV=test by default, as vendor/bin/phpunit (tests/bootstrap.php),
+// so config/core.php loads config/.env.test, where DATABASE_URL is the test database.
+if (($argv[1] ?? null) === 'test' && (string)getenv('APP_ENV') === '' && empty($_SERVER['APP_ENV'])) {
+    putenv('APP_ENV=test');
+    $_ENV['APP_ENV'] = 'test';
+    $_SERVER['APP_ENV'] = 'test';
+}
+
 ShellDispatcher::run($argv);

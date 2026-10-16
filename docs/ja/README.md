@@ -205,8 +205,8 @@ cp config/.env.example .env
 | `config/.env` | 常に | 無視 |
 | プロジェクトルートの `.env` | 常に | 無視 |
 
-`APP_ENV` は実際の環境変数から読み込まれます。`tests/bootstrap.php` が `test` に設定するので、テストでは
-`config/.env.test` が読み込まれます ([テストの実行](#running-tests) を参照してください)。開発用の設定は
+`APP_ENV` は実際の環境変数から読み込まれます。`vendor/bin/phpunit` と `bin/cake test` はデフォルトで
+`APP_ENV=test` で動くので、テストでは `config/.env.test` が読み込まれます ([テストの実行](#running-tests) を参照してください)。開発用の設定は
 `config/.env` に、自分のマシンだけで使う上書きは `config/.env.local` や `config/.env.test.local` に書きます。
 
 | 変数 | 設定 | デフォルト |
@@ -215,7 +215,7 @@ cp config/.env.example .env
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー (2.12.6 からコンポーネントが読み込みます) | `null` (`Security.salt` が使われます) |
-| `DATABASE_URL` | `config/database.php` の `default` 接続 (DSN。`APP_ENV=test` のときは `test` 接続も) | `config/database.php` の値 |
+| `DATABASE_URL` | `config/database.php` の `default` 接続と `test` 接続 (DSN) | `config/database.php` の値 |
 | `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
 
 - 設定されていない変数や空の変数ではデフォルトが使われるので、`.env` ファイルがなければアプリケーションは
@@ -226,8 +226,8 @@ cp config/.env.example .env
 - `DATABASE_URL` は `config/database.php.default` が、`MAILER_DSN` は `config/email.php.default` が
   読み込みます。以前のスケルトンから `config/database.php` や `config/email.php` を作成した場合は、
   `__construct()` メソッドをそこにコピーしてください (以前の `DB_*` 変数用の `applyEnv()` メソッドと以前の
-  `APP_ENV` の分岐は削除します)。また、`config/core.php` は `test` 接続が確認する `App.env` を書き込み、
-  `tests/bootstrap.php` は `APP_ENV=test` を設定する必要があります (どちらもスケルトンからコピーしてください)。
+  `APP_ENV` の分岐は削除します)。`tests/bootstrap.php`、`bin/cake`、`webroot/test.php` の `APP_ENV` の
+  デフォルトもスケルトンからコピーしてください。
 
 <a id="database-and-mailer-dsns"></a>
 
@@ -240,19 +240,14 @@ DSN は、CakePHP 3.x 以降や Symfony と同じように、1 つの文字列�
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
-// Only the test database: config/core.php loaded config/.env.test (APP_ENV=test).
-if (Configure::read('App.env') === 'test') {
-    $this->test['dsn'] = env('DATABASE_URL');
-}
+$this->test['dsn'] = env('DATABASE_URL');
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
 ```
 
-Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースです。
-テスト (`APP_ENV=test`) ではテスト用データベースになり、両方の接続がこれを使います。`APP_ENV=test`
-でないときの `DATABASE_URL` は開発用データベースかもしれず、フィクスチャはテーブルを削除して作成するので、
-`test` 接続は `DATABASE_URL` を無視して `config/database.php` のキーを使います。
+Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースで、
+両方の接続がこれを使います。テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになります。
 
 `'dsn'` キーには、pieceofcake2/cakephp 2.12.7 以降が必要です。それより前のリリースではこのキーは
 無視され、ファイルのほかのキーが使われます。
@@ -545,11 +540,12 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 
 ### テストの実行
 
-テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。PHPUnit のブートストラップ
-`tests/bootstrap.php` は、CakePHP が `.env` ファイルを読み込む前に常に `APP_ENV=test` を設定します。そのため、
-テストではコミットされている `config/.env.test` が読み込まれます。このファイルは `DATABASE_URL` を
-テスト用データベースに設定します (`MAILER_DSN` は `null://null` です)。`APP_ENV=test` のときは、`default`
-接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、`config/.env.test.local` (Git では
+テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。`vendor/bin/phpunit` と
+`bin/cake test` は、デフォルトで `APP_ENV=test` で動きます。`APP_ENV` が設定されていなければ、CakePHP が
+`.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
+ランナー `webroot/test.php` も同じです)。そのため、テストではコミットされている `config/.env.test` が
+読み込まれます。このファイルは `DATABASE_URL` をテスト用データベースに設定し (`MAILER_DSN` は `null://null`
+です)、`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、`config/.env.test.local` (Git では
 無視されます) か、CI と同じように `config/.env.test` より優先される実際の環境変数で設定してください。
 
 ```dotenv
@@ -558,8 +554,9 @@ DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
 ```
 
 開発用の `DATABASE_URL` は `config/.env` に置いたままにします。`config/.env.test` と `config/.env.test.local`
-が先に読み込まれ、優先されます。実際の環境変数も `config/.env.test` より優先されるので、開発用の
-`DATABASE_URL` をシェルで export しないでください。
+が先に読み込まれ、優先されます。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
+開発用の `DATABASE_URL` やほかの `APP_ENV` を export しないでください。フィクスチャはテーブルを削除して
+作成します。
 
 それから PHPUnit でテストを実行します。
 
@@ -570,13 +567,8 @@ vendor/bin/phpunit
 テストシェルで 1 つのテストケースだけを実行することもできます。
 
 ```bash
-APP_ENV=test bin/cake test app Controller/PostsController
+bin/cake test app Controller/PostsController
 ```
-
-`bin/cake` はテストシェルが始まる前に `.env` ファイルを読み込むので、`config/.env.test` を読み込むには
-`APP_ENV=test` を自分で設定してください。設定しないと `tests/bootstrap.php` がエラーで実行を止めます。また、
-`test` 接続は `DATABASE_URL` を読み込まず `config/database.php` のキーを使うので、テストが開発用データベースに
-接続することはありません。
 
 `phpunit.xml.dist` には 2 つのテストスイートがあります:
 
@@ -610,7 +602,7 @@ End-to-End テストのためのディレクトリです。pieceofcake2/panther 
 3. `tests/TestCase/EndToEnd/` に `PieceOfCake2\Panther\TestSuite\PantherTestCase` を継承したテストを書き、
    `vendor/bin/phpunit --testsuite EndToEnd` で実行します。
 
-Panther が起動する Web サーバーは、`tests/bootstrap.php` の `APP_ENV=test` を含む PHPUnit の環境を引き継ぎます。
+Panther が起動する Web サーバーは、`APP_ENV=test` を含む PHPUnit の環境を引き継ぎます。
 そのため Web サーバーも `config/.env.test` を読み込み、ページが使う `default` 接続 (`DATABASE_URL`) がテスト用
 データベースになるので、ページはテストのフィクスチャを読み込みます。ほかの設定は必要ありません。Panther の
 `PANTHER_APP_ENV` が必要になるのは、Web サーバーにテストとは異なる `APP_ENV` を渡すときだけです。

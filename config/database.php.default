@@ -79,14 +79,13 @@
  * An empty dsn is ignored, so the keys below are used when the variable is not set.
  *
  * Environment variable:
- * DATABASE_URL sets the `default` connection. See config/.env.example. In the
- * tests, tests/bootstrap.php sets APP_ENV=test, so config/core.php loads
- * config/.env.test, where DATABASE_URL is the test database. The `test`
- * connection reads DATABASE_URL too, but only when config/core.php loaded the
- * files with APP_ENV=test; otherwise DATABASE_URL is the database of another
- * environment, and the fixtures drop and create tables in it, so the `test`
- * connection keeps the keys below. The web server of the End-to-End tests
- * inherits APP_ENV=test, so its `default` connection is the test database.
+ * DATABASE_URL is the database of the current environment, as in Symfony, and
+ * sets both connections. See config/.env.example. The tests run with
+ * APP_ENV=test, so config/core.php loads
+ * config/.env.test, where DATABASE_URL is the test database; the web server of
+ * the End-to-End tests inherits APP_ENV=test and uses it too. The test entry
+ * points (vendor/bin/phpunit, bin/cake test, webroot/test.php) set
+ * APP_ENV=test when it is not set.
  */
 class DATABASE_CONFIG
 {
@@ -116,8 +115,7 @@ class DATABASE_CONFIG
     ];
 
     /**
-     * The connection of the tests. With APP_ENV=test, DATABASE_URL replaces the
-     * keys it sets.
+     * The connection of the tests. DATABASE_URL replaces the keys it sets.
      *
      * @var array
      */
@@ -142,9 +140,6 @@ class DATABASE_CONFIG
     public function __construct()
     {
         $this->default['dsn'] = env('DATABASE_URL');
-        // Only the test database: config/core.php loaded config/.env.test (APP_ENV=test).
-        if (Configure::read('App.env') === 'test') {
-            $this->test['dsn'] = env('DATABASE_URL');
-        }
+        $this->test['dsn'] = env('DATABASE_URL');
     }
 }

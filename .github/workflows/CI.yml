@@ -160,30 +160,28 @@ jobs:
             }
           '
 
-      - name: Check that the tests load config/.env.test
+      - name: Check that vendor/bin/phpunit and bin/cake test load config/.env.test
         run: |
-          env -u DATABASE_URL -u APP_ENV php -r '
-            require "vendor/autoload.php";
-            require "tests/bootstrap.php";
-            require_once CONFIG . "database.php";
-            $config = new DATABASE_CONFIG();
-            printf("default: %s%stest: %s%s", $config->default["dsn"], PHP_EOL, $config->test["dsn"], PHP_EOL);
-            if (strpos((string)$config->default["dsn"], "/test_database_name") === false || $config->default["dsn"] !== $config->test["dsn"]) {
-                exit(1);
-            }
-          '
-
-      - name: Check that the test connection ignores DATABASE_URL without APP_ENV=test
-        run: |
-          env -u APP_ENV php -r '
-            require "tests/phpstan-bootstrap.php";
-            require_once CONFIG . "database.php";
-            $config = new DATABASE_CONFIG();
-            printf("default: %s%stest: %s%s", $config->default["dsn"], PHP_EOL, var_export($config->test["dsn"] ?? null, true), PHP_EOL);
-            if ($config->default["dsn"] === null || isset($config->test["dsn"])) {
-                exit(1);
-            }
-          '
+          # A development .env, which the tests must not use
+          echo 'DATABASE_URL="mysql://dev:dev@127.0.0.1:3306/development_database"' > config/.env
+          cat > tests/TestCase/EnvTestTest.php <<'PHP'
+          <?php
+          class EnvTestTest extends CakeTestCase
+          {
+              public function testEnvTest()
+              {
+                  require_once CONFIG . 'database.php';
+                  $config = new DATABASE_CONFIG();
+                  $this->assertSame('test', env('APP_ENV'));
+                  $this->assertStringContainsString('/test_database_name', $config->default['dsn']);
+                  $this->assertSame($config->default['dsn'], $config->test['dsn']);
+              }
+          }
+          PHP
+          env -u APP_ENV -u DATABASE_URL vendor/bin/phpunit tests/TestCase/EnvTestTest.php
+          env -u APP_ENV -u DATABASE_URL bin/cake test app EnvTest 2>&1 | tee env-test.log
+          grep -q 'OK (1 test' env-test.log
+          rm config/.env tests/TestCase/EnvTestTest.php env-test.log
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"

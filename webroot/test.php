@@ -50,6 +50,14 @@ if (!is_file(VENDORS . 'autoload.php')) {
 }
 require_once VENDORS . 'autoload.php';
 
+// The test runner runs with APP_ENV=test by default, as vendor/bin/phpunit (tests/bootstrap.php),
+// so config/core.php loads config/.env.test, where DATABASE_URL is the test database.
+if ((string)getenv('APP_ENV') === '' && empty($_SERVER['APP_ENV'])) {
+    putenv('APP_ENV=test');
+    $_ENV['APP_ENV'] = 'test';
+    $_SERVER['APP_ENV'] = 'test';
+}
+
 require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
 
 if (Configure::read('debug') < 1) {
