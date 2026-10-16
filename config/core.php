@@ -59,7 +59,7 @@ unset($appEnv);
  *
  * Can be set with the DEBUG environment variable. Defaults to 0 when not set.
  */
-Configure::write('debug', (int)env('DEBUG'));
+Configure::write('debug', (int)(env('DEBUG') ?: 0));
 
 /**
  * Configure the Error handler used to handle errors for your application. By default
