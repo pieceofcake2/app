@@ -44,9 +44,9 @@ composer create-project pieceofcake2/app my_app
 ```
 
 これにより `my_app` ディレクトリが作成され、CakePHP (`pieceofcake2/cakephp`) が `vendor/` に
-インストールされます。[Bake](https://pieceofcake2.github.io/bake/) プラグインと
-[DebugKit](https://pieceofcake2.github.io/debug_kit/) プラグイン、そして開発ツール
-(PHPUnit、[pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/) を使った PHPStan、
+インストールされます。[Bake](https://pieceofcake2.github.io/bake/ja/) プラグインと
+[DebugKit](https://pieceofcake2.github.io/debug_kit/ja/) プラグイン、そして開発ツール
+(PHPUnit、[pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/ja/) を使った PHPStan、
 CakePHP コーディング規約) は、開発用の依存パッケージとしてインストールされます。
 
 続けて設定を仕上げます:
@@ -81,8 +81,8 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 
 ### 開発用プラグイン
 
-`config/bootstrap.php` は、[Bake](https://pieceofcake2.github.io/bake/) プラグインと
-[DebugKit](https://pieceofcake2.github.io/debug_kit/) プラグインがインストールされていれば読み込みます。
+`config/bootstrap.php` は、[Bake](https://pieceofcake2.github.io/bake/ja/) プラグインと
+[DebugKit](https://pieceofcake2.github.io/debug_kit/ja/) プラグインがインストールされていれば読み込みます。
 
 ```php
 foreach (['Bake', 'DebugKit'] as $plugin) {
@@ -102,7 +102,7 @@ bin/cake bake
 ```
 
 DebugKit のツールバーを表示するには、`AppController` に `DebugKit.Toolbar` コンポーネントを追加します
-([DebugKit のドキュメント](https://pieceofcake2.github.io/debug_kit/) を参照)。開発用の依存パッケージが
+([DebugKit のドキュメント](https://pieceofcake2.github.io/debug_kit/ja/) を参照)。開発用の依存パッケージが
 なくてもアプリケーションが動作するように、プラグインが読み込まれている場合にだけ追加してください。
 
 ```php
@@ -376,7 +376,7 @@ bin/cake server
   (`$this->Flash->success('Saved.')` など)。メッセージはエスケープされます。HTML を出力するには
   `['params' => ['escape' => false]]` を渡します。メッセージをクリックすると非表示になります。
 
-[pieceofcake2/bake](https://pieceofcake2.github.io/bake/) で bake したビューも同じスタイルを使います。
+[pieceofcake2/bake](https://pieceofcake2.github.io/bake/ja/) で bake したビューも同じスタイルを使います。
 
 <a id="home-page"></a>
 
@@ -421,7 +421,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 アプリケーション自身のものだからです。新しい見た目を使うには、`templates/Layouts/`、`templates/Elements/Flash/`、
 `templates/Errors/`、`webroot/css/`、`webroot/font/` と `webroot/img/cake.logo.svg` をアプリケーションに
 コピーしてください。`cake.generic.css` 向けに bake したビューは、bake し直す (またはスタイルを直す) 必要があります。
-[bake したビューと legacy テーマ](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme)
+[bake したビューと legacy テーマ](https://pieceofcake2.github.io/bake/ja/#baked-views-and-the-legacy-theme)
 をご覧ください。
 
 <a id="development"></a>
@@ -460,8 +460,8 @@ bin/cake test app Controller/PostsController
 
 #### End-to-End テスト
 
-`tests/TestCase/EndToEnd/` は、[pieceofcake2/panther](https://pieceofcake2.github.io/panther/)
-([Markdown](https://github.com/pieceofcake2/panther/blob/1.x/docs/README.md)) を使ったブラウザーの
+`tests/TestCase/EndToEnd/` は、[pieceofcake2/panther](https://pieceofcake2.github.io/panther/ja/)
+([Markdown](https://github.com/pieceofcake2/panther/blob/1.x/docs/ja/README.md)) を使ったブラウザーの
 End-to-End テストのためのディレクトリです。pieceofcake2/panther は Symfony Panther と同じ方法でテストを実行します。
 アプリケーションを PHP のビルトイン Web サーバーで起動し、ヘッドレス Chrome で操作します。使い方は次のとおりです:
 
@@ -509,7 +509,7 @@ vendor/bin/phpstan analyse
 ```
 
 設定は `phpstan.neon` にあり、
-[pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/) 拡張を使います。
+[pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/ja/) 拡張を使います。
 
 <a id="origin"></a>
 
