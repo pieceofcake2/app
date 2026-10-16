@@ -14,6 +14,7 @@
         "phpunit/phpunit": "^9.6",
         "pieceofcake2/bake": "^1.0",
         "pieceofcake2/debug_kit": "^2.2",
+        "pieceofcake2/docs": "^2.0",
         "pieceofcake2/phpcs-cakephp2": "^1.1",
         "pieceofcake2/phpstan-cakephp2": "^0.2.3"
     },

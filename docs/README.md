@@ -43,7 +43,9 @@ This creates the `my_app` directory and installs CakePHP (`pieceofcake2/cakephp`
 `vendor/`. The [Bake](https://pieceofcake2.github.io/bake/) and
 [DebugKit](https://pieceofcake2.github.io/debug_kit/) plugins and the development tools
 (PHPUnit, PHPStan with [pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/),
-and the CakePHP coding standard) are installed as development dependencies.
+and the CakePHP coding standard) are installed as development dependencies, with the Markdown
+docs of the CakePHP 2 book for AI coding tools (`pieceofcake2/docs`, in
+`vendor/pieceofcake2/docs/docs/`).
 
 Then finish the configuration:
 

@@ -23,7 +23,7 @@ support, and the home page, layouts, error pages and styles of the CakePHP 5 ske
 It covers the installation, the directory layout, the configuration and `.env` files,
 the pages and styles, running tests and PHPStan, and migrating an existing application to the modern layout.
 
-For AI coding tools, install the Markdown docs of the CakePHP 2 book as a dev dependency: `composer require --dev pieceofcake2/docs` (files in `vendor/pieceofcake2/docs/docs/en/`).
+For AI coding tools, the Markdown docs of the CakePHP 2 book are installed as a dev dependency (`pieceofcake2/docs`, files in `vendor/pieceofcake2/docs/docs/en/`).
 
 ## Requirements
 
