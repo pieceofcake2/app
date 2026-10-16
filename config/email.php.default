@@ -35,7 +35,7 @@
  * The origin email. See CakeEmail::from() about the valid values
  *
  * dsn =>
- * A mailer DSN in the format of Symfony Mailer (needs pieceofcake2/cakephp 2.12.7 or later):
+ * A mailer DSN in the format of Symfony Mailer:
  *  smtp://user:password@smtp.example.com:587 (Smtp; STARTTLS on port 587 or with ?tls=1)
  *  smtps://user:password@smtp.example.com:465 (Smtp over SSL/TLS)
  *  sendmail://default or native://default (Mail, PHP mail())

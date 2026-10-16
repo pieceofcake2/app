@@ -302,12 +302,8 @@ Configure::write('Security.cipherSeed', env('SECURITY_CIPHER_SEED') ?: '26597587
 
 /**
  * Default encryption type and key of CookieComponent. The key is a random value of at
- * least 32 bytes; when it is null, Security.salt is used.
- *
- * From pieceofcake2/cakephp 2.12.6, CookieComponent reads these values. With 2.12.5 and
- * earlier they have no effect: set 'type' => 'aes' in $components and assign the key in
- * beforeFilter() instead (see docs/README.md). Cookies written with the 'cipher' type
- * cannot be read after switching to 'aes'.
+ * least 32 bytes; when it is null, Security.salt is used. Cookies written with the
+ * 'cipher' type cannot be read after switching to 'aes'.
  *
  * The key can be set with the COOKIE_KEY environment variable.
  */

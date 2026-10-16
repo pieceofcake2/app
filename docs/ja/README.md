@@ -220,7 +220,7 @@ cp config/.env.example .env
 | `DEBUG` | `debug` (`0`、`1`、`2`、`true` = 2、`false` = 0) | `2` |
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
-| `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー (2.12.6 からコンポーネントが読み込みます) | `null` (`Security.salt` が使われます) |
+| `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー | `null` (`Security.salt` が使われます) |
 | `DATABASE_URL` | `config/database.php` の `default` 接続と `test` 接続 (DSN) | `config/database.php` の値 |
 | `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
 
@@ -254,9 +254,6 @@ $this->default['dsn'] = env('MAILER_DSN');
 
 Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースで、
 両方の接続がこれを使います。テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになります。
-
-`'dsn'` キーには、pieceofcake2/cakephp 2.12.7 以降が必要です。それより前のリリースではこのキーは
-無視され、ファイルのほかのキーが使われます。
 
 ```dotenv
 # MySQL
@@ -400,9 +397,7 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
 ([OpenSSL を有効にする](https://pieceofcake2.github.io/docs/ja/appendices/migrating-from-cakephp-2-10#enable-openssl)
 を参照)。
 
-pieceofcake2/cakephp 2.12.6 からは、`Cookie.type` と `Cookie.key` を設定で指定できます。
-
-**2.12.6 以降:** `config/core.php` がソルトの隣で両方をすでに設定しているので、コントローラーを変更する必要はありません。
+`config/core.php` がソルトの隣で `Cookie.type` と `Cookie.key` を設定しているので、コントローラーを変更する必要はありません。
 
 ```php
 Configure::write('Cookie.type', 'aes');
@@ -411,28 +406,6 @@ Configure::write('Cookie.key', env('COOKIE_KEY') ?: null);
 
 `CookieComponent` は、明示的な `'type'`/`'key'` の設定 (または `type()` と `$this->Cookie->key`) を最初に使い、
 次に `Cookie.type`/`Cookie.key`、最後に `'cipher'` と `Security.salt` を使います。
-
-**2.12.5 以前:** `CookieComponent` は `Cookie.type` と `Cookie.key` を読み込まないので、上の行は効果がありません。
-スケルトンは `CookieComponent` を使っていません。Cookie を追加するときは、`src/Controller/AppController.php` で
-タイプとキーを渡してください。
-
-```php
-public $components = [
-    'Cookie' => ['type' => 'aes'],
-];
-
-public function beforeFilter()
-{
-    parent::beforeFilter();
-    $key = Configure::read('Cookie.key');
-    if ($key) {
-        $this->Cookie->key = $key;
-    }
-}
-```
-
-キーは設定されている場合にだけ代入してください。`null` のキーはデフォルトのキーを置き換えてしまい、暗号化が失敗します。
-このコードは 2.12.6 以降でもそのまま動作します。
 
 `'aes'` タイプには 32 バイト以上のキーが必要です。`COOKIE_KEY` が設定されていないと、`Cookie.key` は `null` になり、
 キーには `Security.salt` が使われます。ソルトが 32 バイトより短いと、暗号化された Cookie の書き込みや読み込みで

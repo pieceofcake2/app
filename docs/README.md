@@ -216,7 +216,7 @@ your machine.
 | `DEBUG` | `debug` (`0`, `1`, `2`, `true` = 2, `false` = 0) | `2` |
 | `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1 to 4294967295, legacy `'cipher'` cookies only) | value in `config/core.php` |
-| `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type (read by the component from 2.12.6) | `null` (`Security.salt` is used) |
+| `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type | `null` (`Security.salt` is used) |
 | `DATABASE_URL` | `default` and `test` connections in `config/database.php`, as a DSN | values in `config/database.php` |
 | `MAILER_DSN` | transport of the `default` profile in `config/email.php`, as a Symfony Mailer DSN | values in `config/email.php` |
 
@@ -251,9 +251,6 @@ $this->default['dsn'] = env('MAILER_DSN');
 There is one variable for the database, as in Symfony: `DATABASE_URL` is the database of the
 current environment, and both connections use it. In the tests (`APP_ENV=test`) it is the test
 database of `config/.env.test`.
-
-The `'dsn'` key needs pieceofcake2/cakephp 2.12.7 or later. With an earlier
-release the key is ignored and the other keys of the files are used.
 
 ```dotenv
 # MySQL
@@ -394,9 +391,7 @@ Use the `'aes'` type with its own key of 32 random bytes or more instead, and ma
 cookies fail (see
 [Enable OpenSSL](https://pieceofcake2.github.io/docs/appendices/migrating-from-cakephp-2-10#enable-openssl)).
 
-From pieceofcake2/cakephp 2.12.6, `Cookie.type` and `Cookie.key` can be set in configuration.
-
-**2.12.6 and later:** `config/core.php` already sets both, next to the salts, so no controller
+`config/core.php` sets `Cookie.type` and `Cookie.key`, next to the salts, so no controller
 changes are needed:
 
 ```php
@@ -407,28 +402,6 @@ Configure::write('Cookie.key', env('COOKIE_KEY') ?: null);
 `CookieComponent` uses an explicit `'type'`/`'key'` setting (or `type()` and
 `$this->Cookie->key`) first, then `Cookie.type`/`Cookie.key`, then `'cipher'` and
 `Security.salt`.
-
-**2.12.5 and earlier:** `CookieComponent` does not read `Cookie.type` and `Cookie.key`, so
-the lines above have no effect. The skeleton does not use `CookieComponent`; when you add
-cookies, pass the type and the key in `src/Controller/AppController.php`:
-
-```php
-public $components = [
-    'Cookie' => ['type' => 'aes'],
-];
-
-public function beforeFilter()
-{
-    parent::beforeFilter();
-    $key = Configure::read('Cookie.key');
-    if ($key) {
-        $this->Cookie->key = $key;
-    }
-}
-```
-
-Assign the key only when it is set, because a `null` key would replace the default key and
-encryption would fail. This code keeps working on 2.12.6 and later.
 
 The `'aes'` type needs a key of at least 32 bytes. When `COOKIE_KEY` is unset, `Cookie.key` is
 `null` and the key is `Security.salt`; if the salt is shorter than 32 bytes, writing or reading
