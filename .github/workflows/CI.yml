@@ -176,7 +176,6 @@ jobs:
                   $this->assertSame('null://null', env('MAILER_DSN'));
                   $expected = getenv('EXPECTED_DATABASE_URL') ?: 'mysql://user:password@localhost:3306/test_database_name?encoding=utf8mb4';
                   $this->assertSame($expected, $config->default['dsn']);
-                  $this->assertSame($expected, $config->test['dsn']);
                   $this->assertSame($expected, getenv('DATABASE_URL'));
                   $this->assertSame($expected, $_SERVER['DATABASE_URL']);
                   $this->assertSame($expected, $_ENV['DATABASE_URL']);

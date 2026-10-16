@@ -177,7 +177,7 @@ my_app/
 | `config/core.php` | デバッグレベル、エラーと例外の処理、キャッシュ、セッション、セキュリティ用のソルト。 |
 | `config/bootstrap.php` | キャッシュの設定、プラグインの読み込み、ログ、その他のアプリケーションの初期設定。 |
 | `config/routes.php` | URL のルーティング。 |
-| `config/database.php` | データベース接続 (`default` と `test`)。`database.php.default` からコピーします。 |
+| `config/database.php` | データベース接続 (`default`)。`database.php.default` からコピーします。 |
 | `config/email.php` | メールのトランスポートとプロファイル。`email.php.default` からコピーします。 |
 | `config/acl.php`、`config/acl.ini.php` | `IniAcl` と `PhpAcl` の設定。 |
 | `config/define.php` | モダン構成のパス定数。 |
@@ -228,7 +228,7 @@ use Symfony\Component\Dotenv\Dotenv;
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー | `null` (`Security.salt` が使われます) |
-| `DATABASE_URL` | `config/database.php` の `default` 接続と `test` 接続 (DSN) | `config/database.php` の値 |
+| `DATABASE_URL` | `config/database.php` の `default` 接続 (DSN) | `config/database.php` の値 |
 | `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
 
 - 設定されていない変数や空の変数ではデフォルトが使われます。
@@ -269,7 +269,6 @@ DSN は、CakePHP 3.x 以降や Symfony と同じように、1 つの文字列�
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
-$this->test['dsn'] = env('DATABASE_URL');
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
@@ -548,7 +547,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 `.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
 ランナー `webroot/test.php` も同じです)。そのため、テストでは `config/.env` の後に、コミットされている
 `config/.env.test` が読み込まれ、`config/.env.local` は読み込まれません。`config/.env.test` はテストで変える値だけを
-設定します。`DATABASE_URL` はテスト用データベースで (`default` 接続と `test` 接続の両方がこれを使います)、
+設定します。`DATABASE_URL` はテスト用データベースで (`default` 接続です。`APP_ENV=test` では `test` 接続も同じ接続です)、
 `MAILER_DSN` は `null://null` です。自分のテスト用データベースは、Git で無視される `config/.env.test.local` か、
 CI と同じようにファイルより優先される実際の環境変数で設定してください。
 
