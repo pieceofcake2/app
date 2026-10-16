@@ -53,18 +53,17 @@ CakePHP 2 のクックブックの Markdown (`pieceofcake2/docs`、`vendor/piece
 
 続けて設定を仕上げます:
 
-1. `config/.env.example` を `config/.env` にコピーします。`.env` ファイルは必須です
-   ([環境変数 (.env)](#environment-variables-env) を参照してください)。
-2. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` で接続を設定するか
-   ([データベースとメーラーの DSN](#database-and-mailer-dsns) をご覧ください)、ファイルに入力します。テスト用
+1. `config/database.php.default` を `config/database.php` にコピーし、`config/.env.local` の `DATABASE_URL` で
+   接続を設定するか ([環境変数 (.env)](#environment-variables-env) と
+   [データベースとメーラーの DSN](#database-and-mailer-dsns) をご覧ください)、ファイルに入力します。テスト用
    データベースは `config/.env.test.local` で設定します ([テストの実行](#running-tests) を参照してください)。
-3. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
+2. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、`config/.env.local` で
    `SECURITY_SALT` と `SECURITY_CIPHER_SEED` を設定します。スケルトンには広く知られたサンプル値が
    入っており、実際のアプリケーションで使ってはいけません。
    [セキュリティ用のソルトの生成](#generating-the-security-salts) をご覧ください。
-4. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
+3. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
    `MAILER_DSN` でトランスポートを設定するか、ファイルで設定します。
-5. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
+4. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
 
 <a id="version-control"></a>
 
@@ -77,8 +76,10 @@ CakePHP 2 のクックブックの Markdown (`pieceofcake2/docs`、`vendor/piece
   `plugins/DebugKit/`)。Composer でさらにプラグインをインストールした場合は、それらを `.gitignore` に
   追加してください。`plugins/` にあるアプリケーション独自のプラグインはコミットされます。
 - `tmp/` と `logs/` の中身。ディレクトリを残すための `empty` ファイルはコミットされます。
-- 環境ごとの設定や認証情報を含む `config/database.php`、`config/email.php`、`config/.env`、`config/.env.local`、
-  `config/.env.*.local` と、プロジェクトルートの同じファイル。テストの設定である `config/.env.test` はコミットされます。
+- 各マシンの設定や認証情報を含む `config/database.php`、`config/email.php` と、`.env` の `.local` のファイル
+  (`config/.env.local`、`config/.env.*.local`、`config/.env.local.php`)。`config/.env` と `config/.env.test` は
+  Symfony と同じくコミットします。本当の秘密の値は `.local` のファイルか
+  実際の環境変数に置いてください。
 - `phpunit.xml` (`phpunit.xml.dist` のローカルコピー) と `.phpunit.result.cache`。
 
 すべての環境で同じバージョンの依存パッケージがインストールされるように、`composer.lock` はコミットしてください。
@@ -186,43 +187,47 @@ my_app/
 
 ## 環境変数 (.env)
 
-デバッグレベル、セキュリティ用のソルト、データベースの認証情報などの設定は、環境変数から読み込めます。
-サンプルファイルをコピーして編集します。
+デバッグレベル、セキュリティ用のソルト、データベースの認証情報などの設定は、環境変数から読み込みます。
+Symfony と同じく、`config/core.php` が [symfony/dotenv](https://symfony.com/doc/current/configuration.html#configuring-environment-variables-in-env-files)
+で `config/` の `.env` ファイルから読み込むので、Web リクエスト、`bin/cake`、テストのすべてに適用されます:
 
-```bash
-cp config/.env.example config/.env
-# or, in the project root:
-cp config/.env.example .env
+```php
+// config/core.php
+
+use Symfony\Component\Dotenv\Dotenv;
+
+(new Dotenv())->usePutenv()->bootEnv(CONFIG . '.env');
 ```
 
-`.env` ファイルは、`config/core.php` の先頭で [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv)
-を使って読み込まれます (そのため、Web リクエスト、`bin/cake`、テストのすべてに適用されます)。値は `env()`、
-`getenv()`、`$_ENV`、`$_SERVER` で参照できます。次の順に探し、最初に見つかったファイルを 1 つだけ読み込みます。
+ファイルは次の順に読み込まれてマージされ、後のファイルが前のファイルより優先されます:
 
-| ファイル | 探すとき | Git |
+| ファイル | 読み込まれるとき | Git |
 | --- | --- | --- |
-| `config/.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
-| プロジェクトルートの `.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
-| `config/.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
-| プロジェクトルートの `.env.{APP_ENV}` | `APP_ENV` が設定されているとき | 無視 |
-| `config/.env.local` | 常に | 無視 |
-| プロジェクトルートの `.env.local` | 常に | 無視 |
-| `config/.env` | 常に | 無視 |
-| プロジェクトルートの `.env` | 常に | 無視 |
+| `config/.env` | 常に (必須) | コミット: アプリケーションのデフォルト |
+| `config/.env.local` | `APP_ENV` が `test` のとき以外 | 無視: 自分のマシン |
+| `config/.env.{APP_ENV}` (例: `config/.env.test`) | 常に | コミット: 環境ごとのデフォルト |
+| `config/.env.{APP_ENV}.local` | 常に | 無視: その環境での自分のマシン |
 
-どれか 1 つのファイルが必要です。1 つもないと `config/core.php` で例外が投げられます。
-
-ファイルを混ぜることはしないので、各ファイルにはその環境の変数をすべて書きます。`.local` ファイルは、置き換える
-ファイルをコピーして作ってください。実際の環境変数 (Web サーバー、シェル、コンテナ、CI) ですでに設定されている
-変数は上書きされないので、実際の環境変数がファイルより優先されます。
-
-`APP_ENV` は実際の環境変数から読み込まれます。`vendor/bin/phpunit` と `bin/cake test` はデフォルトで
-`APP_ENV=test` で動くので、テストでは `config/.env.test` が読み込まれます ([テストの実行](#running-tests) を参照してください)。開発用の設定は
-`config/.env` に書き、自分のマシンではその代わりに `config/.env.local` や `config/.env.test.local` を使えます。
+- 実際の環境変数 (Web サーバー、シェル、コンテナ、CI) で設定されている変数は上書きされないので、実際の
+  環境変数はすべてのファイルより優先されます。値は `$_SERVER`、`$_ENV`、`putenv()` に書き込まれるので、
+  `env()`、`getenv()`、`$_SERVER`、`$_ENV` で参照できます。
+- `APP_ENV` は実際の環境変数から、無ければファイルから読み込まれます。`config/.env` は `APP_ENV=dev` を
+  設定します。`vendor/bin/phpunit`、`bin/cake test`、`webroot/test.php` は、`APP_ENV` が設定されていなければ
+  `APP_ENV=test` を設定します ([テストの実行](#running-tests) をご覧ください)。本番環境では `APP_ENV=prod` を
+  実際の環境変数として設定してください。
+- `config/.env` は必須で、スケルトンに含まれています。`config/.env.local` などの `.local` ファイルには、
+  `DATABASE_URL` やソルトなど、自分のマシンで異なる値だけを書きます。本番環境の秘密の値をコミットする
+  ファイルに書かないでください。
+- `config/.env.local.php` (Symfony の `composer dump-env prod` が書き出す、変数の配列) があれば、`.env`
+  ファイルの代わりにそれが読み込まれます。スケルトンにはこのコマンド (symfony/flex) は入っていないので、
+  使う場合はデプロイの中でファイルを書き出してください。
+- 空白を含まない値は引用符で囲む必要はありません。ダブルクォートの中では `$NAME` や `${NAME}` が変数の値に
+  置き換えられるので、`$` を含む値はシングルクォートで囲んでください。
 
 | 変数 | 設定 | デフォルト |
 | --- | --- | --- |
-| `DEBUG` | `debug` (`0`、`1`、`2`) | `0` |
+| `APP_ENV` | 環境: `dev`、`test`、`prod`。`config/.env.{APP_ENV}` を選びます | `dev` (`config/.env` の値) |
+| `DEBUG` | `debug` (`0`、`1`、`2`) | `2`。`APP_ENV` が `prod` のときは `0` |
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー | `null` (`Security.salt` が使われます) |
@@ -230,14 +235,31 @@ cp config/.env.example .env
 | `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
 
 - 設定されていない変数や空の変数ではデフォルトが使われます。
-- `.env` ファイルの値は引用符で囲んでください (例: `DEBUG="0"`)。引用符で囲まない数値はパーサーによって
-  正規化されます (`007` は `7` になり、cipher seed のような長い数字の列はオーバーフローします)。
-- 本番環境では実際の環境変数を設定し、空の `config/.env` をデプロイしてください。`.env` ファイルは必須です。
+- 本番環境では `APP_ENV=prod` とほかの設定を実際の環境変数として設定してください。
 - `DATABASE_URL` は `config/database.php.default` が、`MAILER_DSN` は `config/email.php.default` が
   読み込みます。以前のスケルトンから `config/database.php` や `config/email.php` を作成した場合は、
   `__construct()` メソッドをそこにコピーしてください (以前の `DB_*` 変数用の `applyEnv()` メソッドと以前の
   `APP_ENV` の分岐は削除します)。`tests/bootstrap.php`、`bin/cake`、`webroot/test.php` の `APP_ENV` の
   デフォルトもスケルトンからコピーしてください。
+
+<a id="migrating-from-an-earlier-skeleton"></a>
+
+### 以前のスケルトンからの移行
+
+pieceofcake2/app 2.4.x から作成したアプリケーションは、josegonzalez/dotenv で `.env` ファイルを読み込んでいます。
+上の読み込み方に切り替えるには:
+
+1. `composer remove josegonzalez/dotenv` と `composer require symfony/dotenv` を実行します。
+2. `config/core.php` の先頭の `.env` の読み込み処理を上の 2 行に置き換え、`Configure::write('debug', ...)` の行を
+   `Configure::write('debug', env('DEBUG') ?? (env('APP_DEBUG') ? 2 : 0));` に置き換えます。
+3. プロジェクトルートの `.env` は `config/` に移します。ルートの `.env` ファイルは読み込まれなくなりました。
+   デフォルトと `APP_ENV=dev` を書いた `config/.env` をコミットし (スケルトンのファイルをご覧ください)、自分の
+   マシンの値と秘密の値は `config/.env.local` に移します。
+4. `config/.env.test` にはテストで変える値だけを、`config/.env.test.local` には自分のマシンで異なる値だけを
+   書きます。ファイルはマージされるようになりました。
+5. `.gitignore` では、`config/.env` とルートの `.env` ファイルの代わりに `/config/.env.local`、
+   `/config/.env.local.php`、`/config/.env.*.local` を無視します。
+6. 本番環境では、`APP_ENV=prod` (とほかの設定) を実際の環境変数として設定します。
 
 <a id="database-and-mailer-dsns"></a>
 
@@ -352,17 +374,17 @@ php -r 'echo random_int(1, 4294967295), PHP_EOL;'
 od -An -N4 -tu4 /dev/urandom | tr -dc 0-9; echo    # without PHP
 ```
 
-`config/.env.example` をコピーした後で、両方を `config/.env` に追記するには次のようにします
+両方を Git で無視される `config/.env.local` に追記するには次のようにします
 (同じ変数が 2 回設定されている場合は、後の行が有効になります):
 
 ```bash
-php -r 'printf("SECURITY_SALT=\"%s\"\nSECURITY_CIPHER_SEED=\"%d\"\n", bin2hex(random_bytes(32)), random_int(1, 4294967295));' >> config/.env
+php -r 'printf("SECURITY_SALT=\"%s\"\nSECURITY_CIPHER_SEED=\"%d\"\n", bin2hex(random_bytes(32)), random_int(1, 4294967295));' >> config/.env.local
 ```
 
 PHP を使わない場合は次のとおりです。
 
 ```bash
-printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env
+printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32)" "$(od -An -N4 -tu4 /dev/urandom | tr -dc 0-9)" >> config/.env.local
 ```
 
 - ソルトは 32 文字以上にしてください。ソルトは `CookieComponent` のデフォルトのキーで、`'aes'` Cookie の
@@ -416,7 +438,7 @@ Configure::write('Cookie.key', env('COOKIE_KEY') ?: null);
 `CakeException` が投げられます。
 
 キーは `php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'` または `openssl rand -hex 32` で生成し、
-`config/.env` の `COOKIE_KEY` に設定してください (本番環境では実際の環境変数として設定します)。
+`config/.env.local` の `COOKIE_KEY` に設定してください (本番環境では実際の環境変数として設定します)。
 既存のアプリケーションを `'cipher'` から `'aes'` に切り替えると、既存の Cookie の値 (たとえば、ログイン状態を保持する
 remember-me) は一度失われます。影響、アプリケーションに合った選択肢、移行の手順については、クックブックの
 [cipherSeed と Cookie の 'cipher' タイプ](https://pieceofcake2.github.io/docs/ja/development/configuration#cipher-seed)
@@ -435,7 +457,7 @@ bin/cake server
 そして `http://localhost:8765/` を開きます。別のポートを使うには `--port` (`-p`) を指定します。
 
 本番環境では、Web サーバーのドキュメントルートを `webroot/` に向けてください。`config/`、`logs/`、`tmp/`、`vendor/`
-と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。空の `config/.env` をデプロイし、設定は実際の
+と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。`APP_ENV=prod` とほかの設定は実際の
 環境変数で指定してください ([環境変数 (.env)](#environment-variables-env) を参照してください)。`webroot/.htaccess` ファイルは、
 `mod_rewrite` を使う Apache のためにリクエストを `index.php` に書き換えます。Apache と nginx の例については、クックブックの
 [Web サーバーの設定](https://pieceofcake2.github.io/docs/ja/installation/url-rewriting.html)
@@ -476,7 +498,7 @@ bin/cake server
 
 `templates/Pages/home.ctp` は、`debug` が有効な間 `/` に表示されます。このページはアプリケーションの環境をチェックします。
 PHP のバージョンと拡張 (mbstring、intl、openssl、PDO と `default` データソースのドライバー)、`tmp/` と `logs/`
-ディレクトリ、キャッシュ、データベース接続 (失敗した場合はエラーメッセージも)、`config/.env`、セキュリティ用のソルトと
+ディレクトリ、キャッシュ、データベース接続 (失敗した場合はエラーメッセージも)、セキュリティ用のソルトと
 cipher seed、そして DebugKit プラグインと Bake プラグインです。本番環境では `NotFoundException` を投げるので、
 `debug` を無効にする前に独自のページに置き換えてください。
 
@@ -527,18 +549,18 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。`vendor/bin/phpunit` と
 `bin/cake test` は、デフォルトで `APP_ENV=test` で動きます。`APP_ENV` が設定されていなければ、CakePHP が
 `.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
-ランナー `webroot/test.php` も同じです)。そのため、テストではコミットされている `config/.env.test` が
-読み込まれます。このファイルにはテストで使う変数をすべて書き、`DATABASE_URL` をテスト用データベースに設定します
-(`MAILER_DSN` は `null://null` です)。`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、
-`config/.env.test.local` (`config/.env.test` のコピーで、Git では無視され、`config/.env.test` の代わりに読み込まれます)
-か、CI と同じようにファイルより優先される実際の環境変数で設定してください。
+ランナー `webroot/test.php` も同じです)。そのため、テストでは `config/.env` の後に、コミットされている
+`config/.env.test` が読み込まれ、`config/.env.local` は読み込まれません。`config/.env.test` はテストで変える値だけを
+設定します。`DATABASE_URL` はテスト用データベースで (`default` 接続と `test` 接続の両方がこれを使います)、
+`MAILER_DSN` は `null://null` です。自分のテスト用データベースは、Git で無視される `config/.env.test.local` か、
+CI と同じようにファイルより優先される実際の環境変数で設定してください。
 
-```bash
-cp config/.env.test config/.env.test.local
-# then edit DATABASE_URL in config/.env.test.local
+```dotenv
+# config/.env.test.local
+DATABASE_URL="mysql://my_app:secret@localhost:3306/test_my_app?encoding=utf8mb4"
 ```
 
-開発用の `DATABASE_URL` は `config/.env` に置いたままにします。テストでは `config/.env` は読み込まれません。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
+開発用の `DATABASE_URL` は `config/.env.local` に置いたままにします。テストでは `config/.env.local` は読み込まれません。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
 開発用の `DATABASE_URL` やほかの `APP_ENV` を export しないでください。フィクスチャはテーブルを削除して
 作成します。
 
@@ -587,7 +609,7 @@ End-to-End テストのためのディレクトリです。pieceofcake2/panther 
    `vendor/bin/phpunit --testsuite EndToEnd` で実行します。
 
 Panther が起動する Web サーバーは、`APP_ENV=test` を含む PHPUnit の環境を引き継ぎます。
-そのため Web サーバーも `config/.env.test` を読み込み、ページが使う `default` 接続 (`DATABASE_URL`) がテスト用
+そのため Web サーバーも `config/.env.test` (と `config/.env.test.local`) を読み込み、ページが使う `default` 接続 (`DATABASE_URL`) がテスト用
 データベースになるので、ページはテストのフィクスチャを読み込みます。ほかの設定は必要ありません。Panther の
 `PANTHER_APP_ENV` が必要になるのは、Web サーバーにテストとは異なる `APP_ENV` を渡すときだけです。
 

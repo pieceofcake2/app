@@ -18,28 +18,13 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
-use josegonzalez\Dotenv\Loader;
+use Symfony\Component\Dotenv\Dotenv;
 
 /**
- * Load the first .env file that exists. Real environment variables are not overwritten.
+ * Load config/.env, config/.env.local, config/.env.{APP_ENV} and config/.env.{APP_ENV}.local, as in
+ * Symfony. Later files win; real environment variables win over all files.
  */
-$appEnv = env('APP_ENV');
-(new Loader([
-    CONFIG . ".env.{$appEnv}.local",
-    ROOT . DS . ".env.{$appEnv}.local",
-    CONFIG . ".env.{$appEnv}",
-    ROOT . DS . ".env.{$appEnv}",
-    CONFIG . '.env.local',
-    ROOT . DS . '.env.local',
-    CONFIG . '.env',
-    ROOT . DS . '.env',
-]))
-    ->parse()
-    ->skipExisting()
-    ->putenv()
-    ->toEnv()
-    ->toServer();
-unset($appEnv);
+(new Dotenv())->usePutenv()->bootEnv(CONFIG . '.env');
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
@@ -57,9 +42,9 @@ unset($appEnv);
  * In production mode, flash messages redirect after a time interval.
  * In development mode, you need to click the flash message to continue.
  *
- * Can be set with the DEBUG environment variable. Defaults to 0 when not set.
+ * Can be set with the DEBUG environment variable. Defaults to 2, or to 0 when APP_ENV is prod.
  */
-Configure::write('debug', env('DEBUG') ?? 0);
+Configure::write('debug', env('DEBUG') ?? (env('APP_DEBUG') ? 2 : 0));
 
 /**
  * Configure the Error handler used to handle errors for your application. By default

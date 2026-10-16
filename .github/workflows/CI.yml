@@ -162,8 +162,8 @@ jobs:
 
       - name: Check that vendor/bin/phpunit and bin/cake test load config/.env.test
         run: |
-          # A development .env, which the tests must not use
-          echo 'DATABASE_URL="mysql://dev:dev@127.0.0.1:3306/development_database"' > config/.env
+          # A development .env.local, which the tests must not load
+          echo 'DATABASE_URL="mysql://dev:dev@127.0.0.1:3306/development_database"' > config/.env.local
           cat > tests/TestCase/EnvTestTest.php <<'PHP'
           <?php
           class EnvTestTest extends CakeTestCase
@@ -173,15 +173,22 @@ jobs:
                   require_once CONFIG . 'database.php';
                   $config = new DATABASE_CONFIG();
                   $this->assertSame('test', env('APP_ENV'));
-                  $this->assertStringContainsString('/test_database_name', $config->default['dsn']);
-                  $this->assertSame($config->default['dsn'], $config->test['dsn']);
+                  $this->assertSame('null://null', env('MAILER_DSN'));
+                  $expected = getenv('EXPECTED_DATABASE_URL') ?: 'mysql://user:password@localhost:3306/test_database_name?encoding=utf8mb4';
+                  $this->assertSame($expected, $config->default['dsn']);
+                  $this->assertSame($expected, $config->test['dsn']);
+                  $this->assertSame($expected, getenv('DATABASE_URL'));
+                  $this->assertSame($expected, $_SERVER['DATABASE_URL']);
+                  $this->assertSame($expected, $_ENV['DATABASE_URL']);
               }
           }
           PHP
           env -u APP_ENV -u DATABASE_URL vendor/bin/phpunit tests/TestCase/EnvTestTest.php
           env -u APP_ENV -u DATABASE_URL bin/cake test app EnvTest 2>&1 | tee env-test.log
           grep -q 'OK (1 test' env-test.log
-          rm config/.env tests/TestCase/EnvTestTest.php env-test.log
+          # A real environment variable wins over config/.env.test, also in $_ENV (variables_order without E)
+          env -u APP_ENV DATABASE_URL=sqlite:///:memory: EXPECTED_DATABASE_URL=sqlite:///:memory: php -d variables_order=GPCS vendor/bin/phpunit tests/TestCase/EnvTestTest.php
+          rm config/.env.local tests/TestCase/EnvTestTest.php env-test.log
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
@@ -330,9 +337,6 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
-
-      - name: Copy config/.env
-        run: cp ./config/.env.example ./config/.env
 
       - name: Run PHPStan
         id: phpstan

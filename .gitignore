@@ -21,12 +21,9 @@
 /phpunit.xml
 /config/database.php
 /config/email.php
-/config/.env
 /config/.env.local
+/config/.env.local.php
 /config/.env.*.local
-/.env
-/.env.local
-/.env.*.local
 
 # IDE and editor specific files #
 #################################
