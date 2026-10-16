@@ -22,6 +22,8 @@
 /config/database.php
 /config/email.php
 /config/.env
+/config/.env.local
+/config/.env.*.local
 /.env
 
 # IDE and editor specific files #

@@ -45,6 +45,8 @@ jobs:
 
     env:
       DB: ${{ matrix.db-type }}
+      # The test database. A real environment variable wins over config/.env.test.
+      DATABASE_URL: ${{ matrix.db-type == 'pgsql' && 'postgres://postgres:postgres@127.0.0.1:5432/cakephp_test' || 'mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8' }}
 
     steps:
       - name: Checkout
@@ -128,8 +130,58 @@ jobs:
           chmod -R 777 ./tmp
           chmod -R 777 ./logs
 
-      - name: Copy database.php
-        run: cp ./vendor/pieceofcake2/cakephp/tests/config/database.php ./config/
+      - name: Copy database.php and email.php
+        run: |
+          cp ./config/database.php.default ./config/database.php
+          cp ./config/email.php.default ./config/email.php
+
+      - name: Check the connections from DATABASE_URL
+        run: |
+          php -r '
+            require "vendor/autoload.php";
+            require "tests/bootstrap.php";
+            foreach (["default", "test"] as $name) {
+                // Wait for the database container to accept connections
+                for ($try = 1; ; $try++) {
+                    try {
+                        $db = ConnectionManager::getDataSource($name);
+                        break;
+                    } catch (MissingConnectionException $e) {
+                        if ($try === 30) {
+                            throw $e;
+                        }
+                        sleep(2);
+                    }
+                }
+                printf("%s: %s %s@%s/%s%s", $name, get_class($db), $db->config["login"], $db->config["host"], $db->config["database"], PHP_EOL);
+                if (!$db->isConnected()) {
+                    exit(1);
+                }
+            }
+          '
+
+      - name: Check that vendor/bin/phpunit and bin/cake test load config/.env.test
+        run: |
+          # A development .env, which the tests must not use
+          echo 'DATABASE_URL="mysql://dev:dev@127.0.0.1:3306/development_database"' > config/.env
+          cat > tests/TestCase/EnvTestTest.php <<'PHP'
+          <?php
+          class EnvTestTest extends CakeTestCase
+          {
+              public function testEnvTest()
+              {
+                  require_once CONFIG . 'database.php';
+                  $config = new DATABASE_CONFIG();
+                  $this->assertSame('test', env('APP_ENV'));
+                  $this->assertStringContainsString('/test_database_name', $config->default['dsn']);
+                  $this->assertSame($config->default['dsn'], $config->test['dsn']);
+              }
+          }
+          PHP
+          env -u APP_ENV -u DATABASE_URL vendor/bin/phpunit tests/TestCase/EnvTestTest.php
+          env -u APP_ENV -u DATABASE_URL bin/cake test app EnvTest 2>&1 | tee env-test.log
+          grep -q 'OK (1 test' env-test.log
+          rm config/.env tests/TestCase/EnvTestTest.php env-test.log
 
       - name: Setup problem matchers for PHPUnit
         run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
