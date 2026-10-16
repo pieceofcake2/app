@@ -198,6 +198,7 @@ that exists is loaded, in this order:
 | `config/.env` | always | ignored |
 | `.env.local` in the project root | always | ignored |
 | `.env` in the project root | always | ignored |
+| `config/.env.example` (the defaults) | always | committed |
 
 The files are not merged, so each file sets all the variables of its environment: start a
 `.local` file from a copy of the file it replaces. A variable that is already set in the real

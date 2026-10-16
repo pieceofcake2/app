@@ -30,6 +30,7 @@ use josegonzalez\Dotenv\Loader;
  * - .env.{APP_ENV}.local, .env.{APP_ENV} in the project root
  * - config/.env.local, config/.env (copy config/.env.example to config/.env)
  * - .env.local, .env in the project root
+ * - config/.env.example, which is committed, when none of the files above exists
  *
  * The files are not merged, so each one sets all the variables of its environment.
  * A variable that is already defined in the real environment is never overwritten.
@@ -40,7 +41,7 @@ use josegonzalez\Dotenv\Loader;
  * using a .env file.
  */
 $appEnv = env('APP_ENV');
-$dotenv = (new Loader([
+(new Loader([
     CONFIG . ".env.{$appEnv}.local",
     CONFIG . ".env.{$appEnv}",
     ROOT . DS . ".env.{$appEnv}.local",
@@ -49,11 +50,14 @@ $dotenv = (new Loader([
     CONFIG . '.env',
     ROOT . DS . '.env.local',
     ROOT . DS . '.env',
-]))->raiseExceptions(false);
-if ($dotenv->parse()) {
-    $dotenv->skipExisting()->putenv()->toEnv()->toServer();
-}
-unset($appEnv, $dotenv);
+    CONFIG . '.env.example',
+]))
+    ->parse()
+    ->skipExisting()
+    ->putenv()
+    ->toEnv()
+    ->toServer();
+unset($appEnv);
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
