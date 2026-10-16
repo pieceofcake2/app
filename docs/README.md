@@ -72,7 +72,7 @@ The `.gitignore` file of the skeleton is meant for your application, so you can 
 - the contents of `tmp/` and `logs/`. The `empty` files that keep the directories are
   committed.
 - `config/database.php` and `config/email.php`, and the `.local` files of `.env`
-  (`config/.env.local`, `config/.env.*.local` and `config/.env.local.php`), which hold the
+  (`config/.env.local` and `config/.env.*.local`), which hold the
   settings and credentials of each machine. `config/.env` and `config/.env.test` are
   committed, as in Symfony; keep real secrets in the `.local` files or in real environment
   variables.
@@ -188,7 +188,7 @@ so they apply to web requests, `bin/cake` and tests:
 
 use Symfony\Component\Dotenv\Dotenv;
 
-(new Dotenv())->usePutenv()->bootEnv(CONFIG . '.env');
+(new Dotenv())->usePutenv()->loadEnv(CONFIG . '.env');
 ```
 
 The files are loaded in this order and merged; a later file wins over an earlier one:
@@ -211,16 +211,13 @@ The files are loaded in this order and merged; a later file wins over an earlier
 - `config/.env` must exist; the skeleton ships it. `config/.env.local` and the other `.local`
   files hold only what differs on your machine, such as `DATABASE_URL` and the salts. Never put
   production secrets in a committed file.
-- If `config/.env.local.php` exists (an array of the variables, as written by Symfony's
-  `composer dump-env prod`), it is loaded instead of the `.env` files. The skeleton does not
-  install the command (symfony/flex); you can write the file in your deployment.
 - Values do not need quotes unless they contain spaces. Inside double quotes, `$NAME` and
   `${NAME}` are replaced with the value of a variable; single-quote a value that contains `$`.
 
 | Variable | Setting | Default |
 | --- | --- | --- |
 | `APP_ENV` | the environment: `dev`, `test` or `prod`; selects `config/.env.{APP_ENV}` | `dev` (from `config/.env`) |
-| `DEBUG` | `debug` (`0`, `1`, `2`) | `2`, or `0` when `APP_ENV` is `prod` |
+| `APP_DEBUG` | `debug` (`0`, `1`, `2`) | `0` |
 | `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1 to 4294967295, legacy `'cipher'` cookies only) | value in `config/core.php` |
 | `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type | `null` (`Security.salt` is used) |
@@ -243,14 +240,14 @@ josegonzalez/dotenv. To switch to the loading above:
 1. `composer remove josegonzalez/dotenv` and `composer require symfony/dotenv`.
 2. Replace the `.env` loading at the top of `config/core.php` with the two lines above, and
    the `Configure::write('debug', ...)` line with
-   `Configure::write('debug', env('DEBUG') ?? (env('APP_DEBUG') ? 2 : 0));`.
+   `Configure::write('debug', env('APP_DEBUG') ?? 0);`.
 3. Move a root `.env` to `config/`: the root `.env` files are no longer read. Commit
    `config/.env` with the defaults and `APP_ENV=dev` (see the skeleton's file), and move the
    values of your machine and the secrets to `config/.env.local`.
 4. Keep only what the tests change in `config/.env.test`, and only what differs on your
    machine in `config/.env.test.local`: the files are merged now.
-5. In `.gitignore`, ignore `/config/.env.local`, `/config/.env.local.php` and
-   `/config/.env.*.local` instead of `config/.env` and the root `.env` files.
+5. In `.gitignore`, ignore `/config/.env.local` and `/config/.env.*.local` instead of
+   `config/.env` and the root `.env` files.
 6. In production, set `APP_ENV=prod` (and the other settings) as real environment variables.
 
 ### Database and Mailer DSNs
