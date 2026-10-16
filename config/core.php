@@ -21,51 +21,25 @@
 use josegonzalez\Dotenv\Loader;
 
 /**
- * Load environment variables from .env files, if present.
- *
- * The files are loaded in this order, as in Symfony; a variable that is already
- * defined (in the real environment or by an earlier file) is never overwritten,
- * so real environment variables win over all files and earlier files win over
- * later ones:
- *
- * - config/.env.{APP_ENV}.local and config/.env.{APP_ENV} (only when APP_ENV is set,
- *   e.g. config/.env.test: tests/bootstrap.php, bin/cake test and webroot/test.php
- *   set APP_ENV=test when it is not set)
- * - config/.env.local
- * - config/.env (copy config/.env.example to config/.env)
- * - .env in the project root (ROOT . DS . '.env')
- *
- * config/.env.test is committed; the other files are ignored by git.
- *
- * In production, prefer setting real environment variables instead of
- * using a .env file.
+ * Load the first .env file that exists. Real environment variables are not overwritten.
  */
-$appEnv = (string)env('APP_ENV');
-$dotenvFiles = [CONFIG . '.env.local', CONFIG . '.env', ROOT . DS . '.env'];
-if ($appEnv !== '') {
-    array_unshift($dotenvFiles, CONFIG . ".env.{$appEnv}.local", CONFIG . ".env.{$appEnv}");
-}
-foreach ($dotenvFiles as $dotenvFile) {
-    if (!is_file($dotenvFile)) {
-        continue;
-    }
-    $dotenv = new Loader([$dotenvFile]);
-    foreach ($dotenv->parse()->toArray() as $key => $value) {
-        if (getenv($key) !== false || isset($_ENV[$key]) || isset($_SERVER[$key])) {
-            continue;
-        }
-        // The parser converts some values to booleans, numbers or null; keep them as strings.
-        if (is_bool($value)) {
-            $value = $value ? 'true' : 'false';
-        }
-        $value = (string)$value;
-        putenv($key . '=' . $value);
-        $_ENV[$key] = $value;
-        $_SERVER[$key] = $value;
-    }
-    unset($dotenv, $key, $value);
-}
-unset($appEnv, $dotenvFiles, $dotenvFile);
+$appEnv = env('APP_ENV');
+(new Loader([
+    CONFIG . ".env.{$appEnv}.local",
+    ROOT . DS . ".env.{$appEnv}.local",
+    CONFIG . ".env.{$appEnv}",
+    ROOT . DS . ".env.{$appEnv}",
+    CONFIG . '.env.local',
+    ROOT . DS . '.env.local',
+    CONFIG . '.env',
+    ROOT . DS . '.env',
+]))
+    ->parse()
+    ->skipExisting()
+    ->putenv()
+    ->toEnv()
+    ->toServer();
+unset($appEnv);
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
@@ -83,20 +57,9 @@ unset($appEnv, $dotenvFiles, $dotenvFile);
  * In production mode, flash messages redirect after a time interval.
  * In development mode, you need to click the flash message to continue.
  *
- * Can be set with the DEBUG environment variable (0, 1, 2, true or false).
- * true is treated as 2 and false as 0. Defaults to 2 when not set.
+ * Can be set with the DEBUG environment variable. Defaults to 0 when not set.
  */
-$debug = env('DEBUG');
-if (is_string($debug) && $debug !== '') {
-    $debug = is_numeric($debug)
-        ? (int)$debug
-        : filter_var($debug, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-}
-if (is_bool($debug)) {
-    $debug = $debug ? 2 : 0;
-}
-Configure::write('debug', is_int($debug) ? $debug : 2);
-unset($debug);
+Configure::write('debug', env('DEBUG') ?? 0);
 
 /**
  * Configure the Error handler used to handle errors for your application. By default
@@ -310,12 +273,8 @@ Configure::write('Security.cipherSeed', env('SECURITY_CIPHER_SEED') ?: '26597587
 
 /**
  * Default encryption type and key of CookieComponent. The key is a random value of at
- * least 32 bytes; when it is null, Security.salt is used.
- *
- * From pieceofcake2/cakephp 2.12.6, CookieComponent reads these values. With 2.12.5 and
- * earlier they have no effect: set 'type' => 'aes' in $components and assign the key in
- * beforeFilter() instead (see docs/README.md). Cookies written with the 'cipher' type
- * cannot be read after switching to 'aes'.
+ * least 32 bytes; when it is null, Security.salt is used. Cookies written with the
+ * 'cipher' type cannot be read after switching to 'aes'.
  *
  * The key can be set with the COOKIE_KEY environment variable.
  */

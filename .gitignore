@@ -25,6 +25,8 @@
 /config/.env.local
 /config/.env.*.local
 /.env
+/.env.local
+/.env.*.local
 
 # IDE and editor specific files #
 #################################

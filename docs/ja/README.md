@@ -51,16 +51,18 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 
 続けて設定を仕上げます:
 
-1. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` で接続を設定するか
+1. `config/.env.example` を `config/.env` にコピーします。`.env` ファイルは必須です
+   ([環境変数 (.env)](#environment-variables-env) を参照してください)。
+2. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` で接続を設定するか
    ([データベースとメーラーの DSN](#database-and-mailer-dsns) をご覧ください)、ファイルに入力します。テスト用
    データベースは `config/.env.test.local` で設定します ([テストの実行](#running-tests) を参照してください)。
-2. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
+3. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
    `SECURITY_SALT` と `SECURITY_CIPHER_SEED` を設定します。スケルトンには広く知られたサンプル値が
    入っており、実際のアプリケーションで使ってはいけません。
    [セキュリティ用のソルトの生成](#generating-the-security-salts) をご覧ください。
-3. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
+4. メールを送信する場合は、`config/email.php.default` を `config/email.php` にコピーし、
    `MAILER_DSN` でトランスポートを設定するか、ファイルで設定します。
-4. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
+5. Web サーバーが `tmp/` と `logs/` に書き込めることを確認します。
 
 <a id="version-control"></a>
 
@@ -74,7 +76,7 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
   追加してください。`plugins/` にあるアプリケーション独自のプラグインはコミットされます。
 - `tmp/` と `logs/` の中身。ディレクトリを残すための `empty` ファイルはコミットされます。
 - 環境ごとの設定や認証情報を含む `config/database.php`、`config/email.php`、`config/.env`、`config/.env.local`、
-  `config/.env.*.local` と `.env`。テストの設定である `config/.env.test` はコミットされます。
+  `config/.env.*.local` と、プロジェクトルートの同じファイル。テストの設定である `config/.env.test` はコミットされます。
 - `phpunit.xml` (`phpunit.xml.dist` のローカルコピー) と `.phpunit.result.cache`。
 
 すべての環境で同じバージョンの依存パッケージがインストールされるように、`composer.lock` はコミットしてください。
@@ -183,7 +185,7 @@ my_app/
 ## 環境変数 (.env)
 
 デバッグレベル、セキュリティ用のソルト、データベースの認証情報などの設定は、環境変数から読み込めます。
-ローカルでの開発では、サンプルファイルをコピーして編集します。
+サンプルファイルをコピーして編集します。
 
 ```bash
 cp config/.env.example config/.env
@@ -193,36 +195,42 @@ cp config/.env.example .env
 
 `.env` ファイルは、`config/core.php` の先頭で [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv)
 を使って読み込まれます (そのため、Web リクエスト、`bin/cake`、テストのすべてに適用されます)。値は `env()`、
-`getenv()`、`$_ENV`、`$_SERVER` で参照できます。Symfony と同じように、ファイルは次の順に読み込まれ、すでに
-設定されている変数は上書きされません。そのため、先に読み込まれるファイルが後のファイルより優先され、実際の環境変数
-(Web サーバー、シェル、コンテナ、CI) はすべてのファイルより優先されます。
+`getenv()`、`$_ENV`、`$_SERVER` で参照できます。次の順に探し、最初に見つかったファイルを 1 つだけ読み込みます。
 
-| ファイル | 読み込まれるとき | Git |
+| ファイル | 探すとき | Git |
 | --- | --- | --- |
 | `config/.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
+| プロジェクトルートの `.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
 | `config/.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
+| プロジェクトルートの `.env.{APP_ENV}` | `APP_ENV` が設定されているとき | 無視 |
 | `config/.env.local` | 常に | 無視 |
+| プロジェクトルートの `.env.local` | 常に | 無視 |
 | `config/.env` | 常に | 無視 |
 | プロジェクトルートの `.env` | 常に | 無視 |
 
+どれか 1 つのファイルが必要です。1 つもないと `config/core.php` で例外が投げられます。
+
+ファイルを混ぜることはしないので、各ファイルにはその環境の変数をすべて書きます。`.local` ファイルは、置き換える
+ファイルをコピーして作ってください。実際の環境変数 (Web サーバー、シェル、コンテナ、CI) ですでに設定されている
+変数は上書きされないので、実際の環境変数がファイルより優先されます。
+
 `APP_ENV` は実際の環境変数から読み込まれます。`vendor/bin/phpunit` と `bin/cake test` はデフォルトで
 `APP_ENV=test` で動くので、テストでは `config/.env.test` が読み込まれます ([テストの実行](#running-tests) を参照してください)。開発用の設定は
-`config/.env` に、自分のマシンだけで使う上書きは `config/.env.local` や `config/.env.test.local` に書きます。
+`config/.env` に書き、自分のマシンではその代わりに `config/.env.local` や `config/.env.test.local` を使えます。
 
 | 変数 | 設定 | デフォルト |
 | --- | --- | --- |
-| `DEBUG` | `debug` (`0`、`1`、`2`、`true` = 2、`false` = 0) | `2` |
+| `DEBUG` | `debug` (`0`、`1`、`2`) | `0` |
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
-| `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー (2.12.6 からコンポーネントが読み込みます) | `null` (`Security.salt` が使われます) |
+| `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー | `null` (`Security.salt` が使われます) |
 | `DATABASE_URL` | `config/database.php` の `default` 接続と `test` 接続 (DSN) | `config/database.php` の値 |
 | `MAILER_DSN` | `config/email.php` の `default` プロファイルのトランスポート (Symfony Mailer の DSN) | `config/email.php` の値 |
 
-- 設定されていない変数や空の変数ではデフォルトが使われるので、`.env` ファイルがなければアプリケーションは
-  これまでとまったく同じように動作します。
+- 設定されていない変数や空の変数ではデフォルトが使われます。
 - `.env` ファイルの値は引用符で囲んでください (例: `DEBUG="0"`)。引用符で囲まない数値はパーサーによって
   正規化されます (`007` は `7` になり、cipher seed のような長い数字の列はオーバーフローします)。
-- `.env` ファイルは開発用です。本番環境では、代わりに実際の環境変数を設定してください。
+- 本番環境では実際の環境変数を設定し、空の `config/.env` をデプロイしてください。`.env` ファイルは必須です。
 - `DATABASE_URL` は `config/database.php.default` が、`MAILER_DSN` は `config/email.php.default` が
   読み込みます。以前のスケルトンから `config/database.php` や `config/email.php` を作成した場合は、
   `__construct()` メソッドをそこにコピーしてください (以前の `DB_*` 変数用の `applyEnv()` メソッドと以前の
@@ -248,9 +256,6 @@ $this->default['dsn'] = env('MAILER_DSN');
 
 Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースで、
 両方の接続がこれを使います。テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになります。
-
-`'dsn'` キーには、pieceofcake2/cakephp 2.12.7 以降が必要です。それより前のリリースではこのキーは
-無視され、ファイルのほかのキーが使われます。
 
 ```dotenv
 # MySQL
@@ -394,9 +399,7 @@ printf 'SECURITY_SALT="%s"\nSECURITY_CIPHER_SEED="%s"\n' "$(openssl rand -hex 32
 ([OpenSSL を有効にする](https://pieceofcake2.github.io/docs/ja/appendices/migrating-from-cakephp-2-10#enable-openssl)
 を参照)。
 
-pieceofcake2/cakephp 2.12.6 からは、`Cookie.type` と `Cookie.key` を設定で指定できます。
-
-**2.12.6 以降:** `config/core.php` がソルトの隣で両方をすでに設定しているので、コントローラーを変更する必要はありません。
+`config/core.php` がソルトの隣で `Cookie.type` と `Cookie.key` を設定しているので、コントローラーを変更する必要はありません。
 
 ```php
 Configure::write('Cookie.type', 'aes');
@@ -405,28 +408,6 @@ Configure::write('Cookie.key', env('COOKIE_KEY') ?: null);
 
 `CookieComponent` は、明示的な `'type'`/`'key'` の設定 (または `type()` と `$this->Cookie->key`) を最初に使い、
 次に `Cookie.type`/`Cookie.key`、最後に `'cipher'` と `Security.salt` を使います。
-
-**2.12.5 以前:** `CookieComponent` は `Cookie.type` と `Cookie.key` を読み込まないので、上の行は効果がありません。
-スケルトンは `CookieComponent` を使っていません。Cookie を追加するときは、`src/Controller/AppController.php` で
-タイプとキーを渡してください。
-
-```php
-public $components = [
-    'Cookie' => ['type' => 'aes'],
-];
-
-public function beforeFilter()
-{
-    parent::beforeFilter();
-    $key = Configure::read('Cookie.key');
-    if ($key) {
-        $this->Cookie->key = $key;
-    }
-}
-```
-
-キーは設定されている場合にだけ代入してください。`null` のキーはデフォルトのキーを置き換えてしまい、暗号化が失敗します。
-このコードは 2.12.6 以降でもそのまま動作します。
 
 `'aes'` タイプには 32 バイト以上のキーが必要です。`COOKIE_KEY` が設定されていないと、`Cookie.key` は `null` になり、
 キーには `Security.salt` が使われます。ソルトが 32 バイトより短いと、暗号化された Cookie の書き込みや読み込みで
@@ -452,7 +433,8 @@ bin/cake server
 そして `http://localhost:8765/` を開きます。別のポートを使うには `--port` (`-p`) を指定します。
 
 本番環境では、Web サーバーのドキュメントルートを `webroot/` に向けてください。`config/`、`logs/`、`tmp/`、`vendor/`
-と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。`webroot/.htaccess` ファイルは、
+と `.env` ファイルを含むプロジェクトディレクトリに向けてはいけません。空の `config/.env` をデプロイし、設定は実際の
+環境変数で指定してください ([環境変数 (.env)](#environment-variables-env) を参照してください)。`webroot/.htaccess` ファイルは、
 `mod_rewrite` を使う Apache のためにリクエストを `index.php` に書き換えます。Apache と nginx の例については、クックブックの
 [Web サーバーの設定](https://pieceofcake2.github.io/docs/ja/installation/url-rewriting.html)
 をご覧ください。
@@ -544,17 +526,17 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 `bin/cake test` は、デフォルトで `APP_ENV=test` で動きます。`APP_ENV` が設定されていなければ、CakePHP が
 `.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
 ランナー `webroot/test.php` も同じです)。そのため、テストではコミットされている `config/.env.test` が
-読み込まれます。このファイルは `DATABASE_URL` をテスト用データベースに設定し (`MAILER_DSN` は `null://null`
-です)、`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、`config/.env.test.local` (Git では
-無視されます) か、CI と同じように `config/.env.test` より優先される実際の環境変数で設定してください。
+読み込まれます。このファイルにはテストで使う変数をすべて書き、`DATABASE_URL` をテスト用データベースに設定します
+(`MAILER_DSN` は `null://null` です)。`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、
+`config/.env.test.local` (`config/.env.test` のコピーで、Git では無視され、`config/.env.test` の代わりに読み込まれます)
+か、CI と同じようにファイルより優先される実際の環境変数で設定してください。
 
-```dotenv
-# config/.env.test.local
-DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
+```bash
+cp config/.env.test config/.env.test.local
+# then edit DATABASE_URL in config/.env.test.local
 ```
 
-開発用の `DATABASE_URL` は `config/.env` に置いたままにします。`config/.env.test` と `config/.env.test.local`
-が先に読み込まれ、優先されます。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
+開発用の `DATABASE_URL` は `config/.env` に置いたままにします。テストでは `config/.env` は読み込まれません。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
 開発用の `DATABASE_URL` やほかの `APP_ENV` を export しないでください。フィクスチャはテーブルを削除して
 作成します。
 
