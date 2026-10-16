@@ -21,51 +21,31 @@
 use josegonzalez\Dotenv\Loader;
 
 /**
- * Load environment variables from .env files, if present.
+ * Load environment variables from a .env file, if present.
  *
- * The files are loaded in this order, as in Symfony; a variable that is already
- * defined (in the real environment or by an earlier file) is never overwritten,
- * so real environment variables win over all files and earlier files win over
- * later ones:
+ * One file is loaded: .env, or .env.{APP_ENV} when APP_ENV is set (e.g. .env.test),
+ * from config/ or, when config/ has none, from the project root. The files are not
+ * merged, so each one sets all the variables of its environment. A variable that
+ * is already defined in the real environment is never overwritten.
  *
- * - config/.env.{APP_ENV}.local and config/.env.{APP_ENV} (only when APP_ENV is set,
- *   e.g. config/.env.test: tests/bootstrap.php, bin/cake test and webroot/test.php
- *   set APP_ENV=test when it is not set)
- * - config/.env.local
- * - config/.env (copy config/.env.example to config/.env)
- * - .env in the project root (ROOT . DS . '.env')
+ * tests/bootstrap.php, bin/cake test and webroot/test.php set APP_ENV=test when it
+ * is not set, so the tests load config/.env.test.
  *
- * config/.env.test is committed; the other files are ignored by git.
- *
- * In production, prefer setting real environment variables instead of
- * using a .env file.
+ * This follows the .env support of the CakePHP 3+/5 application skeleton
+ * (config/bootstrap.php in cakephp/app). In production, prefer setting real
+ * environment variables instead of using a .env file.
  */
-$appEnv = (string)env('APP_ENV');
-$dotenvFiles = [CONFIG . '.env.local', CONFIG . '.env', ROOT . DS . '.env'];
-if ($appEnv !== '') {
-    array_unshift($dotenvFiles, CONFIG . ".env.{$appEnv}.local", CONFIG . ".env.{$appEnv}");
+$dotenvName = env('APP_ENV') ? '.env.' . env('APP_ENV') : '.env';
+$dotenvFiles = array_values(array_filter([CONFIG . $dotenvName, ROOT . DS . $dotenvName], 'is_file'));
+if ($dotenvFiles) {
+    (new Loader($dotenvFiles))
+        ->parse()
+        ->skipExisting()
+        ->putenv()
+        ->toEnv()
+        ->toServer();
 }
-foreach ($dotenvFiles as $dotenvFile) {
-    if (!is_file($dotenvFile)) {
-        continue;
-    }
-    $dotenv = new Loader([$dotenvFile]);
-    foreach ($dotenv->parse()->toArray() as $key => $value) {
-        if (getenv($key) !== false || isset($_ENV[$key]) || isset($_SERVER[$key])) {
-            continue;
-        }
-        // The parser converts some values to booleans, numbers or null; keep them as strings.
-        if (is_bool($value)) {
-            $value = $value ? 'true' : 'false';
-        }
-        $value = (string)$value;
-        putenv($key . '=' . $value);
-        $_ENV[$key] = $value;
-        $_SERVER[$key] = $value;
-    }
-    unset($dotenv, $key, $value);
-}
-unset($appEnv, $dotenvFiles, $dotenvFile);
+unset($dotenvName, $dotenvFiles);
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');

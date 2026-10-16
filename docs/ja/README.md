@@ -53,7 +53,7 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
 
 1. `config/database.php.default` を `config/database.php` にコピーし、`DATABASE_URL` で接続を設定するか
    ([データベースとメーラーの DSN](#database-and-mailer-dsns) をご覧ください)、ファイルに入力します。テスト用
-   データベースは `config/.env.test.local` で設定します ([テストの実行](#running-tests) を参照してください)。
+   データベースは `config/.env.test` で設定します ([テストの実行](#running-tests) を参照してください)。
 2. `config/core.php` の `Security.salt` と `Security.cipherSeed` を変更するか、
    `SECURITY_SALT` と `SECURITY_CIPHER_SEED` を設定します。スケルトンには広く知られたサンプル値が
    入っており、実際のアプリケーションで使ってはいけません。
@@ -73,8 +73,9 @@ CakePHP コーディング規約) は、開発用の依存パッケージとし�
   `plugins/DebugKit/`)。Composer でさらにプラグインをインストールした場合は、それらを `.gitignore` に
   追加してください。`plugins/` にあるアプリケーション独自のプラグインはコミットされます。
 - `tmp/` と `logs/` の中身。ディレクトリを残すための `empty` ファイルはコミットされます。
-- 環境ごとの設定や認証情報を含む `config/database.php`、`config/email.php`、`config/.env`、`config/.env.local`、
-  `config/.env.*.local` と `.env`。テストの設定である `config/.env.test` はコミットされます。
+- 環境ごとの設定や認証情報を含む `config/database.php`、`config/email.php`、`config/.env`、`config/.env.*`、
+  プロジェクトルートの `.env` と `.env.*`。`config/.env.example` と、テストの設定である `config/.env.test` は
+  コミットされます。
 - `phpunit.xml` (`phpunit.xml.dist` のローカルコピー) と `.phpunit.result.cache`。
 
 すべての環境で同じバージョンの依存パッケージがインストールされるように、`composer.lock` はコミットしてください。
@@ -193,21 +194,21 @@ cp config/.env.example .env
 
 `.env` ファイルは、`config/core.php` の先頭で [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv)
 を使って読み込まれます (そのため、Web リクエスト、`bin/cake`、テストのすべてに適用されます)。値は `env()`、
-`getenv()`、`$_ENV`、`$_SERVER` で参照できます。Symfony と同じように、ファイルは次の順に読み込まれ、すでに
-設定されている変数は上書きされません。そのため、先に読み込まれるファイルが後のファイルより優先され、実際の環境変数
-(Web サーバー、シェル、コンテナ、CI) はすべてのファイルより優先されます。
+`getenv()`、`$_ENV`、`$_SERVER` で参照できます。読み込まれるファイルは 1 つだけで、複数のファイルを混ぜることはしません。
 
-| ファイル | 読み込まれるとき | Git |
-| --- | --- | --- |
-| `config/.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
-| `config/.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
-| `config/.env.local` | 常に | 無視 |
-| `config/.env` | 常に | 無視 |
-| プロジェクトルートの `.env` | 常に | 無視 |
+| `APP_ENV` | ファイル (最初に見つかったもの) |
+| --- | --- |
+| 設定されていない | `config/.env`、プロジェクトルートの `.env` |
+| 設定されている (例: `test`) | `config/.env.{APP_ENV}`、プロジェクトルートの `.env.{APP_ENV}` |
+
+そのため、各ファイルにはその環境の変数をすべて書きます。`config/.env.example` をコピーして、必要な変数を
+すべて設定してください。実際の環境変数 (Web サーバー、シェル、コンテナ、CI) ですでに設定されている変数は
+上書きされないので、実際の環境変数がファイルより優先されます。
 
 `APP_ENV` は実際の環境変数から読み込まれます。`vendor/bin/phpunit` と `bin/cake test` はデフォルトで
-`APP_ENV=test` で動くので、テストでは `config/.env.test` が読み込まれます ([テストの実行](#running-tests) を参照してください)。開発用の設定は
-`config/.env` に、自分のマシンだけで使う上書きは `config/.env.local` や `config/.env.test.local` に書きます。
+`APP_ENV=test` で動くので、テストでは `config/.env` の代わりに `config/.env.test` が読み込まれます
+([テストの実行](#running-tests) を参照してください)。`config/.env.test` はコミットされ、ほかのファイルは
+Git では無視されます。
 
 | 変数 | 設定 | デフォルト |
 | --- | --- | --- |
@@ -240,14 +241,16 @@ DSN は、CakePHP 3.x 以降や Symfony と同じように、1 つの文字列�
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
-$this->test['dsn'] = env('DATABASE_URL');
+$this->test['dsn'] = env('APP_ENV') === 'test' ? env('DATABASE_URL') : null;
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
 ```
 
-Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースで、
-両方の接続がこれを使います。テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになります。
+Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースです。
+テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになり、両方の接続がこれを使います。
+`test` 接続は `APP_ENV` が `test` のときだけ `DATABASE_URL` を読むので、フィクスチャがほかの環境の
+データベースを使うことはありません。
 
 `'dsn'` キーには、pieceofcake2/cakephp 2.12.7 以降が必要です。それより前のリリースではこのキーは
 無視され、ファイルのほかのキーが使われます。
@@ -259,7 +262,7 @@ DATABASE_URL="mysql://user:password@localhost:3306/my_app?encoding=utf8mb4"
 DATABASE_URL="postgres://user:password@localhost:5432/my_app?schema=public"
 # SQLite: three slashes for a path relative to the working directory, four for an absolute path
 DATABASE_URL="sqlite:////var/db/my_app.sqlite"
-# SQLite in memory (e.g. in config/.env.test.local)
+# SQLite in memory (e.g. in config/.env.test)
 DATABASE_URL="sqlite:///:memory:"
 # SQL Server
 DATABASE_URL="sqlserver://user:password@localhost:1433/my_app?encoding=utf8"
@@ -543,20 +546,19 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。`vendor/bin/phpunit` と
 `bin/cake test` は、デフォルトで `APP_ENV=test` で動きます。`APP_ENV` が設定されていなければ、CakePHP が
 `.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
-ランナー `webroot/test.php` も同じです)。そのため、テストではコミットされている `config/.env.test` が
-読み込まれます。このファイルは `DATABASE_URL` をテスト用データベースに設定し (`MAILER_DSN` は `null://null`
-です)、`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、`config/.env.test.local` (Git では
-無視されます) か、CI と同じように `config/.env.test` より優先される実際の環境変数で設定してください。
+ランナー `webroot/test.php` も同じです)。そのため、テストでは `config/.env` の代わりに、コミットされている
+`config/.env.test` が読み込まれます。このファイルにはテストで使う変数をすべて書き、`DATABASE_URL` を
+テスト用データベースに設定します (`MAILER_DSN` は `null://null` です)。`default` 接続と `test` 接続の両方が
+これを使います。自分のテスト用データベースは、`config/.env.test` で設定するか、CI と同じようにファイルより
+優先される実際の環境変数で設定してください。
 
-```dotenv
-# config/.env.test.local
-DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
+```bash
+DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4" vendor/bin/phpunit
 ```
 
-開発用の `DATABASE_URL` は `config/.env` に置いたままにします。`config/.env.test` と `config/.env.test.local`
-が先に読み込まれ、優先されます。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
-開発用の `DATABASE_URL` やほかの `APP_ENV` を export しないでください。フィクスチャはテーブルを削除して
-作成します。
+開発用の `DATABASE_URL` は `config/.env` に置いたままにします。テストでは `config/.env` は読み込まれません。
+実際の環境変数はファイルより優先されるので、テストを実行するシェルで開発用の `DATABASE_URL` を export
+しないでください。フィクスチャはテーブルを削除して作成します。
 
 それから PHPUnit でテストを実行します。
 
