@@ -72,12 +72,12 @@
 class DATABASE_CONFIG
 {
     public $default = [
-        'datasource' => 'Database/Mysql',
+        //'datasource' => 'Database/Mysql',
         'persistent' => false,
-        'host' => 'localhost',
-        'login' => 'user',
-        'password' => 'password',
-        'database' => 'database_name',
+        //'host' => 'localhost',
+        //'login' => 'user',
+        //'password' => 'password',
+        //'database' => 'database_name',
         'prefix' => '',
         //'encoding' => 'utf8mb4',
 
@@ -91,20 +91,7 @@ class DATABASE_CONFIG
         //],
     ];
 
-    public $test = [
-        'datasource' => 'Database/Mysql',
-        'persistent' => false,
-        'host' => 'localhost',
-        'login' => 'user',
-        'password' => 'password',
-        'database' => 'test_database_name',
-        'prefix' => '',
-        //'encoding' => 'utf8mb4',
-
-        //'flags' => [
-        //    PDO::ATTR_STRINGIFY_FETCHES => true,
-        //],
-    ];
+    public $test = [];
 
     /**
      * Constructor
@@ -112,6 +99,8 @@ class DATABASE_CONFIG
     public function __construct()
     {
         $this->default['dsn'] = env('DATABASE_URL');
-        $this->test['dsn'] = env('DATABASE_URL');
+        if (env('APP_ENV') === 'test') {
+            $this->test = $this->default;
+        }
     }
 }
