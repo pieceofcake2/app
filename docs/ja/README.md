@@ -241,7 +241,7 @@ $this->test['dsn'] = env('DATABASE_TEST_URL');
 $this->default['dsn'] = env('MAILER_DSN');
 ```
 
-`'dsn'` キーには、2.12.6 の次のリリース以降の pieceofcake2/cakephp が必要です。それより前のリリースではこのキーは
+`'dsn'` キーには、pieceofcake2/cakephp 2.12.7 以降が必要です。それより前のリリースではこのキーは
 無視され、ファイルのほかのキーが使われます。
 
 ```dotenv

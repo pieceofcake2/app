@@ -67,7 +67,7 @@
  *
  * dsn =>
  * A DSN that sets the connection in one string, as in CakePHP 3.x and later
- * (needs the release of pieceofcake2/cakephp after 2.12.6). The scheme selects the datasource:
+ * (needs pieceofcake2/cakephp 2.12.7 or later). The scheme selects the datasource:
  *  mysql://user:password@localhost:3306/database_name?encoding=utf8mb4
  *  postgres://user:password@localhost:5432/database_name?schema=public
  *  sqlite:///tmp/database.sqlite (relative to the working directory),
