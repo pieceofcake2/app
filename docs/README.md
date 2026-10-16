@@ -184,6 +184,8 @@ environment variables. As in Symfony, `config/core.php` loads them from `.env` f
 so they apply to web requests, `bin/cake` and tests:
 
 ```php
+// config/core.php
+
 use Symfony\Component\Dotenv\Dotenv;
 
 (new Dotenv())->usePutenv()->bootEnv(CONFIG . '.env');

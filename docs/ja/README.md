@@ -192,6 +192,8 @@ Symfony と同じく、`config/core.php` が [symfony/dotenv](https://symfony.co
 で `config/` の `.env` ファイルから読み込むので、Web リクエスト、`bin/cake`、テストのすべてに適用されます:
 
 ```php
+// config/core.php
+
 use Symfony\Component\Dotenv\Dotenv;
 
 (new Dotenv())->usePutenv()->bootEnv(CONFIG . '.env');
