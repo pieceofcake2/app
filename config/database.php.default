@@ -109,9 +109,9 @@ class DATABASE_CONFIG
         // * https://www.php.net/manual/en/migration81.incompatible.php#migration81.incompatible.pdo.sqlite
         // If under PHP 8.1 and didn't use the following flags, adding them will cause integer and float columns
         // in the result set to be strings as before.
-        //    'flags' => array(
-        //        PDO::ATTR_STRINGIFY_FETCHES => true
-        //    )
+        //'flags' => [
+        //    PDO::ATTR_STRINGIFY_FETCHES => true,
+        //],
     ];
 
     /**
@@ -129,9 +129,9 @@ class DATABASE_CONFIG
         'prefix' => '',
         //'encoding' => 'utf8mb4',
 
-        //    'flags' => array(
-        //        PDO::ATTR_STRINGIFY_FETCHES => true
-        //    )
+        //'flags' => [
+        //    PDO::ATTR_STRINGIFY_FETCHES => true,
+        //],
     ];
 
     /**
