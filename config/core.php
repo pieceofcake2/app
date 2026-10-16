@@ -27,8 +27,9 @@ use josegonzalez\Dotenv\Loader;
  * test and webroot/test.php set APP_ENV=test when it is not set):
  *
  * - config/.env.{APP_ENV}.local, config/.env.{APP_ENV} (e.g. config/.env.test)
+ * - .env.{APP_ENV}.local, .env.{APP_ENV} in the project root
  * - config/.env.local, config/.env (copy config/.env.example to config/.env)
- * - the same files in the project root
+ * - .env.local, .env in the project root
  *
  * The files are not merged, so each one sets all the variables of its environment.
  * A variable that is already defined in the real environment is never overwritten.
@@ -42,10 +43,10 @@ $appEnv = env('APP_ENV');
 $dotenv = (new Loader([
     CONFIG . ".env.{$appEnv}.local",
     CONFIG . ".env.{$appEnv}",
-    CONFIG . '.env.local',
-    CONFIG . '.env',
     ROOT . DS . ".env.{$appEnv}.local",
     ROOT . DS . ".env.{$appEnv}",
+    CONFIG . '.env.local',
+    CONFIG . '.env',
     ROOT . DS . '.env.local',
     ROOT . DS . '.env',
 ]))->raiseExceptions(false);

@@ -192,9 +192,12 @@ that exists is loaded, in this order:
 | --- | --- | --- |
 | `config/.env.{APP_ENV}.local` | when `APP_ENV` is set | ignored |
 | `config/.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
+| `.env.{APP_ENV}.local` in the project root | when `APP_ENV` is set | ignored |
+| `.env.{APP_ENV}` in the project root | when `APP_ENV` is set | ignored |
 | `config/.env.local` | always | ignored |
 | `config/.env` | always | ignored |
-| the same files in the project root | as above | ignored |
+| `.env.local` in the project root | always | ignored |
+| `.env` in the project root | always | ignored |
 
 The files are not merged, so each file sets all the variables of its environment: start a
 `.local` file from a copy of the file it replaces. A variable that is already set in the real
