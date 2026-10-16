@@ -16,7 +16,7 @@
         "pieceofcake2/debug_kit": "^2.2",
         "pieceofcake2/docs": "^2.0",
         "pieceofcake2/phpcs-cakephp2": "^1.1",
-        "pieceofcake2/phpstan-cakephp2": "^0.2.3"
+        "pieceofcake2/phpstan-cakephp2": "^1.0"
     },
     "suggest": {
         "pieceofcake2/panther": "Browser End-to-End tests with Symfony Panther in tests/TestCase/EndToEnd/ (the EndToEnd suite of phpunit.xml.dist)",
