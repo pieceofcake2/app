@@ -21,24 +21,7 @@
 use josegonzalez\Dotenv\Loader;
 
 /**
- * Load environment variables from a .env file, if present.
- *
- * The first file that exists is loaded, in this order (tests/bootstrap.php, bin/cake
- * test and webroot/test.php set APP_ENV=test when it is not set):
- *
- * - config/.env.{APP_ENV}.local, config/.env.{APP_ENV} (e.g. config/.env.test)
- * - .env.{APP_ENV}.local, .env.{APP_ENV} in the project root
- * - config/.env.local, config/.env (copy config/.env.example to config/.env)
- * - .env.local, .env in the project root
- * - config/.env.example, which is committed, when none of the files above exists
- *
- * The files are not merged, so each one sets all the variables of its environment.
- * A variable that is already defined in the real environment is never overwritten.
- *
- * config/.env.test is committed; the other files are ignored by git.
- *
- * In production, prefer setting real environment variables instead of
- * using a .env file.
+ * Load the first .env file that exists. Real environment variables are not overwritten.
  */
 $appEnv = env('APP_ENV');
 (new Loader([
