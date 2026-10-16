@@ -57,20 +57,9 @@ unset($appEnv);
  * In production mode, flash messages redirect after a time interval.
  * In development mode, you need to click the flash message to continue.
  *
- * Can be set with the DEBUG environment variable (0, 1, 2, true or false).
- * true is treated as 2 and false as 0. Defaults to 2 when not set.
+ * Can be set with the DEBUG environment variable. Defaults to 0 when not set.
  */
-$debug = env('DEBUG');
-if (is_string($debug) && $debug !== '') {
-    $debug = is_numeric($debug)
-        ? (int)$debug
-        : filter_var($debug, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-}
-if (is_bool($debug)) {
-    $debug = $debug ? 2 : 0;
-}
-Configure::write('debug', is_int($debug) ? $debug : 2);
-unset($debug);
+Configure::write('debug', (int)env('DEBUG'));
 
 /**
  * Configure the Error handler used to handle errors for your application. By default

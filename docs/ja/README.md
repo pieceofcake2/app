@@ -220,7 +220,7 @@ cp config/.env.example .env
 
 | 変数 | 設定 | デフォルト |
 | --- | --- | --- |
-| `DEBUG` | `debug` (`0`、`1`、`2`、`true` = 2、`false` = 0) | `2` |
+| `DEBUG` | `debug` (`0`、`1`、`2`) | `0` |
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー | `null` (`Security.salt` が使われます) |

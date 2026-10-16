@@ -216,7 +216,7 @@ your machine.
 
 | Variable | Setting | Default |
 | --- | --- | --- |
-| `DEBUG` | `debug` (`0`, `1`, `2`, `true` = 2, `false` = 0) | `2` |
+| `DEBUG` | `debug` (`0`, `1`, `2`) | `0` |
 | `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1 to 4294967295, legacy `'cipher'` cookies only) | value in `config/core.php` |
 | `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type | `null` (`Security.salt` is used) |
