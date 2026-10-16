@@ -77,7 +77,7 @@ CakePHP 2 のクックブックの Markdown (`pieceofcake2/docs`、`vendor/piece
   追加してください。`plugins/` にあるアプリケーション独自のプラグインはコミットされます。
 - `tmp/` と `logs/` の中身。ディレクトリを残すための `empty` ファイルはコミットされます。
 - 各マシンの設定や認証情報を含む `config/database.php`、`config/email.php` と、`.env` の `.local` のファイル
-  (`config/.env.local`、`config/.env.*.local`、`config/.env.local.php`)。`config/.env` と `config/.env.test` は
+  (`config/.env.local`、`config/.env.*.local`)。`config/.env` と `config/.env.test` は
   Symfony と同じくコミットします。本当の秘密の値は `.local` のファイルか
   実際の環境変数に置いてください。
 - `phpunit.xml` (`phpunit.xml.dist` のローカルコピー) と `.phpunit.result.cache`。
@@ -196,7 +196,7 @@ Symfony と同じく、`config/core.php` が [symfony/dotenv](https://symfony.co
 
 use Symfony\Component\Dotenv\Dotenv;
 
-(new Dotenv())->usePutenv()->bootEnv(CONFIG . '.env');
+(new Dotenv())->usePutenv()->loadEnv(CONFIG . '.env');
 ```
 
 ファイルは次の順に読み込まれてマージされ、後のファイルが前のファイルより優先されます:
@@ -218,16 +218,13 @@ use Symfony\Component\Dotenv\Dotenv;
 - `config/.env` は必須で、スケルトンに含まれています。`config/.env.local` などの `.local` ファイルには、
   `DATABASE_URL` やソルトなど、自分のマシンで異なる値だけを書きます。本番環境の秘密の値をコミットする
   ファイルに書かないでください。
-- `config/.env.local.php` (Symfony の `composer dump-env prod` が書き出す、変数の配列) があれば、`.env`
-  ファイルの代わりにそれが読み込まれます。スケルトンにはこのコマンド (symfony/flex) は入っていないので、
-  使う場合はデプロイの中でファイルを書き出してください。
 - 空白を含まない値は引用符で囲む必要はありません。ダブルクォートの中では `$NAME` や `${NAME}` が変数の値に
   置き換えられるので、`$` を含む値はシングルクォートで囲んでください。
 
 | 変数 | 設定 | デフォルト |
 | --- | --- | --- |
 | `APP_ENV` | 環境: `dev`、`test`、`prod`。`config/.env.{APP_ENV}` を選びます | `dev` (`config/.env` の値) |
-| `DEBUG` | `debug` (`0`、`1`、`2`) | `2`。`APP_ENV` が `prod` のときは `0` |
+| `APP_DEBUG` | `debug` (`0`、`1`、`2`) | `0` |
 | `SECURITY_SALT` | `Security.salt` | `config/core.php` の値 |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1〜4294967295。レガシーな `'cipher'` Cookie でのみ使用) | `config/core.php` の値 |
 | `COOKIE_KEY` | `Cookie.key`。`'aes'` タイプでの `CookieComponent` のキー | `null` (`Security.salt` が使われます) |
@@ -251,14 +248,14 @@ pieceofcake2/app 2.4.x から作成したアプリケーションは、josegonza
 
 1. `composer remove josegonzalez/dotenv` と `composer require symfony/dotenv` を実行します。
 2. `config/core.php` の先頭の `.env` の読み込み処理を上の 2 行に置き換え、`Configure::write('debug', ...)` の行を
-   `Configure::write('debug', env('DEBUG') ?? (env('APP_DEBUG') ? 2 : 0));` に置き換えます。
+   `Configure::write('debug', env('APP_DEBUG') ?? 0);` に置き換えます。
 3. プロジェクトルートの `.env` は `config/` に移します。ルートの `.env` ファイルは読み込まれなくなりました。
    デフォルトと `APP_ENV=dev` を書いた `config/.env` をコミットし (スケルトンのファイルをご覧ください)、自分の
    マシンの値と秘密の値は `config/.env.local` に移します。
 4. `config/.env.test` にはテストで変える値だけを、`config/.env.test.local` には自分のマシンで異なる値だけを
    書きます。ファイルはマージされるようになりました。
 5. `.gitignore` では、`config/.env` とルートの `.env` ファイルの代わりに `/config/.env.local`、
-   `/config/.env.local.php`、`/config/.env.*.local` を無視します。
+   `/config/.env.*.local` を無視します。
 6. 本番環境では、`APP_ENV=prod` (とほかの設定) を実際の環境変数として設定します。
 
 <a id="database-and-mailer-dsns"></a>
