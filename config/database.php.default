@@ -91,11 +91,16 @@ class DATABASE_CONFIG
         //],
     ];
 
+    public $test = [];
+
     /**
      * Constructor
      */
     public function __construct()
     {
         $this->default['dsn'] = env('DATABASE_URL');
+        if (env('APP_ENV') === 'test') {
+            $this->test = $this->default;
+        }
     }
 }

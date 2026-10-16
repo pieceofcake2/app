@@ -170,7 +170,7 @@ The legacy layout with an `app/` directory (`app/Config/`, `app/Controller/`,
 | `config/core.php` | Debug level, error and exception handling, caching, session, security salts. |
 | `config/bootstrap.php` | Cache configuration, plugin loading, logging and other application setup. |
 | `config/routes.php` | URL routing. |
-| `config/database.php` | Database connection (`default`). Copy it from `database.php.default`. |
+| `config/database.php` | Database connections (`default`, and `test` with `APP_ENV=test`). Copy it from `database.php.default`. |
 | `config/email.php` | Email transports and profiles. Copy it from `email.php.default`. |
 | `config/acl.php`, `config/acl.ini.php` | Configuration of `IniAcl` and `PhpAcl`. |
 | `config/define.php` | Path constants of the modern layout. |
@@ -221,7 +221,7 @@ The files are loaded in this order and merged; a later file wins over an earlier
 | `SECURITY_SALT` | `Security.salt` | value in `config/core.php` |
 | `SECURITY_CIPHER_SEED` | `Security.cipherSeed` (1 to 4294967295, legacy `'cipher'` cookies only) | value in `config/core.php` |
 | `COOKIE_KEY` | `Cookie.key`, the `CookieComponent` key for the `'aes'` type | `null` (`Security.salt` is used) |
-| `DATABASE_URL` | `default` connection in `config/database.php`, as a DSN | values in `config/database.php` |
+| `DATABASE_URL` | `default` connection in `config/database.php` (also `test` with `APP_ENV=test`), as a DSN | values in `config/database.php` |
 | `MAILER_DSN` | transport of the `default` profile in `config/email.php`, as a Symfony Mailer DSN | values in `config/email.php` |
 
 - Unset or empty variables keep the defaults.
@@ -260,6 +260,9 @@ takes the DSN, and the skeleton sets it from the environment variables of Symfon
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
+if (env('APP_ENV') === 'test') {
+    $this->test = $this->default;
+}
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
@@ -527,8 +530,8 @@ Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`.
 and `bin/cake` set it before CakePHP loads the `.env` files when it is not set (`webroot/test.php`,
 the browser test runner, does the same). So the tests load `config/.env.test` after
 `config/.env`, without `config/.env.local`. `config/.env.test` is committed and changes only
-what the tests need: `DATABASE_URL` is the test database (the `default` connection, which is
-also the `test` connection with `APP_ENV=test`) and `MAILER_DSN` is `null://null`. Set your test database in
+what the tests need: `DATABASE_URL` is the test database (the `default` connection, which
+`config/database.php` copies to the `test` connection with `APP_ENV=test`) and `MAILER_DSN` is `null://null`. Set your test database in
 `config/.env.test.local`, which is ignored by Git, or as a real environment variable, which
 wins over the files, as CI does:
 
