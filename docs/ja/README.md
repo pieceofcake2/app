@@ -193,23 +193,23 @@ cp config/.env.example .env
 
 `.env` ファイルは、`config/core.php` の先頭で [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv)
 を使って読み込まれます (そのため、Web リクエスト、`bin/cake`、テストのすべてに適用されます)。値は `env()`、
-`getenv()`、`$_ENV`、`$_SERVER` で参照できます。Symfony と同じように、ファイルは次の順に読み込まれ、すでに
-設定されている変数は上書きされません。そのため、先に読み込まれるファイルが後のファイルより優先され、実際の環境変数
-(Web サーバー、シェル、コンテナ、CI) はすべてのファイルより優先されます。
+`getenv()`、`$_ENV`、`$_SERVER` で参照できます。次の順に探し、最初に見つかったファイルを 1 つだけ読み込みます。
 
-| ファイル | 読み込まれるとき | Git |
+| ファイル | 探すとき | Git |
 | --- | --- | --- |
-| `.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
-| `.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
-| `.env.local` | 常に | 無視 |
-| `.env` | 常に | 無視 |
+| `config/.env.{APP_ENV}.local` | `APP_ENV` が設定されているとき | 無視 |
+| `config/.env.{APP_ENV}` (例: `config/.env.test`) | `APP_ENV` が設定されているとき | コミット |
+| `config/.env.local` | 常に | 無視 |
+| `config/.env` | 常に | 無視 |
+| プロジェクトルートの同じファイル | 上と同じ | 無視 |
 
-ファイルは `config/` から読み込みます。`config/` にどのファイルもないときは、プロジェクトルートから読み込みます。
-2 つのディレクトリのファイルを混ぜることはしません。
+ファイルを混ぜることはしないので、各ファイルにはその環境の変数をすべて書きます。`.local` ファイルは、置き換える
+ファイルをコピーして作ってください。実際の環境変数 (Web サーバー、シェル、コンテナ、CI) ですでに設定されている
+変数は上書きされないので、実際の環境変数がファイルより優先されます。
 
 `APP_ENV` は実際の環境変数から読み込まれます。`vendor/bin/phpunit` と `bin/cake test` はデフォルトで
 `APP_ENV=test` で動くので、テストでは `config/.env.test` が読み込まれます ([テストの実行](#running-tests) を参照してください)。開発用の設定は
-`config/.env` に、自分のマシンだけで使う上書きは `config/.env.local` や `config/.env.test.local` に書きます。
+`config/.env` に書き、自分のマシンではその代わりに `config/.env.local` や `config/.env.test.local` を使えます。
 
 | 変数 | 設定 | デフォルト |
 | --- | --- | --- |
@@ -546,17 +546,17 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 `bin/cake test` は、デフォルトで `APP_ENV=test` で動きます。`APP_ENV` が設定されていなければ、CakePHP が
 `.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
 ランナー `webroot/test.php` も同じです)。そのため、テストではコミットされている `config/.env.test` が
-読み込まれます。このファイルは `DATABASE_URL` をテスト用データベースに設定し (`MAILER_DSN` は `null://null`
-です)、`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、`config/.env.test.local` (Git では
-無視されます) か、CI と同じように `config/.env.test` より優先される実際の環境変数で設定してください。
+読み込まれます。このファイルにはテストで使う変数をすべて書き、`DATABASE_URL` をテスト用データベースに設定します
+(`MAILER_DSN` は `null://null` です)。`default` 接続と `test` 接続の両方がこれを使います。自分のテスト用データベースは、
+`config/.env.test.local` (`config/.env.test` のコピーで、Git では無視され、`config/.env.test` の代わりに読み込まれます)
+か、CI と同じようにファイルより優先される実際の環境変数で設定してください。
 
-```dotenv
-# config/.env.test.local
-DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
+```bash
+cp config/.env.test config/.env.test.local
+# then edit DATABASE_URL in config/.env.test.local
 ```
 
-開発用の `DATABASE_URL` は `config/.env` に置いたままにします。`config/.env.test` と `config/.env.test.local`
-が先に読み込まれ、優先されます。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
+開発用の `DATABASE_URL` は `config/.env` に置いたままにします。テストでは `config/.env` は読み込まれません。実際の環境変数はファイルより優先されるので、テストを実行するシェルで
 開発用の `DATABASE_URL` やほかの `APP_ENV` を export しないでください。フィクスチャはテーブルを削除して
 作成します。
 

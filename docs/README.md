@@ -185,26 +185,27 @@ cp config/.env.example .env
 
 The `.env` files are loaded at the top of `config/core.php` (so they apply to web requests,
 `bin/cake` and tests) using [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv).
-Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`. As in Symfony,
-the files are loaded in this order, and a variable that is already set is never overwritten, so
-an earlier file wins over a later one and real environment variables (web server, shell,
-container, CI) win over all files:
+Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`. The first file
+that exists is loaded, in this order:
 
-| File | Loaded | In Git |
+| File | Checked | In Git |
 | --- | --- | --- |
-| `.env.{APP_ENV}.local` | when `APP_ENV` is set | ignored |
-| `.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
-| `.env.local` | always | ignored |
-| `.env` | always | ignored |
+| `config/.env.{APP_ENV}.local` | when `APP_ENV` is set | ignored |
+| `config/.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
+| `config/.env.local` | always | ignored |
+| `config/.env` | always | ignored |
+| the same files in the project root | as above | ignored |
 
-The files are read from `config/`, or from the project root when `config/` has none of them.
-The two directories are not merged.
+The files are not merged, so each file sets all the variables of its environment: start a
+`.local` file from a copy of the file it replaces. A variable that is already set in the real
+environment (web server, shell, container, CI) is never overwritten, so real environment
+variables win over the file.
 
 `APP_ENV` is read from the real environment. `vendor/bin/phpunit` and `bin/cake test` run with
 `APP_ENV=test` by default, so the tests load `config/.env.test` (see
 [Running Tests](#running-tests)). Use `config/.env` for your
-development settings and `config/.env.local` or `config/.env.test.local` for overrides that
-only apply to your machine.
+development settings, and `config/.env.local` or `config/.env.test.local` in place of them on
+your machine.
 
 | Variable | Setting | Default |
 | --- | --- | --- |
@@ -529,18 +530,18 @@ Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`.
 `vendor/bin/phpunit` and `bin/cake test` run with `APP_ENV=test` by default: `tests/bootstrap.php`
 and `bin/cake` set it before CakePHP loads the `.env` files when it is not set (`webroot/test.php`,
 the browser test runner, does the same). So the tests load `config/.env.test`. This file is
-committed and sets `DATABASE_URL` to the test database (and `MAILER_DSN` to `null://null`), which
-both the `default` and the `test` connection use. Set your test database in
-`config/.env.test.local` (ignored by Git) or as a real environment variable, which wins over
-`config/.env.test`, as CI does:
+committed and sets all the variables of the tests, with `DATABASE_URL` set to the test database
+(and `MAILER_DSN` to `null://null`), which both the `default` and the `test` connection use. Set
+your test database in `config/.env.test.local`, a copy of `config/.env.test` that is ignored by
+Git and loaded instead of it, or as a real environment variable, which wins over the file, as CI
+does:
 
-```dotenv
-# config/.env.test.local
-DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
+```bash
+cp config/.env.test config/.env.test.local
+# then edit DATABASE_URL in config/.env.test.local
 ```
 
-Your development `DATABASE_URL` stays in `config/.env`; `config/.env.test` and
-`config/.env.test.local` are loaded first and win. A real environment variable wins over the
+Your development `DATABASE_URL` stays in `config/.env`, which the tests do not load. A real environment variable wins over the
 files, so do not export your development `DATABASE_URL` or another `APP_ENV` in the shell where
 you run the tests: the fixtures drop and create tables.
 
