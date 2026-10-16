@@ -47,7 +47,9 @@ composer create-project pieceofcake2/app my_app
 インストールされます。[Bake](https://pieceofcake2.github.io/bake/ja/) プラグインと
 [DebugKit](https://pieceofcake2.github.io/debug_kit/ja/) プラグイン、そして開発ツール
 (PHPUnit、[pieceofcake2/phpstan-cakephp2](https://pieceofcake2.github.io/phpstan-cakephp2/ja/) を使った PHPStan、
-CakePHP コーディング規約) は、開発用の依存パッケージとしてインストールされます。
+CakePHP コーディング規約) は、開発用の依存パッケージとしてインストールされます。AI コーディングツール向けに、
+CakePHP 2 のクックブックの Markdown (`pieceofcake2/docs`、`vendor/pieceofcake2/docs/docs/` に入ります) も
+開発用の依存パッケージとしてインストールされます。
 
 続けて設定を仕上げます:
 
