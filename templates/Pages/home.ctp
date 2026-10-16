@@ -244,23 +244,15 @@ endforeach;
                         <h4><?php echo __d('cake_dev', 'Configuration'); ?></h4>
                         <ul>
                             <?php
-                            if (file_exists(CONFIG . '.env.example')):
-                                echo $bullet(
-                                    file_exists(CONFIG . '.env') || file_exists(ROOT . DS . '.env'),
-                                    __d('cake_dev', 'Your %s file is present.', '<code>config/.env</code>'),
-                                    __d('cake_dev', 'Your %s file is NOT present.', '<code>config/.env</code>') . '<br />'
-                                    . __d('cake_dev', 'To set environment variables (debug level, security keys, database) for local development, copy %s to %s.', '<code>config/.env.example</code>', '<code>config/.env</code>'),
-                                );
-                            endif;
                             echo $bullet(
                                 Configure::read('Security.salt') !== 'DYhG93b0qyJfIxfs2guVoUubWwvniR2G0FgaC9mi',
                                 __d('cake_dev', '%s is set to a value specific to your application.', '<code>Security.salt</code>'),
-                                __d('cake_dev', 'Please change the value of %s to a salt value specific to your application. Set %s in %s or edit %s.', '<code>Security.salt</code>', '<code>SECURITY_SALT</code>', '<code>config/.env</code>', '<code>config/core.php</code>'),
+                                __d('cake_dev', 'Please change the value of %s to a salt value specific to your application. Set %s in %s or edit %s.', '<code>Security.salt</code>', '<code>SECURITY_SALT</code>', '<code>config/.env.local</code>', '<code>config/core.php</code>'),
                             );
                             echo $bullet(
                                 Configure::read('Security.cipherSeed') !== '76859309657453542496749683645',
                                 __d('cake_dev', '%s is set to a value specific to your application.', '<code>Security.cipherSeed</code>'),
-                                __d('cake_dev', 'Please change the value of %s to a numeric (digits only) seed value specific to your application. Set %s in %s or edit %s.', '<code>Security.cipherSeed</code>', '<code>SECURITY_CIPHER_SEED</code>', '<code>config/.env</code>', '<code>config/core.php</code>'),
+                                __d('cake_dev', 'Please change the value of %s to a numeric (digits only) seed value specific to your application. Set %s in %s or edit %s.', '<code>Security.cipherSeed</code>', '<code>SECURITY_CIPHER_SEED</code>', '<code>config/.env.local</code>', '<code>config/core.php</code>'),
                             );
                             ?>
                         </ul>
