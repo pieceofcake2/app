@@ -20,10 +20,10 @@
  * You can specify multiple configurations for production, development and testing.
  *
  * datasource => The name of a supported datasource; valid options are as follows:
- *  Database/Mysql - MySQL 5.6, 5.7, 8.0+ (pdo_mysql),
- *  Database/Sqlite - SQLite 3 (pdo_sqlite),
- *  Database/Postgres - PostgreSQL 9.4+ (pdo_pgsql),
- *  Database/Sqlserver - Microsoft SQL Server 2022+ (pdo_sqlsrv)
+ *  Database/Mysql - MySQL 4 & 5,
+ *  Database/Sqlite - SQLite (PHP5 only),
+ *  Database/Postgres - PostgreSQL 7 and higher,
+ *  Database/Sqlserver - Microsoft SQL Server 2005 and higher
  *
  * You can add custom database datasources (or override existing datasources) by adding the
  * appropriate file to src/Model/Datasource/Database. Datasources should be named 'MyDatasource.php',
@@ -49,9 +49,8 @@
  * database. Uses database default not specified.
  *
  * sslmode =>
- * For Postgres specifies the SSL mode for the connection ('disable', 'allow', 'prefer', 'require',
- * 'verify-ca' or 'verify-full'). If not set, sslmode is not added to the DSN and the libpq
- * default ('prefer') is used.
+ * For Postgres specifies whether to 'disable', 'allow', 'prefer', or 'require' SSL for the
+ * connection. The default value is 'allow'.
  *
  * unix_socket =>
  * For MySQL to connect via socket specify the `unix_socket` parameter instead of `host` and `port`
@@ -66,8 +65,7 @@
  * A key/value array of driver specific connection options.
  *
  * dsn =>
- * A DSN that sets the connection in one string (e.g. mysql://user:password@localhost/database_name).
- * The keys in the DSN replace the same keys of the connection.
+ * A DSN (e.g. mysql://user:password@localhost/database_name) that replaces the keys above.
  */
 class DATABASE_CONFIG
 {
