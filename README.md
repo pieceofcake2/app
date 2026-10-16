@@ -38,7 +38,7 @@ composer create-project pieceofcake2/app my_app
 ```
 
 Then copy `config/database.php.default` to `config/database.php`, set the database with
-`DATABASE_URL` in `config/.env` (and the test database in `config/.env.test`) or the
+`DATABASE_URL` in `config/.env` (and the test database in `config/.env.test.local`) or the
 environment, and
 change the security salts in `config/core.php` (see
 [Generating the Security Salts](https://pieceofcake2.github.io/app/#generating-the-security-salts)).

@@ -49,7 +49,7 @@ Then finish the configuration:
 
 1. Copy `config/database.php.default` to `config/database.php`, and set the connection with
    `DATABASE_URL` (see [Database and Mailer DSNs](#database-and-mailer-dsns)) or enter it in the
-   file. Set the test database in `config/.env.test` (see [Running Tests](#running-tests)).
+   file. Set the test database in `config/.env.test.local` (see [Running Tests](#running-tests)).
 2. Change `Security.salt` and `Security.cipherSeed` in `config/core.php`, or set
    `SECURITY_SALT` and `SECURITY_CIPHER_SEED`. The skeleton ships with well-known example
    values that must not be used in a real application. See
@@ -68,9 +68,9 @@ The `.gitignore` file of the skeleton is meant for your application, so you can 
   `.gitignore`; the plugins of your own application in `plugins/` are committed.
 - the contents of `tmp/` and `logs/`. The `empty` files that keep the directories are
   committed.
-- `config/database.php`, `config/email.php`, `config/.env`, `config/.env.*` and `.env`,
-  `.env.*` in the project root, which contain the settings and credentials of each
-  environment. `config/.env.example` and `config/.env.test`, the settings of the tests, are
+- `config/database.php`, `config/email.php`, `config/.env`, `config/.env.local`,
+  `config/.env.*.local` and the same files in the project root, which contain the settings
+  and credentials of each environment. `config/.env.test`, the settings of the tests, is
   committed.
 - `phpunit.xml` (a local copy of `phpunit.xml.dist`) and `.phpunit.result.cache`.
 
@@ -183,24 +183,28 @@ cp config/.env.example config/.env
 cp config/.env.example .env
 ```
 
-A `.env` file is loaded at the top of `config/core.php` (so it applies to web requests,
+The `.env` files are loaded at the top of `config/core.php` (so they apply to web requests,
 `bin/cake` and tests) using [josegonzalez/dotenv](https://github.com/josegonzalez/php-dotenv).
-Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`. One file is
-loaded, and the files are not merged:
+Values are then available through `env()`, `getenv()`, `$_ENV` and `$_SERVER`. As in Symfony,
+the files are loaded in this order, and a variable that is already set is never overwritten, so
+an earlier file wins over a later one and real environment variables (web server, shell,
+container, CI) win over all files:
 
-| `APP_ENV` | File (the first one that exists) |
-| --- | --- |
-| not set | `config/.env`, `.env` in the project root |
-| set (e.g. `test`) | `config/.env.{APP_ENV}`, `.env.{APP_ENV}` in the project root |
+| File | Loaded | In Git |
+| --- | --- | --- |
+| `.env.{APP_ENV}.local` | when `APP_ENV` is set | ignored |
+| `.env.{APP_ENV}` (e.g. `config/.env.test`) | when `APP_ENV` is set | committed |
+| `.env.local` | always | ignored |
+| `.env` | always | ignored |
 
-So each file sets all the variables of its environment: copy `config/.env.example` and set
-every variable you need. A variable that is already set in the real environment (web server,
-shell, container, CI) is never overwritten, so real environment variables win over the file.
+The files are read from `config/`, or from the project root when `config/` has none of them.
+The two directories are not merged.
 
 `APP_ENV` is read from the real environment. `vendor/bin/phpunit` and `bin/cake test` run with
-`APP_ENV=test` by default, so the tests load `config/.env.test` instead of `config/.env` (see
-[Running Tests](#running-tests)). `config/.env.test` is committed; the other files are ignored
-by Git.
+`APP_ENV=test` by default, so the tests load `config/.env.test` (see
+[Running Tests](#running-tests)). Use `config/.env` for your
+development settings and `config/.env.local` or `config/.env.test.local` for overrides that
+only apply to your machine.
 
 | Variable | Setting | Default |
 | --- | --- | --- |
@@ -253,7 +257,7 @@ DATABASE_URL="mysql://user:password@localhost:3306/my_app?encoding=utf8mb4"
 DATABASE_URL="postgres://user:password@localhost:5432/my_app?schema=public"
 # SQLite: three slashes for a path relative to the working directory, four for an absolute path
 DATABASE_URL="sqlite:////var/db/my_app.sqlite"
-# SQLite in memory (e.g. in config/.env.test)
+# SQLite in memory (e.g. in config/.env.test.local)
 DATABASE_URL="sqlite:///:memory:"
 # SQL Server
 DATABASE_URL="sqlserver://user:password@localhost:1433/my_app?encoding=utf8"
@@ -524,19 +528,21 @@ their templates and `webroot/css/`. To use the new look, copy `templates/Layouts
 Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`.
 `vendor/bin/phpunit` and `bin/cake test` run with `APP_ENV=test` by default: `tests/bootstrap.php`
 and `bin/cake` set it before CakePHP loads the `.env` files when it is not set (`webroot/test.php`,
-the browser test runner, does the same). So the tests load `config/.env.test` instead of
-`config/.env`. This file is committed and sets all the variables of the tests, with
-`DATABASE_URL` set to the test database (and `MAILER_DSN` to `null://null`), which both the
-`default` and the `test` connection use. Set your test database in `config/.env.test`, or as a
-real environment variable, which wins over the file, as CI does:
+the browser test runner, does the same). So the tests load `config/.env.test`. This file is
+committed and sets `DATABASE_URL` to the test database (and `MAILER_DSN` to `null://null`), which
+both the `default` and the `test` connection use. Set your test database in
+`config/.env.test.local` (ignored by Git) or as a real environment variable, which wins over
+`config/.env.test`, as CI does:
 
-```bash
-DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4" vendor/bin/phpunit
+```dotenv
+# config/.env.test.local
+DATABASE_URL="mysql://root:secret@127.0.0.1:3306/my_app_test?encoding=utf8mb4"
 ```
 
-Your development `DATABASE_URL` stays in `config/.env`, which the tests do not load. A real
-environment variable wins over the files, so do not export your development `DATABASE_URL` in
-the shell where you run the tests: the fixtures drop and create tables.
+Your development `DATABASE_URL` stays in `config/.env`; `config/.env.test` and
+`config/.env.test.local` are loaded first and win. A real environment variable wins over the
+files, so do not export your development `DATABASE_URL` or another `APP_ENV` in the shell where
+you run the tests: the fixtures drop and create tables.
 
 Then run the tests with PHPUnit:
 

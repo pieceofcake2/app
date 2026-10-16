@@ -22,11 +22,11 @@
 /config/database.php
 /config/email.php
 /config/.env
-/config/.env.*
-!/config/.env.example
-!/config/.env.test
+/config/.env.local
+/config/.env.*.local
 /.env
-/.env.*
+/.env.local
+/.env.*.local
 
 # IDE and editor specific files #
 #################################

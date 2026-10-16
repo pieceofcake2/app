@@ -21,31 +21,46 @@
 use josegonzalez\Dotenv\Loader;
 
 /**
- * Load environment variables from a .env file, if present.
+ * Load environment variables from .env files, if present.
  *
- * One file is loaded: .env, or .env.{APP_ENV} when APP_ENV is set (e.g. .env.test),
- * from config/ or, when config/ has none, from the project root. The files are not
- * merged, so each one sets all the variables of its environment. A variable that
- * is already defined in the real environment is never overwritten.
+ * The files are loaded in this order, as in Symfony; a variable that is already
+ * defined (in the real environment or by an earlier file) is never overwritten,
+ * so real environment variables win over all files and earlier files win over
+ * later ones:
  *
- * tests/bootstrap.php, bin/cake test and webroot/test.php set APP_ENV=test when it
- * is not set, so the tests load config/.env.test.
+ * - .env.{APP_ENV}.local and .env.{APP_ENV} (only when APP_ENV is set, e.g. .env.test:
+ *   tests/bootstrap.php, bin/cake test and webroot/test.php set APP_ENV=test when it
+ *   is not set)
+ * - .env.local
+ * - .env (copy config/.env.example to config/.env)
  *
- * This follows the .env support of the CakePHP 3+/5 application skeleton
- * (config/bootstrap.php in cakephp/app). In production, prefer setting real
- * environment variables instead of using a .env file.
+ * The files are read from config/, or from the project root when config/ has none
+ * of them; the two directories are not merged.
+ *
+ * config/.env.test is committed; the other files are ignored by git.
+ *
+ * In production, prefer setting real environment variables instead of
+ * using a .env file.
  */
-$dotenvName = env('APP_ENV') ? '.env.' . env('APP_ENV') : '.env';
-$dotenvFiles = array_values(array_filter([CONFIG . $dotenvName, ROOT . DS . $dotenvName], 'is_file'));
-if ($dotenvFiles) {
-    (new Loader($dotenvFiles))
+$dotenvNames = ['.env.local', '.env'];
+if (env('APP_ENV')) {
+    array_unshift($dotenvNames, '.env.' . env('APP_ENV') . '.local', '.env.' . env('APP_ENV'));
+}
+foreach ([CONFIG, ROOT . DS] as $dotenvDir) {
+    $dotenvFiles = array_filter(array_map(fn($name) => $dotenvDir . $name, $dotenvNames), 'is_file');
+    if ($dotenvFiles) {
+        break;
+    }
+}
+foreach ($dotenvFiles as $dotenvFile) {
+    (new Loader($dotenvFile))
         ->parse()
         ->skipExisting()
         ->putenv()
         ->toEnv()
         ->toServer();
 }
-unset($dotenvName, $dotenvFiles);
+unset($dotenvNames, $dotenvDir, $dotenvFiles, $dotenvFile);
 
 //setLocale(LC_ALL, 'deu');
 //Configure::write('Config.language', 'deu');
