@@ -78,11 +78,15 @@
  * The keys in the DSN replace the same keys below, and the other keys below are kept.
  * An empty dsn is ignored, so the keys below are used when the variable is not set.
  *
- * Environment variables:
- * DATABASE_URL sets the `default` connection and DATABASE_TEST_URL the `test`
- * connection. See config/.env.example. In the tests (APP_ENV=test, set in
- * phpunit.xml.dist) config/.env.test sets both to the test database, so the
- * web server of the End-to-End tests also uses it.
+ * Environment variable:
+ * DATABASE_URL sets the `default` connection. See config/.env.example. In the
+ * tests, tests/bootstrap.php sets APP_ENV=test, so config/core.php loads
+ * config/.env.test, where DATABASE_URL is the test database. The `test`
+ * connection reads DATABASE_URL too, but only when config/core.php loaded the
+ * files with APP_ENV=test; otherwise DATABASE_URL is the database of another
+ * environment, and the fixtures drop and create tables in it, so the `test`
+ * connection keeps the keys below. The web server of the End-to-End tests
+ * inherits APP_ENV=test, so its `default` connection is the test database.
  */
 class DATABASE_CONFIG
 {
@@ -112,7 +116,8 @@ class DATABASE_CONFIG
     ];
 
     /**
-     * The connection of the tests. DATABASE_TEST_URL replaces the keys it sets.
+     * The connection of the tests. With APP_ENV=test, DATABASE_URL replaces the
+     * keys it sets.
      *
      * @var array
      */
@@ -132,11 +137,14 @@ class DATABASE_CONFIG
     ];
 
     /**
-     * Constructor. Reads the connections from DATABASE_URL and DATABASE_TEST_URL.
+     * Constructor. Reads the connections from DATABASE_URL.
      */
     public function __construct()
     {
         $this->default['dsn'] = env('DATABASE_URL');
-        $this->test['dsn'] = env('DATABASE_TEST_URL');
+        // Only the test database: config/core.php loaded config/.env.test (APP_ENV=test).
+        if (Configure::read('App.env') === 'test') {
+            $this->test['dsn'] = env('DATABASE_URL');
+        }
     }
 }

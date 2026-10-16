@@ -29,7 +29,7 @@ use josegonzalez\Dotenv\Loader;
  * later ones:
  *
  * - config/.env.{APP_ENV}.local and config/.env.{APP_ENV} (only when APP_ENV is set,
- *   e.g. config/.env.test, which phpunit.xml.dist selects with APP_ENV=test)
+ *   e.g. config/.env.test, which tests/bootstrap.php selects with APP_ENV=test)
  * - config/.env.local
  * - config/.env (copy config/.env.example to config/.env)
  * - .env in the project root (ROOT . DS . '.env')
@@ -64,6 +64,9 @@ foreach ($dotenvFiles as $dotenvFile) {
     }
     unset($dotenv, $key, $value);
 }
+// The APP_ENV of the loaded files. config/database.php gives the "test" connection
+// DATABASE_URL only when it is "test" (config/.env.test was loaded).
+Configure::write('App.env', $appEnv);
 unset($appEnv, $dotenvFiles, $dotenvFile);
 
 //setLocale(LC_ALL, 'deu');

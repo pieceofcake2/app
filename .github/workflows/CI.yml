@@ -45,9 +45,8 @@ jobs:
 
     env:
       DB: ${{ matrix.db-type }}
-      # The connections of config/database.php (copied from config/database.php.default)
+      # The test database. A real environment variable wins over config/.env.test.
       DATABASE_URL: ${{ matrix.db-type == 'pgsql' && 'postgres://postgres:postgres@127.0.0.1:5432/cakephp_test' || 'mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8' }}
-      DATABASE_TEST_URL: ${{ matrix.db-type == 'pgsql' && 'postgres://postgres:postgres@127.0.0.1:5432/cakephp_test' || 'mysql://root:root@127.0.0.1:3306/cakephp_test?encoding=utf8' }}
 
     steps:
       - name: Checkout
@@ -136,7 +135,7 @@ jobs:
           cp ./config/database.php.default ./config/database.php
           cp ./config/email.php.default ./config/email.php
 
-      - name: Check the connections from DATABASE_URL and DATABASE_TEST_URL
+      - name: Check the connections from DATABASE_URL
         run: |
           php -r '
             require "vendor/autoload.php";
@@ -161,15 +160,27 @@ jobs:
             }
           '
 
-      - name: Check that APP_ENV=test loads config/.env.test
+      - name: Check that the tests load config/.env.test
         run: |
-          env -u DATABASE_URL -u DATABASE_TEST_URL APP_ENV=test php -r '
+          env -u DATABASE_URL -u APP_ENV php -r '
             require "vendor/autoload.php";
             require "tests/bootstrap.php";
             require_once CONFIG . "database.php";
             $config = new DATABASE_CONFIG();
             printf("default: %s%stest: %s%s", $config->default["dsn"], PHP_EOL, $config->test["dsn"], PHP_EOL);
             if (strpos((string)$config->default["dsn"], "/test_database_name") === false || $config->default["dsn"] !== $config->test["dsn"]) {
+                exit(1);
+            }
+          '
+
+      - name: Check that the test connection ignores DATABASE_URL without APP_ENV=test
+        run: |
+          env -u APP_ENV php -r '
+            require "tests/phpstan-bootstrap.php";
+            require_once CONFIG . "database.php";
+            $config = new DATABASE_CONFIG();
+            printf("default: %s%stest: %s%s", $config->default["dsn"], PHP_EOL, var_export($config->test["dsn"] ?? null, true), PHP_EOL);
+            if ($config->default["dsn"] === null || isset($config->test["dsn"])) {
                 exit(1);
             }
           '
