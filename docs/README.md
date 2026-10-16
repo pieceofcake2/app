@@ -233,16 +233,15 @@ takes the DSN, and the skeleton sets it from the environment variables of Symfon
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
-$this->test['dsn'] = env('APP_ENV') === 'test' ? env('DATABASE_URL') : null;
+$this->test['dsn'] = env('DATABASE_URL');
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
 ```
 
 There is one variable for the database, as in Symfony: `DATABASE_URL` is the database of the
-current environment. In the tests (`APP_ENV=test`) it is the test database of
-`config/.env.test`, and both connections use it. The `test` connection reads `DATABASE_URL`
-only when `APP_ENV` is `test`, so the fixtures never use the database of another environment.
+current environment, and both connections use it. In the tests (`APP_ENV=test`) it is the test
+database of `config/.env.test`.
 
 The `'dsn'` key needs pieceofcake2/cakephp 2.12.7 or later. With an earlier
 release the key is ignored and the other keys of the files are used.

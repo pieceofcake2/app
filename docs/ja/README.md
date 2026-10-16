@@ -241,16 +241,14 @@ DSN は、CakePHP 3.x 以降や Symfony と同じように、1 つの文字列�
 ```php
 // config/database.php
 $this->default['dsn'] = env('DATABASE_URL');
-$this->test['dsn'] = env('APP_ENV') === 'test' ? env('DATABASE_URL') : null;
+$this->test['dsn'] = env('DATABASE_URL');
 
 // config/email.php
 $this->default['dsn'] = env('MAILER_DSN');
 ```
 
-Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースです。
-テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになり、両方の接続がこれを使います。
-`test` 接続は `APP_ENV` が `test` のときだけ `DATABASE_URL` を読むので、フィクスチャがほかの環境の
-データベースを使うことはありません。
+Symfony と同じように、データベースの変数は 1 つです。`DATABASE_URL` は現在の環境のデータベースで、
+両方の接続がこれを使います。テスト (`APP_ENV=test`) では `config/.env.test` のテスト用データベースになります。
 
 `'dsn'` キーには、pieceofcake2/cakephp 2.12.7 以降が必要です。それより前のリリースではこのキーは
 無視され、ファイルのほかのキーが使われます。

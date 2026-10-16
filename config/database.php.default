@@ -80,13 +80,12 @@
  *
  * Environment variable:
  * DATABASE_URL is the database of the current environment, as in Symfony, and
- * sets the `default` connection. See config/.env.example. The tests run with
- * APP_ENV=test, so config/core.php loads config/.env.test, where DATABASE_URL
- * is the test database and sets both connections; the web server of the
- * End-to-End tests inherits APP_ENV=test and uses it too. The `test` connection
- * reads DATABASE_URL only when APP_ENV is `test`, so the fixtures never use the
- * database of another environment. The test entry points (vendor/bin/phpunit,
- * bin/cake test, webroot/test.php) set APP_ENV=test when it is not set.
+ * sets both connections. See config/.env.example. The tests run with
+ * APP_ENV=test, so config/core.php loads
+ * config/.env.test, where DATABASE_URL is the test database; the web server of
+ * the End-to-End tests inherits APP_ENV=test and uses it too. The test entry
+ * points (vendor/bin/phpunit, bin/cake test, webroot/test.php) set
+ * APP_ENV=test when it is not set.
  */
 class DATABASE_CONFIG
 {
@@ -116,7 +115,7 @@ class DATABASE_CONFIG
     ];
 
     /**
-     * The connection of the tests. DATABASE_URL replaces the keys it sets when APP_ENV is `test`.
+     * The connection of the tests. DATABASE_URL replaces the keys it sets.
      *
      * @var array
      */
@@ -141,7 +140,6 @@ class DATABASE_CONFIG
     public function __construct()
     {
         $this->default['dsn'] = env('DATABASE_URL');
-        // Only the test database of config/.env.test, never the database of another environment
-        $this->test['dsn'] = env('APP_ENV') === 'test' ? env('DATABASE_URL') : null;
+        $this->test['dsn'] = env('DATABASE_URL');
     }
 }
