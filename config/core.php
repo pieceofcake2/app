@@ -236,6 +236,7 @@ Configure::write('App.encoding', 'UTF-8');
  */
 Configure::write('Session', [
     'defaults' => 'php',
+    'cacheLimiter' => 'nocache',
 ]);
 
 /**
