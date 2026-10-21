@@ -6,7 +6,7 @@
     "license": "MIT",
     "require": {
         "php": ">=8.0",
-        "pieceofcake2/cakephp": "^2.12.7",
+        "pieceofcake2/cakephp": "^2.13",
         "symfony/dotenv": "^5.4 || ^6.4 || ^7.0 || ^8.0"
     },
     "require-dev": {
@@ -16,7 +16,7 @@
         "pieceofcake2/debug_kit": "^2.2",
         "pieceofcake2/docs": "^2.0",
         "pieceofcake2/phpcs-cakephp2": "^1.1",
-        "pieceofcake2/phpstan-cakephp2": "^1.0"
+        "pieceofcake2/phpstan-cakephp2": "^1.1"
     },
     "suggest": {
         "pieceofcake2/panther": "Browser End-to-End tests with Symfony Panther in tests/TestCase/EndToEnd/ (the EndToEnd suite of phpunit.xml.dist)",

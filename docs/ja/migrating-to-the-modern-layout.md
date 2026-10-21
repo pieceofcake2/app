@@ -111,7 +111,7 @@ your-project/
 {
     "require": {
         "php": ">=8.0",
-        "pieceofcake2/cakephp": "^2.12"
+        "pieceofcake2/cakephp": "^2.13"
     },
     "autoload": {
         "classmap": ["src/"]
@@ -169,8 +169,8 @@ define('VENDORS', ROOT . DS . 'vendor' . DS); // Standard Composer
 
 ### 4. アプリケーションが引き続き動作することを確認する
 
-[pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) のコアは、`App::uses()` とそのクラスの読み込みで
-モダン構成をサポートし、テンプレートを `templates/` から探すので、既存の CakePHP 2 のコードは変更せずに動作します。
+[pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) のコアはモダン構成をサポートし、テンプレートを
+`templates/` から探すので、既存の CakePHP 2 のコードは変更せずに動作します。
 移行の間も、従来のファイルの場所は引き続き使えます。
 
 <a id="5-leverage-composer-autoloading-optional"></a>
@@ -178,7 +178,7 @@ define('VENDORS', ROOT . DS . 'vendor' . DS); // Standard Composer
 ### 5. Composer のオートロードを活用する (任意)
 
 `composer.json` で `src/` を `classmap` でオートロードすれば、`composer dump-autoload` を実行した後で、
-コードから `App::uses()` の呼び出しを削除できます。
+コードから `App::uses()` の呼び出しを削除できます。`App::uses()` は CakePHP 2.13 で非推奨になりました。
 
 ```php
 // Before
@@ -202,7 +202,7 @@ class UsersController extends AppController
 > 新しいクラスのファイルを作成するたびに `composer dump-autoload` を実行してください。新しいクラスが見つかるようにするには、
 > Composer のクラスマップを再生成する必要があります。
 
-Composer のオートロードに対応していないプラグインには、引き続き `App::uses()` か `CakePlugin::load()` が必要です。
+Composer がオートロードしないプラグインは、そのフォルダをアプリケーションの classmap に追加してください。
 
 <a id="upgrading-to-cakephp-5-step-3"></a>
 

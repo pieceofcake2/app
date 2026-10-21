@@ -103,7 +103,7 @@ your-project/
 {
     "require": {
         "php": ">=8.0",
-        "pieceofcake2/cakephp": "^2.12"
+        "pieceofcake2/cakephp": "^2.13"
     },
     "autoload": {
         "classmap": ["src/"]
@@ -160,14 +160,15 @@ gradually:
 ### 4. Verify Your Application Still Works
 
 The [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) core supports the modern
-layout with `App::uses()` and its class loading, and finds templates in `templates/`, so
-your existing CakePHP 2 code works without modifications. The traditional file locations
+layout and finds templates in `templates/`, so your existing CakePHP 2 code works without
+modifications. The traditional file locations
 keep working during the migration.
 
 ### 5. Leverage Composer Autoloading (Optional)
 
 With the `classmap` autoloading of `src/` in `composer.json`, you can remove the
-`App::uses()` calls from your code after running `composer dump-autoload`:
+`App::uses()` calls from your code after running `composer dump-autoload`. `App::uses()` is
+deprecated as of CakePHP 2.13:
 
 ```php
 // Before
@@ -191,8 +192,8 @@ class UsersController extends AppController
 > Run `composer dump-autoload` every time you create a new class file. Composer's classmap
 > must be regenerated before new classes can be found.
 
-Plugins that don't support Composer autoloading still require `App::uses()` or
-`CakePlugin::load()`.
+For a plugin that Composer does not autoload, add its folder to the classmap of your
+application.
 
 ## Upgrading to CakePHP 5 (Step 3)
 

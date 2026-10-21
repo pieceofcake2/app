@@ -55,7 +55,7 @@ if (!is_file(VENDORS . 'autoload.php')) {
 }
 require_once VENDORS . 'autoload.php';
 
-require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
+require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'bootstrap.php';
 
 $dispatcher = new Dispatcher();
 $dispatcher->dispatch(

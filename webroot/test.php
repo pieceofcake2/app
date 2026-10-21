@@ -58,7 +58,7 @@ if ((string)getenv('APP_ENV') === '' && empty($_SERVER['APP_ENV'])) {
     $_SERVER['APP_ENV'] = 'test';
 }
 
-require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
+require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'bootstrap.php';
 
 if (Configure::read('debug') < 1) {
     throw new NotFoundException(__d('cake_dev', 'Debug setting does not allow access to this URL.'));
