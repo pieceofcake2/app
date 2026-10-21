@@ -64,7 +64,8 @@ Configure::write('debug', env('APP_DEBUG') ?? 0);
  */
 Configure::write('Error', [
     'handler' => 'ErrorHandler::handleError',
-    'level' => E_ALL & ~E_DEPRECATED,
+    // Show the deprecations while debugging, and leave them out of the production logs
+    'level' => Configure::read('debug') ? E_ALL : E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED,
     'trace' => true,
 ]);
 

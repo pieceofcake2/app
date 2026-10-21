@@ -13,6 +13,9 @@
          colors="true">
     <php>
         <ini name="memory_limit" value="-1"/>
+        <!-- Deprecations are shown on stderr, once, and do not fail the tests -->
+        <ini name="display_errors" value="stderr"/>
+        <ini name="log_errors" value="0"/>
         <!--
             tests/bootstrap.php sets APP_ENV=test (when not set), so config/core.php loads config/.env.test, where
             DATABASE_URL is the test database. The web server of the End-to-End tests inherits
