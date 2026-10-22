@@ -18,6 +18,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Cache\Cache;
+use Cake\Core\Configure;
 use Symfony\Component\Dotenv\Dotenv;
 
 /**

@@ -18,6 +18,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Model\CakeSchema;
+
 /**
  * Using the Schema command line utility
  *

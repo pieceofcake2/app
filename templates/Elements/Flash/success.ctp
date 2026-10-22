@@ -15,6 +15,9 @@
  * @var string $message
  * @var array $params
  */
+
+use Cake\View\View;
+
 if (!isset($params['escape']) || $params['escape'] !== false) {
     $message = h($message);
 }

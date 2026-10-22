@@ -18,6 +18,10 @@
  * @var string $url
  * @var int $pause
  */
+
+use Cake\Core\Configure;
+use Cake\View\View;
+
 ?>
 <!DOCTYPE html>
 <html>

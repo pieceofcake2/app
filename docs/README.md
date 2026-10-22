@@ -87,6 +87,9 @@ dependencies.
 [DebugKit](https://pieceofcake2.github.io/debug_kit/) plugins when they are installed:
 
 ```php
+use Cake\Core\CakePlugin;
+use Cake\Error\MissingPluginException;
+
 foreach (['Bake', 'DebugKit'] as $plugin) {
     try {
         CakePlugin::load($plugin);
@@ -109,6 +112,9 @@ when the plugin is loaded, so that the application still works without the devel
 dependencies:
 
 ```php
+use Cake\Controller\Controller;
+use Cake\Core\CakePlugin;
+
 class AppController extends Controller
 {
     public function __construct($request = null, $response = null)
