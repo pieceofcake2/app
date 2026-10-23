@@ -24,12 +24,9 @@ use Cake\Utility\Debugger;
 use Cake\View\View;
 
 // In production, render the error in the minimal error layout. In debug mode, use the
-// development error page of the core (dev_error layout), like CakePHP 5 does. The core
-// provides that layout from pieceofcake2/cakephp 2.12.6; with older versions, keep the
-// default layout and show the stack trace below the message.
-$devErrorLayout = is_file(dirname(CAKE_CORE_INCLUDE_PATH) . DS . 'templates' . DS . 'Layouts' . DS . 'dev_error.ctp');
+// development error page of the core (dev_error layout), like CakePHP 5 does.
 
-if (Configure::read('debug') > 0 && !$this->request->is('ajax') && $devErrorLayout):
+if (Configure::read('debug') > 0 && !$this->request->is('ajax')):
     $this->layout = 'dev_error';
 
     $this->assign('title', $message);
