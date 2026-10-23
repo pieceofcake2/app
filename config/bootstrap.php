@@ -22,6 +22,12 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Cache\Cache;
+use Cake\Core\CakePlugin;
+use Cake\Core\Configure;
+use Cake\Error\MissingPluginException;
+use Cake\Log\CakeLog;
+
 // Setup a 'default' cache configuration for use in the application.
 Cache::config('default', ['engine' => 'File']);
 

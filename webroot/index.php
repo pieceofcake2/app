@@ -16,6 +16,9 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Network\CakeRequest;
+use Cake\Network\CakeResponse;
+use Cake\Routing\Dispatcher;
 use Composer\InstalledVersions;
 
 if (!defined('DS')) {
@@ -55,7 +58,7 @@ if (!is_file(VENDORS . 'autoload.php')) {
 }
 require_once VENDORS . 'autoload.php';
 
-require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'Cake' . DS . 'bootstrap.php';
+require_once InstalledVersions::getInstallPath('pieceofcake2/cakephp') . DS . 'src' . DS . 'bootstrap.php';
 
 $dispatcher = new Dispatcher();
 $dispatcher->dispatch(

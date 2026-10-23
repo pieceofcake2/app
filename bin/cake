@@ -17,6 +17,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Console\ShellDispatcher;
+
 if (!defined('DS')) {
     define('DS', DIRECTORY_SEPARATOR);
 }

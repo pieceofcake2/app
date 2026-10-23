@@ -18,6 +18,13 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Core\Configure;
+use Cake\Error\ForbiddenException;
+use Cake\Error\MissingViewException;
+use Cake\Error\NotFoundException;
+use Cake\Network\CakeResponse;
+use Cake\Utility\Inflector;
+
 /**
  * Static content controller
  *

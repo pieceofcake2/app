@@ -14,6 +14,9 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  * @var View $this
  */
+
+use Cake\View\View;
+
 ?>
 <!DOCTYPE html>
 <html>

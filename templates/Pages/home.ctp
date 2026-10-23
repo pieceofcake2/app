@@ -17,6 +17,15 @@
  * @var View $this
  */
 
+use Cake\Cache\Cache;
+use Cake\Core\App;
+use Cake\Core\CakePlugin;
+use Cake\Core\Configure;
+use Cake\Error\NotFoundException;
+use Cake\Model\ConnectionManager;
+use Cake\Utility\Validation;
+use Cake\View\View;
+
 if (!Configure::read('debug')):
     throw new NotFoundException();
 endif;

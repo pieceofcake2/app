@@ -19,6 +19,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Model\Model;
+
 /**
  * Application model for Cake.
  *

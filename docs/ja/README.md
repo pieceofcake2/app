@@ -92,6 +92,9 @@ CakePHP 2 のクックブックの Markdown (`pieceofcake2/docs`、`vendor/piece
 [DebugKit](https://pieceofcake2.github.io/debug_kit/ja/) プラグインがインストールされていれば読み込みます。
 
 ```php
+use Cake\Core\CakePlugin;
+use Cake\Error\MissingPluginException;
+
 foreach (['Bake', 'DebugKit'] as $plugin) {
     try {
         CakePlugin::load($plugin);
@@ -113,6 +116,9 @@ DebugKit のツールバーを表示するには、`AppController` に `DebugKit
 なくてもアプリケーションが動作するように、プラグインが読み込まれている場合にだけ追加してください。
 
 ```php
+use Cake\Controller\Controller;
+use Cake\Core\CakePlugin;
+
 class AppController extends Controller
 {
     public function __construct($request = null, $response = null)
