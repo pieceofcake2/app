@@ -23,14 +23,17 @@ use Cake\Core\Configure;
 use Cake\Utility\Debugger;
 use Cake\View\View;
 
-// In production, render the error in the minimal error layout. In debug mode, use the
-// development error page of the core (dev_error layout), like CakePHP 5 does.
+// Render the error in the minimal error layout, or in debug mode in the development error page
+// of the core (dev_error layout), like CakePHP 5 does.
+$this->layout = 'error';
+// The page title would otherwise be the humanized view path ("Errors")
+$this->assign('title', __d('cake', 'Error'));
 
-if (Configure::read('debug') > 0 && !$this->request->is('ajax')):
+if (Configure::read('debug')):
     $this->layout = 'dev_error';
 
     $this->assign('title', $message);
-    $this->assign('templateName', 'error500.ctp');
+    $this->assign('templateName', 'error500.php');
 
     $this->start('file');
     if (isset($error) && $error instanceof Error):
@@ -45,20 +48,9 @@ if (Configure::read('debug') > 0 && !$this->request->is('ajax')):
 
     return;
 endif;
-
-if (!Configure::read('debug')):
-    $this->layout = 'error';
-    // The page title would otherwise be the humanized view path ("Errors")
-    $this->assign('title', __d('cake', 'Error'));
-endif;
 ?>
 <h2><?php echo $message; ?></h2>
 <p class="error">
     <strong><?php echo __d('cake', 'Error'); ?>: </strong>
     <?php echo __d('cake', 'An Internal Error Has Occurred.'); ?>
 </p>
-<?php
-if (Configure::read('debug') > 0):
-    echo $this->element('exception_stack_trace');
-endif;
-?>
