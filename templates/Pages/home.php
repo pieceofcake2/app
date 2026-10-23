@@ -140,7 +140,7 @@ endforeach;
                 <div class="row">
                     <div class="column">
                         <div class="message default text-center">
-                            <small><?php echo __d('cake_dev', 'Please be aware that this page will not be shown if you turn off debug mode unless you replace %s with your own version.', 'templates/Pages/home.ctp'); ?></small>
+                            <small><?php echo __d('cake_dev', 'Please be aware that this page will not be shown if you turn off debug mode unless you replace %s with your own version.', 'templates/Pages/home.php'); ?></small>
                         </div>
                         <div id="url-rewriting-warning" class="message error">
                             <ul>
@@ -318,8 +318,8 @@ endforeach;
                     <div class="column">
                         <h3><?php echo __d('cake_dev', 'Editing this Page'); ?></h3>
                         <ul class="plain">
-                            <li><?php echo __d('cake_dev', 'To change the content of this page, edit: %s.', '<code>templates/Pages/home.ctp</code>'); ?></li>
-                            <li><?php echo __d('cake_dev', 'To change its layout, edit: %s.', '<code>templates/Layouts/default.ctp</code>'); ?></li>
+                            <li><?php echo __d('cake_dev', 'To change the content of this page, edit: %s.', '<code>templates/Pages/home.php</code>'); ?></li>
+                            <li><?php echo __d('cake_dev', 'To change its layout, edit: %s.', '<code>templates/layout/default.php</code>'); ?></li>
                             <li><?php echo __d('cake_dev', 'You can also add some CSS styles for your pages at: %s.', '<code>webroot/css</code>'); ?></li>
                         </ul>
                     </div>
