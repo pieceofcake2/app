@@ -329,7 +329,7 @@ endforeach;
                     <div class="column links">
                         <h3><?php echo __d('cake_dev', 'Getting Started'); ?></h3>
                         <a target="_blank" rel="noopener" href="<?php echo $docsUrl; ?>"><?php echo __d('cake_dev', 'CakePHP 2 Documentation'); ?></a>
-                        <a target="_blank" rel="noopener" href="https://pieceofcake2.github.io/app/"><?php echo __d('cake_dev', 'Application Skeleton'); ?></a>
+                        <a target="_blank" rel="noopener" href="<?php echo $docsUrl; ?>installation/application-skeleton.html"><?php echo __d('cake_dev', 'Application Skeleton'); ?></a>
                         <a target="_blank" rel="noopener" href="<?php echo $docsUrl; ?>installation.html"><?php echo __d('cake_dev', 'Installation'); ?></a>
                         <a target="_blank" rel="noopener" href="<?php echo $docsUrl; ?>development/configuration.html"><?php echo __d('cake_dev', 'Configuration'); ?></a>
                         <a target="_blank" rel="noopener" href="<?php echo $docsUrl; ?>tutorials-and-examples/blog/blog.html"><?php echo __d('cake_dev', 'Blog Tutorial'); ?></a>

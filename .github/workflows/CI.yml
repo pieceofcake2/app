@@ -6,13 +6,11 @@ on:
       - '2.x'
     paths-ignore:
       - '**.md'
-      - 'docs/**'
   pull_request:
     branches:
       - '**'
     paths-ignore:
       - '**.md'
-      - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
