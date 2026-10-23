@@ -19,7 +19,10 @@
  */
 
 use Cake\Cache\Cache;
+use Cake\Controller\Component\Acl\DbAcl;
 use Cake\Core\Configure;
+use Cake\Error\ErrorHandler;
+use Cake\Error\ExceptionRenderer;
 use Symfony\Component\Dotenv\Dotenv;
 
 /**
@@ -55,8 +58,7 @@ Configure::write('debug', env('APP_DEBUG') ?? 0);
  *
  * - `handler` - callback - The callback to handle errors. You can set this to any callable type,
  *   including anonymous functions.
- *   A custom handler class in src/ is autoloaded by the Composer classmap (run `composer dump-autoload`
- *   after adding it)
+ *   A custom handler class in src/ is autoloaded by Composer (PSR-4)
  * - `level` - integer - The level of errors you are interested in capturing.
  * - `trace` - boolean - Include stack traces for errors in log files.
  * - `extraFatalErrorMemory` - integer - Increases memory limit at shutdown so fatal errors are logged. Specify
@@ -65,7 +67,7 @@ Configure::write('debug', env('APP_DEBUG') ?? 0);
  * @see ErrorHandler for more information on error handling and configuration.
  */
 Configure::write('Error', [
-    'handler' => 'ErrorHandler::handleError',
+    'handler' => [ErrorHandler::class, 'handleError'],
     // Show the deprecations while debugging, and leave them out of the production logs
     'level' => Configure::read('debug') ? E_ALL : E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED,
     'trace' => true,
@@ -81,10 +83,9 @@ Configure::write('Error', [
  *
  * - `handler` - callback - The callback to handle exceptions. You can set this to any callback type,
  *   including anonymous functions.
- *   A custom handler class in src/ is autoloaded by the Composer classmap (run `composer dump-autoload`
- *   after adding it)
+ *   A custom handler class in src/ is autoloaded by Composer (PSR-4)
  * - `renderer` - string - The class responsible for rendering uncaught exceptions. If you choose a custom class you
- *   should place the file for that class in src/Lib/Error. This class needs to implement a render method.
+ *   should place the file for that class in src/Error. This class needs to implement a render method.
  * - `log` - boolean - Should Exceptions be logged?
  * - `skipLog` - array - list of exceptions to skip for logging. Exceptions that
  *   extend one of the listed exceptions will also be skipped for logging.
@@ -93,10 +94,15 @@ Configure::write('Error', [
  * @see ErrorHandler for more information on exception handling and configuration.
  */
 Configure::write('Exception', [
-    'handler' => 'ErrorHandler::handleException',
-    'renderer' => 'ExceptionRenderer',
+    'handler' => [ErrorHandler::class, 'handleException'],
+    'renderer' => ExceptionRenderer::class,
     'log' => true,
 ]);
+
+/**
+ * The namespace of the classes of the application
+ */
+Configure::write('App.namespace', 'App');
 
 /**
  * Application wide charset encoding
@@ -310,7 +316,7 @@ Configure::write('Security.useOpenSsl', true);
  * The class name and database used in CakePHP's
  * access control lists.
  */
-Configure::write('Acl.classname', 'DbAcl');
+Configure::write('Acl.classname', DbAcl::class);
 Configure::write('Acl.database', 'default');
 
 /**
