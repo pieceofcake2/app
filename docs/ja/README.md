@@ -3,7 +3,10 @@
 pieceofcake2/app は、[pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp) で動作する
 CakePHP 2 アプリケーションのためのアプリケーションスケルトンです。CakePHP 5 と互換性のあるディレクトリ構成
 (`config/`、`src/`、`templates/`、`tests/`、`webroot/`) を使い、CakePHP とすべての依存パッケージを
-Composer で読み込みます。
+Composer で読み込みます。CakePHP 5 と同じく、アプリケーションのクラスは `App` 名前空間にあり、テンプレートは
+CakePHP 5 のディレクトリ (`layout/`、`element/`、`email/`、`Error/`) にある `.php` ファイルです。
+グローバルなクラスと `.ctp` のテンプレートを使う場合は、
+[pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy) を使ってください。
 
 > [!WARNING]
 > CakePHP 2.x は既存アプリケーションのメンテナンスのためのものです。新しいプロジェクトには、
@@ -18,8 +21,9 @@ Composer で読み込みます。
 - [ページとスタイル](#pages-and-styles)
 - [開発](#development)
 
-レガシーな `app/` 構成の既存アプリケーションをこの構成に移すには、
+既存のアプリケーションをこの構成と名前空間付きのクラスに移すには、
 [モダン構成への移行](migrating-to-the-modern-layout.md) をご覧ください。
+[pieceofcake2/upgrade](https://pieceofcake2.github.io/upgrade/ja/) の `layout` コマンドと `namespace` コマンドで移行できます。
 
 <a id="requirements"></a>
 
@@ -116,6 +120,8 @@ DebugKit のツールバーを表示するには、`AppController` に `DebugKit
 なくてもアプリケーションが動作するように、プラグインが読み込まれている場合にだけ追加してください。
 
 ```php
+namespace App\Controller;
+
 use Cake\Controller\Controller;
 use Cake\Core\CakePlugin;
 
@@ -150,14 +156,18 @@ my_app/
 ├── plugins/            plugins installed by Composer
 ├── resources/
 │   └── locales/        translation files
-├── src/                PHP code
+├── src/                PHP code (the App namespace)
 │   ├── Console/        shells, tasks and bake templates
 │   ├── Controller/
-│   ├── Lib/
 │   ├── Model/
 │   └── View/           helpers
-├── templates/          view templates, layouts, elements and email templates
-├── tests/
+├── templates/          view templates (.php)
+│   ├── Error/          error pages
+│   ├── Pages/          pages of PagesController
+│   ├── element/        elements (Flash/ for the flash messages)
+│   ├── email/          email templates (html/, text/)
+│   └── layout/         layouts (email/ for the email layouts)
+├── tests/              tests (the App\Test namespace)
 │   ├── Fixture/
 │   └── TestCase/
 ├── tmp/                cache, sessions and test files
@@ -174,13 +184,59 @@ my_app/
 `app/` ディレクトリを使うレガシー構成 (`app/Config/`、`app/Controller/`、`app/View/`、...) も
 サポートされていますが、スケルトンに含まれるのはモダン構成だけです。
 
+<a id="namespace"></a>
+
+### 名前空間
+
+`src/` のクラスは `App` 名前空間にあり、名前空間はディレクトリに対応します。
+たとえば `src/Controller/PostsController.php` は `App\Controller\PostsController`、
+`src/Model/Post.php` は `App\Model\Post` です。Composer が PSR-4 で `src/` から `App\` を、`tests/` から
+`App\Test\` を読み込むので、クラスのファイルを追加しても `composer dump-autoload` は必要ありません。
+
+```json
+"autoload": {
+    "psr-4": {
+        "App\\": "src/"
+    }
+},
+"autoload-dev": {
+    "psr-4": {
+        "App\\Test\\": "tests/"
+    }
+},
+```
+
+`config/core.php` で CakePHP に名前空間を設定しているので、CakePHP はアプリケーションのコントローラー、モデル、
+コンポーネント、ヘルパー、ビヘイビア、シェルをこの名前空間から探します。
+
+```php
+Configure::write('App.namespace', 'App');
+```
+
+CakePHP のクラスは `Cake` 名前空間にあり、`use` 文でインポートします。名前空間を持たない `config/` と
+テンプレートでも同じです。
+
+```php
+namespace App\Controller;
+
+use Cake\Controller\Controller;
+
+class AppController extends Controller
+{
+}
+```
+
+クラスを指定する設定には `::class` を使います (例: `config/core.php` の
+`'renderer' => ExceptionRenderer::class`)。CakePHP 2 の名前 (`'File'`、`'Auth'`、`'DebugKit.Toolbar'`) も
+引き続き使えます。
+
 <a id="configuration"></a>
 
 ## 設定
 
 | ファイル | 内容 |
 | --- | --- |
-| `config/core.php` | デバッグレベル、エラーと例外の処理、キャッシュ、セッション、セキュリティ用のソルト。 |
+| `config/core.php` | デバッグレベル、エラーと例外の処理、アプリケーションの名前空間、キャッシュ、セッション、セキュリティ用のソルト。 |
 | `config/bootstrap.php` | キャッシュの設定、プラグインの読み込み、ログ、その他のアプリケーションの初期設定。 |
 | `config/routes.php` | URL のルーティング。 |
 | `config/database.php` | データベース接続 (`default`。`APP_ENV=test` では `test` も)。`database.php.default` からコピーします。 |
@@ -487,11 +543,11 @@ bin/cake server
 
 テンプレート:
 
-- `templates/Layouts/default.ctp`: 上部のナビゲーションバーとコンテンツのコンテナ。`debug` が 2 の間は、
+- `templates/layout/default.php`: 上部のナビゲーションバーとコンテンツのコンテナ。`debug` が 2 の間は、
   コンテンツの下に SQL ログが表示されます。
-- `templates/Layouts/error.ctp`: 本番環境のエラーページ用の最小限のレイアウト。
-- `templates/Layouts/flash.ctp`: `Controller::flash()` が描画するページ。
-- `templates/Elements/Flash/`: `default`、`success`、`error`、`warning`、`info` のフラッシュメッセージ
+- `templates/layout/error.php`: 本番環境のエラーページ用の最小限のレイアウト。
+- `templates/layout/flash.php`: `Controller::flash()` が描画するページ。
+- `templates/element/Flash/`: `default`、`success`、`error`、`warning`、`info` のフラッシュメッセージ
   (`$this->Flash->success('Saved.')` など)。メッセージはエスケープされます。HTML を出力するには
   `['params' => ['escape' => false]]` を渡します。メッセージをクリックすると非表示になります。
 
@@ -501,7 +557,7 @@ bin/cake server
 
 ### ホームページ
 
-`templates/Pages/home.ctp` は、`debug` が有効な間 `/` に表示されます。このページはアプリケーションの環境をチェックします。
+`templates/Pages/home.php` は、`debug` が有効な間 `/` に表示されます。このページはアプリケーションの環境をチェックします。
 PHP のバージョンと拡張 (mbstring、intl、openssl、PDO と `default` データソースのドライバー)、`tmp/` と `logs/`
 ディレクトリ、キャッシュ、データベース接続 (失敗した場合はエラーメッセージも)、セキュリティ用のソルトと
 cipher seed、そして DebugKit プラグインと Bake プラグインです。本番環境では `NotFoundException` を投げるので、
@@ -517,7 +573,7 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 
 ### エラーページ
 
-`debug` が 0 のとき、`templates/Errors/error400.ctp` と `error500.ctp` は `error` レイアウトで短いメッセージを
+`debug` が 0 のとき、`templates/Error/error400.php` と `error500.php` は `error` レイアウトで短いメッセージを
 表示します。
 
 ![本番環境のエラー 400](../img/error400.png)
@@ -537,9 +593,11 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 ### 既存のアプリケーション
 
 以前のバージョンのスケルトンから作成したアプリケーションは影響を受けません。テンプレートと `webroot/css/` は
-アプリケーション自身のものだからです。新しい見た目を使うには、`templates/Layouts/`、`templates/Elements/Flash/`、
-`templates/Errors/`、`webroot/css/`、`webroot/font/` と `webroot/img/cake.logo.svg` をアプリケーションに
-コピーしてください。`cake.generic.css` 向けに bake したビューは、bake し直す (またはスタイルを直す) 必要があります。
+アプリケーション自身のものだからです。新しい見た目を使うには、`templates/layout/`、`templates/element/Flash/`、
+`templates/Error/`、`webroot/css/`、`webroot/font/` と `webroot/img/cake.logo.svg` をアプリケーションに
+コピーしてください (`.ctp` のテンプレートが必要なら、`Layouts/`、`Elements/`、`Errors/` にある
+[pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy) のものを使います)。
+`cake.generic.css` 向けに bake したビューは、bake し直す (またはスタイルを直す) 必要があります。
 [bake したビューと legacy テーマ](https://pieceofcake2.github.io/bake/ja/#baked-views-and-the-legacy-theme)
 をご覧ください。
 
@@ -551,7 +609,9 @@ cipher seed、そして DebugKit プラグインと Bake プラグインです�
 
 ### テストの実行
 
-テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。`vendor/bin/phpunit` と
+テストケースは `tests/TestCase/` に、フィクスチャは `tests/Fixture/` に置きます。名前空間はそれぞれ
+`App\Test\TestCase` と `App\Test\Fixture` です (例: `tests/TestCase/Controller/PostsControllerTest.php` の
+`App\Test\TestCase\Controller\PostsControllerTest`)。`vendor/bin/phpunit` と
 `bin/cake test` は、デフォルトで `APP_ENV=test` で動きます。`APP_ENV` が設定されていなければ、CakePHP が
 `.env` ファイルを読み込む前に `tests/bootstrap.php` と `bin/cake` がこれを設定します (ブラウザーのテスト
 ランナー `webroot/test.php` も同じです)。そのため、テストでは `config/.env` の後に、コミットされている
@@ -634,6 +694,11 @@ CakePHP のコーディング規約に沿っているかコードをチェック
 ```bash
 vendor/bin/phpcs
 ```
+
+`phpcs.xml` は [pieceofcake2/phpcs-cakephp2](https://pieceofcake2.github.io/phpcs-cakephp2/ja/) の
+`CakePHP2Namespace` 規約を使います。クラスは名前空間の中で、クラス名と同じ名前のファイルに宣言し、使うクラスは
+`use` 文でインポートします。`config/` のクラス (`DATABASE_CONFIG`、`EmailConfig` とスキーマのクラス) は
+グローバルのままです。
 
 <a id="static-analysis"></a>
 

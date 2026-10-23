@@ -3,7 +3,10 @@
 pieceofcake2/app is the application skeleton for CakePHP 2 applications running on
 [pieceofcake2/cakephp](https://github.com/pieceofcake2/cakephp). It uses a directory layout
 compatible with CakePHP 5 (`config/`, `src/`, `templates/`, `tests/`, `webroot/`) and
-loads CakePHP and all dependencies with Composer.
+loads CakePHP and all dependencies with Composer. Its application classes are in the `App`
+namespace, as in CakePHP 5, and its templates are `.php` files in the directories of CakePHP 5
+(`layout/`, `element/`, `email/`, `Error/`). For global classes and `.ctp` templates, use
+[pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy).
 
 > [!WARNING]
 > CakePHP 2.x is for the maintenance of existing applications. For new projects, use
@@ -18,8 +21,9 @@ loads CakePHP and all dependencies with Composer.
 - [Pages and Styles](#pages-and-styles)
 - [Development](#development)
 
-To move an existing application with the legacy `app/` layout to this layout, see
-[Migrating to the Modern Layout](migrating-to-the-modern-layout.md).
+To move an existing application to this layout and to namespaced classes, see
+[Migrating to the Modern Layout](migrating-to-the-modern-layout.md): the `layout` and `namespace`
+commands of [pieceofcake2/upgrade](https://pieceofcake2.github.io/upgrade/) do it.
 
 ## Requirements
 
@@ -112,6 +116,8 @@ when the plugin is loaded, so that the application still works without the devel
 dependencies:
 
 ```php
+namespace App\Controller;
+
 use Cake\Controller\Controller;
 use Cake\Core\CakePlugin;
 
@@ -145,14 +151,18 @@ my_app/
 ├── plugins/            plugins installed by Composer
 ├── resources/
 │   └── locales/        translation files
-├── src/                PHP code
+├── src/                PHP code (the App namespace)
 │   ├── Console/        shells, tasks and bake templates
 │   ├── Controller/
-│   ├── Lib/
 │   ├── Model/
 │   └── View/           helpers
-├── templates/          view templates, layouts, elements and email templates
-├── tests/
+├── templates/          view templates (.php)
+│   ├── Error/          error pages
+│   ├── Pages/          pages of PagesController
+│   ├── element/        elements (Flash/ for the flash messages)
+│   ├── email/          email templates (html/, text/)
+│   └── layout/         layouts (email/ for the email layouts)
+├── tests/              tests (the App\Test namespace)
 │   ├── Fixture/
 │   └── TestCase/
 ├── tmp/                cache, sessions and test files
@@ -169,11 +179,55 @@ directories by itself: `config/`, `tests/`, `tmp/`, `logs/`, `templates/` and
 The legacy layout with an `app/` directory (`app/Config/`, `app/Controller/`,
 `app/View/`, ...) is supported as well, but the skeleton only ships the modern layout.
 
+### Namespace
+
+The classes of `src/` are in the `App` namespace, which follows their directories:
+`App\Controller\PostsController` in `src/Controller/PostsController.php`,
+`App\Model\Post` in `src/Model/Post.php`. Composer loads them with PSR-4, `App\` from `src/`
+and `App\Test\` from `tests/`, so a new class file needs no `composer dump-autoload`:
+
+```json
+"autoload": {
+    "psr-4": {
+        "App\\": "src/"
+    }
+},
+"autoload-dev": {
+    "psr-4": {
+        "App\\Test\\": "tests/"
+    }
+},
+```
+
+`config/core.php` tells CakePHP the namespace, so that it finds the controllers, models,
+components, helpers, behaviors and shells of the application in it:
+
+```php
+Configure::write('App.namespace', 'App');
+```
+
+The classes of CakePHP are in the `Cake` namespace and are imported with `use` statements, also
+in `config/` and in the templates, which stay without a namespace:
+
+```php
+namespace App\Controller;
+
+use Cake\Controller\Controller;
+
+class AppController extends Controller
+{
+}
+```
+
+The settings that name a class use `::class`, e.g. `'renderer' => ExceptionRenderer::class` in
+`config/core.php`. The names of CakePHP 2 (`'File'`, `'Auth'`, `'DebugKit.Toolbar'`) keep
+working.
+
 ## Configuration
 
 | File | Contents |
 | --- | --- |
-| `config/core.php` | Debug level, error and exception handling, caching, session, security salts. |
+| `config/core.php` | Debug level, error and exception handling, the namespace of the application, caching, session, security salts. |
 | `config/bootstrap.php` | Cache configuration, plugin loading, logging and other application setup. |
 | `config/routes.php` | URL routing. |
 | `config/database.php` | Database connections (`default`, and `test` with `APP_ENV=test`). Copy it from `database.php.default`. |
@@ -476,11 +530,11 @@ The layouts, the home page, the error pages and the flash messages are ported fr
 
 Templates:
 
-- `templates/Layouts/default.ctp`: the top navigation bar and the content container. While
+- `templates/layout/default.php`: the top navigation bar and the content container. While
   `debug` is 2, the SQL log is shown below the content.
-- `templates/Layouts/error.ctp`: a minimal layout for the error pages in production.
-- `templates/Layouts/flash.ctp`: the page rendered by `Controller::flash()`.
-- `templates/Elements/Flash/`: `default`, `success`, `error`, `warning` and `info` flash
+- `templates/layout/error.php`: a minimal layout for the error pages in production.
+- `templates/layout/flash.php`: the page rendered by `Controller::flash()`.
+- `templates/element/Flash/`: `default`, `success`, `error`, `warning` and `info` flash
   messages (`$this->Flash->success('Saved.')` and so on). Messages are escaped; pass
   `['params' => ['escape' => false]]` to output HTML. Click a message to hide it.
 
@@ -489,7 +543,7 @@ styles.
 
 ### Home Page
 
-`templates/Pages/home.ctp` is shown at `/` while `debug` is enabled. It checks the
+`templates/Pages/home.php` is shown at `/` while `debug` is enabled. It checks the
 environment of the application: the PHP version and extensions (mbstring, intl, openssl,
 PDO and the driver of the `default` datasource), the `tmp/` and `logs/` directories, the
 cache, the database connection (with the error message when it fails), the
@@ -504,7 +558,7 @@ On a phone:
 
 ### Error Pages
 
-When `debug` is 0, `templates/Errors/error400.ctp` and `error500.ctp` render a short
+When `debug` is 0, `templates/Error/error400.php` and `error500.php` render a short
 message in the `error` layout:
 
 ![Error 400 in production](img/error400.png)
@@ -521,9 +575,11 @@ pages of CakePHP.
 ### Existing Applications
 
 Applications created from an earlier version of the skeleton are not affected: they own
-their templates and `webroot/css/`. To use the new look, copy `templates/Layouts/`,
-`templates/Elements/Flash/`, `templates/Errors/`, `webroot/css/`, `webroot/font/` and
-`webroot/img/cake.logo.svg` into your application. Views that you baked for
+their templates and `webroot/css/`. To use the new look, copy `templates/layout/`,
+`templates/element/Flash/`, `templates/Error/`, `webroot/css/`, `webroot/font/` and
+`webroot/img/cake.logo.svg` into your application (or the `.ctp` templates of
+[pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy), with `Layouts/`, `Elements/`
+and `Errors/`). Views that you baked for
 `cake.generic.css` need to be baked again (or restyled), see
 [Baked Views and the Legacy Theme](https://pieceofcake2.github.io/bake/#baked-views-and-the-legacy-theme).
 
@@ -531,7 +587,10 @@ their templates and `webroot/css/`. To use the new look, copy `templates/Layouts
 
 ### Running Tests
 
-Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`.
+Put your test cases in `tests/TestCase/` and your fixtures in `tests/Fixture/`, in the
+`App\Test\TestCase` and `App\Test\Fixture` namespaces (e.g.
+`App\Test\TestCase\Controller\PostsControllerTest` in
+`tests/TestCase/Controller/PostsControllerTest.php`).
 `vendor/bin/phpunit` and `bin/cake test` run with `APP_ENV=test` by default: `tests/bootstrap.php`
 and `bin/cake` set it before CakePHP loads the `.env` files when it is not set (`webroot/test.php`,
 the browser test runner, does the same). So the tests load `config/.env.test` after
@@ -614,6 +673,12 @@ Check your code against the CakePHP coding standard:
 ```bash
 vendor/bin/phpcs
 ```
+
+`phpcs.xml` uses the `CakePHP2Namespace` standard of
+[pieceofcake2/phpcs-cakephp2](https://pieceofcake2.github.io/phpcs-cakephp2/): the classes are
+declared in a namespace, in a file named after the class, and the classes that they use are
+imported with `use` statements. `config/` keeps its global classes (`DATABASE_CONFIG`,
+`EmailConfig` and the schema classes).
 
 ### Static Analysis
 

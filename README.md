@@ -11,6 +11,13 @@ The application skeleton for CakePHP 2 applications running on
 compatible with CakePHP 5 (`config/`, `src/`, `templates/`, `tests/`, `webroot/`), `.env`
 support, and the home page, layouts, error pages and styles of the CakePHP 5 skeleton.
 
+The application classes are in the `App` namespace (`App\Controller\AppController`), and the
+templates are `.php` files in the directories of CakePHP 5 (`templates/layout/`,
+`templates/element/`, `templates/email/`, `templates/Error/`). The skeleton with global classes
+and `.ctp` templates is [pieceofcake2/app-legacy](https://github.com/pieceofcake2/app-legacy).
+To move an existing application to this form, use the `layout` and `namespace` commands of
+[pieceofcake2/upgrade](https://pieceofcake2.github.io/upgrade/#layout-and-namespace).
+
 > [!WARNING]
 > CakePHP 2.x is for the maintenance of existing applications. For new projects, use
 > the current major version of CakePHP instead.
@@ -21,7 +28,8 @@ support, and the home page, layouts, error pages and styles of the CakePHP 5 ske
 - Markdown: [docs/README.md](docs/README.md) (日本語: [docs/ja/README.md](docs/ja/README.md)) (for AI tools and offline reading)
 
 It covers the installation, the directory layout, the configuration and `.env` files,
-the pages and styles, running tests and PHPStan, and migrating an existing application to the modern layout.
+the namespace, the pages and styles, running tests and PHPStan, and migrating an existing
+application to the modern layout.
 
 For AI coding tools, the Markdown docs of the CakePHP 2 book are installed as a dev dependency (`pieceofcake2/docs`, files in `vendor/pieceofcake2/docs/docs/en/`).
 
