@@ -1,17 +1,17 @@
 # User specific & automatically generated files #
 #################################################
-# Keep the directory structure of tmp/ and logs/ (the "empty" placeholder files)
+# Keep the directory structure of tmp/ and logs/ (the ".gitkeep" placeholder files)
 # but ignore their contents.
 /tmp/cache/*
 !/tmp/cache/*/
 /tmp/cache/*/*
-!/tmp/cache/*/empty
+!/tmp/cache/*/.gitkeep
 /tmp/sessions/*
-!/tmp/sessions/empty
+!/tmp/sessions/.gitkeep
 /tmp/tests/*
-!/tmp/tests/empty
+!/tmp/tests/.gitkeep
 /logs/*
-!/logs/empty
+!/logs/.gitkeep
 /vendor
 # Plugins installed by Composer. Plugins of your own application in plugins/ are
 # committed; add other plugins that you install with Composer here.
