@@ -37,6 +37,3 @@
 *.woff2 binary
 *.ttf binary
 *.eot binary
-
-# Exclude the documentation from Composer dist archives.
-/docs export-ignore

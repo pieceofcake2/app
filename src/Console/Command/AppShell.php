@@ -15,6 +15,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+namespace App\Console\Command;
+
 use Cake\Console\Shell;
 
 /**

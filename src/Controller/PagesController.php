@@ -18,6 +18,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+namespace App\Controller;
+
 use Cake\Core\Configure;
 use Cake\Error\ForbiddenException;
 use Cake\Error\MissingViewException;

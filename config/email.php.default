@@ -14,6 +14,9 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+use Cake\Network\Email\MailTransport;
+use Cake\Network\Email\SmtpTransport;
+
 /**
  * This is email configuration file.
  *
@@ -28,8 +31,8 @@
  *  Debug - Do not send the email, just return the result
  *
  * You can add custom transports (or override existing transports) by adding the
- * appropriate file to src/Lib/Network/Email (or src/Network/Email). Transports should be
- * named 'YourTransport.php', where 'Your' is the name of the transport.
+ * appropriate file to src/Network/Email. Transports should be named 'YourTransport.php',
+ * where 'Your' is the name of the transport.
  *
  * from =>
  * The origin email. See CakeEmail::from() about the valid values
@@ -41,14 +44,14 @@
 class EmailConfig
 {
     public $default = [
-        'transport' => 'Mail',
+        'transport' => MailTransport::class,
         'from' => 'you@localhost',
         //'charset' => 'utf-8',
         //'headerCharset' => 'utf-8',
     ];
 
     public $smtp = [
-        'transport' => 'Smtp',
+        'transport' => SmtpTransport::class,
         'from' => ['site@localhost' => 'My Site'],
         'host' => 'localhost',
         'port' => 25,
@@ -80,7 +83,7 @@ class EmailConfig
         'viewVars' => null,
         'attachments' => null,
         'emailFormat' => null,
-        'transport' => 'Smtp',
+        'transport' => SmtpTransport::class,
         'host' => 'localhost',
         'port' => 25,
         'timeout' => 30,

@@ -23,13 +23,17 @@
  */
 
 use Cake\Cache\Cache;
+use Cake\Cache\Engine\FileEngine;
 use Cake\Core\CakePlugin;
 use Cake\Core\Configure;
 use Cake\Error\MissingPluginException;
 use Cake\Log\CakeLog;
+use Cake\Log\Engine\FileLog;
+use Cake\Routing\Filter\AssetDispatcher;
+use Cake\Routing\Filter\CacheDispatcher;
 
 // Setup a 'default' cache configuration for use in the application.
-Cache::config('default', ['engine' => 'File']);
+Cache::config('default', ['engine' => FileEngine::class]);
 
 /**
  * The settings below can be used to set additional paths to models, views and controllers.
@@ -111,20 +115,20 @@ unset($plugin);
  * ]);
  */
 Configure::write('Dispatcher.filters', [
-    'AssetDispatcher',
-    'CacheDispatcher',
+    AssetDispatcher::class,
+    CacheDispatcher::class,
 ]);
 
 /**
  * Configures default file logging options
  */
 CakeLog::config('debug', [
-    'engine' => 'File',
+    'engine' => FileLog::class,
     'types' => ['notice', 'info', 'debug'],
     'file' => 'debug',
 ]);
 CakeLog::config('error', [
-    'engine' => 'File',
+    'engine' => FileLog::class,
     'types' => ['warning', 'error', 'critical', 'alert', 'emergency'],
     'file' => 'error',
 ]);

@@ -23,7 +23,14 @@
         "dbrekelmans/bdi": "Downloads a chromedriver that matches the installed Chrome for pieceofcake2/panther (vendor/bin/bdi detect drivers)"
     },
     "autoload": {
-        "classmap": ["src/"]
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Test\\": "tests/"
+        }
     },
     "config": {
         "sort-packages": true,

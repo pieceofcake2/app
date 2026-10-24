@@ -19,6 +19,8 @@
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
 
+namespace App\View\Helper;
+
 use Cake\View\Helper;
 
 /**
