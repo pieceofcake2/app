@@ -68,7 +68,10 @@
  * dsn =>
  * A DSN that sets the connection in one string (e.g. mysql://user:password@localhost/database_name).
  * The keys in the DSN replace the same keys of the connection.
+ *
+ * ConnectionManager::create() adds the connections that it creates as properties of this class.
  */
+#[\AllowDynamicProperties]
 class DATABASE_CONFIG
 {
     public $default = [
